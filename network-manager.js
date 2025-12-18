@@ -133,13 +133,15 @@ class NetworkManager {
    */
   joinQueue(playerData) {
     if (!this.connected) {
-      console.error('Not connected to server');
-      return;
+      console.error('[NetworkManager] Not connected to server - cannot join queue');
+      console.error('[NetworkManager] Socket status:', this.socket?.connected);
+      return false;
     }
 
-    console.log('Joining queue...');
+    console.log('[NetworkManager] Joining queue with player data:', playerData);
     this.playerId = playerData.playerId;
     this.socket.emit('joinQueue', playerData);
+    return true;
   }
 
   /**

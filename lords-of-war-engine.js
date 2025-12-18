@@ -3100,11 +3100,11 @@ function startQuickMatch() {
         showUnitTypeSelection();
     };
 
-    // Connect and join queue
-    initMultiplayer();
-
-    // Register game found handler
+    // Register game found handler FIRST
     networkManager.on('gameFound', tempHandler);
+
+    // Connect and wait for connection before joining queue
+    initMultiplayer();
 
     const playerData = {
         playerId: generatePlayerId(),
@@ -3113,7 +3113,25 @@ function startQuickMatch() {
         hero: null
     };
 
-    networkManager.joinQueue(playerData);
+    // Wait for connection to be established before joining queue
+    const checkConnection = setInterval(() => {
+        if (networkManager && networkManager.isConnected()) {
+            console.log('[Game] Connected! Joining queue...');
+            clearInterval(checkConnection);
+            networkManager.joinQueue(playerData);
+        }
+    }, 100);
+
+    // Safety timeout - if not connected after 10 seconds, give up
+    setTimeout(() => {
+        if (!networkManager.isConnected()) {
+            clearInterval(checkConnection);
+            console.error('[Game] Failed to connect to server after 10 seconds');
+            alert('Failed to connect to multiplayer server. Check that the server is running on localhost:3000');
+            document.getElementById('lobbyModal').style.display = 'none';
+            document.getElementById('mainMenuModal').style.display = 'flex';
+        }
+    }, 10000);
 }
 
 function cancelMatchmaking() {
