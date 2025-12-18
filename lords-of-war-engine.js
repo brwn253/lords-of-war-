@@ -75,16 +75,61 @@ function initializeMultiplayerGame(data) {
   // Apply the server state (which has heroes, decks, hands)
   applyServerState(data.gameState);
 
+  // Show roll modal
+  showRollModal(data.gameState.currentPlayer);
+}
+
+function showRollModal(firstPlayerRole) {
   // Hide all modals
   const modals = document.querySelectorAll('.modal');
   modals.forEach(m => m.style.display = 'none');
 
-  // Show game board
+  // Show roll modal
+  document.getElementById('rollModal').style.display = 'flex';
+  document.getElementById('modalOverlay').style.display = 'block';
+
+  // Animate the dice roll
+  let rollCount = 0;
+  const rollInterval = setInterval(() => {
+    rollCount++;
+    const roll = Math.floor(Math.random() * 6) + 1;
+    document.getElementById('rollDisplay').textContent = ['⚫', '🔴', '🟡', '🟢', '🔵', '🟣'][roll - 1];
+
+    if (rollCount > 15) {
+      clearInterval(rollInterval);
+
+      // Show result
+      const isPlayerFirst = firstPlayerRole === networkManager.playerRole;
+      const resultText = isPlayerFirst
+        ? '🎯 YOU GO FIRST!'
+        : '⏳ OPPONENT GOES FIRST';
+      const resultColor = isPlayerFirst ? '#2ecc71' : '#ff6b6b';
+
+      document.getElementById('rollResult').textContent = resultText;
+      document.getElementById('rollResult').style.color = resultColor;
+      document.getElementById('rollStartBtn').style.display = 'inline-block';
+    }
+  }, 100);
+}
+
+function startGameAfterRoll() {
+  // Hide modals
+  document.getElementById('rollModal').style.display = 'none';
   document.getElementById('modalOverlay').style.display = 'none';
 
-  // Start the game
+  // Show game board
+  const gameBoard = document.querySelector('.game-board');
+  if (gameBoard) gameBoard.style.display = 'grid';
+
+  // Start the game with proper turn
   log('Game started! Your hero: ' + game.player.hero.name);
-  startTurn('player');
+
+  // Determine whose turn it is
+  if (game.currentPlayer === 'player') {
+    startTurn('player');
+  } else {
+    startTurn('enemy');
+  }
 }
 
 function applyServerState(serverState) {
@@ -3161,12 +3206,14 @@ function selectMultiplayerHero(hero) {
 
     // Show hero details
     document.getElementById('multiplayerHeroDetails').style.display = 'block';
-    document.getElementById('selectedHeroName').textContent = `${hero.name} (${hero.unitType})`;
+    document.getElementById('selectedHeroName').textContent = hero.name;
+    document.getElementById('heroType').textContent = hero.unitType.charAt(0).toUpperCase() + hero.unitType.slice(1);
+    document.getElementById('heroHealth').textContent = hero.health || '30';
 
     // Show passive ability description
-    let passiveText = 'Passive: Draw 1 card (2 gold)';
+    let passiveText = 'Draw 1 card (costs 2 gold per turn)';
     if (hero.passiveAbility) {
-        passiveText = 'Passive: ' + hero.passiveAbility;
+        passiveText = hero.passiveAbility;
     }
     document.getElementById('selectedHeroPassive').textContent = passiveText;
 
@@ -3182,11 +3229,11 @@ function confirmMultiplayerHero() {
 
     console.log('[Game] Confirming hero:', selectedMultiplayerHero.name);
 
-    // Hide modal
-    document.getElementById('multiplayerHeroModal').style.display = 'none';
-    document.getElementById('modalOverlay').style.display = 'none';
+    // Hide confirm button and show waiting message
+    document.getElementById('confirmHeroBtn').style.display = 'none';
+    document.getElementById('waitingMessage').style.display = 'block';
 
-    // Start game with selected hero
+    // Start game with selected hero (send to server)
     startGame(selectedMultiplayerHero.id);
 }
 

@@ -609,10 +609,13 @@ function initializeMultiplayerGame(room) {
     }
   }
 
-  // Set first player
-  room.gameState.currentPlayer = 'player1';
+  // Randomize first player (coin flip)
+  const firstPlayer = Math.random() < 0.5 ? 'player1' : 'player2';
+  room.gameState.currentPlayer = firstPlayer;
   room.gameState.turnNumber = 1;
   room.status = 'active';
+
+  console.log(`[GAME] First player: ${firstPlayer}`);
 
   console.log(`[GAME] Game initialized for room ${room.roomId}`);
 
