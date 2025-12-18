@@ -2176,32 +2176,37 @@
     </div>
 
     <!-- Multiplayer Hero Selection Modal -->
-    <div class="modal" id="multiplayerHeroModal" style="display: none; max-width: 900px;">
-        <h1 style="margin-bottom: 15px;">⚔️ Select Your Hero ⚔️</h1>
+    <div class="modal" id="multiplayerHeroModal" style="display: none; max-width: 1000px;">
+        <!-- Title across the top -->
+        <h1 style="margin: 0 0 20px 0; text-align: center;">⚔️ Select your hero</h1>
 
         <!-- Unit Type Buttons -->
-        <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 20px;">
-            <button onclick="selectMultiplayerUnitType('ranged')" style="padding: 10px 20px; margin: 0; font-size: 12px; background: linear-gradient(135deg, #4a5f8f 0%, #2a3f5f 100%); border: 3px solid #7a9fff;">🏹 Ranged</button>
-            <button onclick="selectMultiplayerUnitType('infantry')" style="padding: 10px 20px; margin: 0; font-size: 12px; background: linear-gradient(135deg, #5f4a4f 0%, #3f2a2f 100%); border: 3px solid #ff7a7a;">🛡️ Infantry</button>
-            <button onclick="selectMultiplayerUnitType('cavalry')" style="padding: 10px 20px; margin: 0; font-size: 12px; background: linear-gradient(135deg, #5f5f2a 0%, #3f3f0a 100%); border: 3px solid #ffff7a;">🐎 Cavalry</button>
+        <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px;">
+            <button onclick="selectMultiplayerUnitType('ranged')" style="padding: 5px 20px; margin: 0; font-size: 12px; background: linear-gradient(135deg, #4a5f8f 0%, #2a3f5f 100%); border: 3px solid #7a9fff;">🏹 Ranged</button>
+            <button onclick="selectMultiplayerUnitType('infantry')" style="padding: 5px 20px; margin: 0; font-size: 12px; background: linear-gradient(135deg, #5f4a4f 0%, #3f2a2f 100%); border: 3px solid #ff7a7a;">🛡️ Infantry</button>
+            <button onclick="selectMultiplayerUnitType('cavalry')" style="padding: 5px 20px; margin: 0; font-size: 12px; background: linear-gradient(135deg, #5f5f2a 0%, #3f3f0a 100%); border: 3px solid #ffff7a;">🐎 Cavalry</button>
         </div>
 
-        <!-- Hero List and Details Side by Side -->
-        <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-            <!-- Hero List -->
-            <div id="multiplayerHeroList" style="flex: 1; max-height: 250px; overflow-y: auto; border: 2px solid #8b6f47; padding: 10px; border-radius: 5px;"></div>
+        <!-- Two-Column Table Layout -->
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px; margin-bottom: 15px; height: 350px;">
+            <!-- Left Column: Hero List -->
+            <div style="border: 2px solid #8b6f47; border-radius: 5px; overflow: hidden; display: flex; flex-direction: column;">
+                <div id="multiplayerHeroList" style="flex: 1; overflow-y: auto;"></div>
+            </div>
 
-            <!-- Hero Details Panel -->
-            <div id="multiplayerHeroDetails" style="flex: 1; padding: 12px; background: rgba(0,0,0,0.6); border: 2px solid #8b6f47; border-radius: 5px; display: none; font-size: 12px;">
-                <h3 id="selectedHeroName" style="margin: 0 0 8px 0; color: #ffd700; font-size: 14px;"></h3>
-                <div id="selectedHeroStats" style="margin-bottom: 8px; line-height: 1.4;">
-                    <div><strong>Health:</strong> <span id="heroHealth" style="color: #ff6b6b;">30</span></div>
-                    <div><strong>Type:</strong> <span id="heroType"></span></div>
-                </div>
-                <hr style="margin: 8px 0; border: 1px solid #8b6f47;">
-                <div>
-                    <div style="color: #ffd700; font-size: 11px; margin-bottom: 5px;">PASSIVE ABILITY:</div>
-                    <p id="selectedHeroPassive" style="margin: 0; font-size: 11px; color: #f4e4c1; line-height: 1.3;"></p>
+            <!-- Right Column: Hero Details Table -->
+            <div style="border: 2px solid #8b6f47; border-radius: 5px; background: rgba(0,0,0,0.6); overflow: hidden; display: flex; flex-direction: column;">
+                <div id="multiplayerHeroDetails" style="flex: 1; display: flex; flex-direction: column; padding: 12px; display: none;">
+                    <!-- Headers Row -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 2px solid #8b6f47;">
+                        <div style="color: #ffd700; font-weight: bold; font-size: 12px; text-transform: uppercase;">Name</div>
+                        <div style="color: #ffd700; font-weight: bold; font-size: 12px; text-transform: uppercase;">Description</div>
+                    </div>
+                    <!-- Content Row -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div id="selectedHeroName" style="color: #f4e4c1; font-size: 13px; font-weight: bold;"></div>
+                        <div id="selectedHeroPassive" style="color: #f4e4c1; font-size: 12px; line-height: 1.5; overflow-y: auto;"></div>
+                    </div>
                 </div>
             </div>
         </div>

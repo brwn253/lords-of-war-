@@ -3191,10 +3191,10 @@ function selectMultiplayerUnitType(unitType) {
 
     heroes.forEach(hero => {
         const btn = document.createElement('button');
-        btn.textContent = `${hero.name}`;
-        btn.style.cssText = 'display: block; width: 100%; padding: 12px; margin: 5px 0; font-size: 12px; background: rgba(74, 144, 226, 0.3); border: 2px solid #8b6f47; border-radius: 5px; cursor: pointer; color: #f4e4c1; text-align: left;';
-        btn.onmouseover = () => btn.style.background = 'rgba(74, 144, 226, 0.6)';
-        btn.onmouseout = () => btn.style.background = 'rgba(74, 144, 226, 0.3)';
+        btn.textContent = hero.name;
+        btn.style.cssText = 'display: block; width: 100%; padding: 8px 10px; margin: 0; font-size: 12px; background: rgba(74, 144, 226, 0.2); border: 1px solid #8b6f47; border-radius: 0; cursor: pointer; color: #f4e4c1; text-align: left; transition: all 0.15s;';
+        btn.onmouseover = () => btn.style.background = 'rgba(74, 144, 226, 0.5)';
+        btn.onmouseout = () => btn.style.background = 'rgba(74, 144, 226, 0.2)';
         btn.onclick = () => selectMultiplayerHero(hero);
         heroList.appendChild(btn);
     });
@@ -3205,10 +3205,8 @@ function selectMultiplayerHero(hero) {
     selectedMultiplayerHero = hero;
 
     // Show hero details
-    document.getElementById('multiplayerHeroDetails').style.display = 'block';
+    document.getElementById('multiplayerHeroDetails').style.display = 'flex';
     document.getElementById('selectedHeroName').textContent = hero.name;
-    document.getElementById('heroType').textContent = hero.unitType.charAt(0).toUpperCase() + hero.unitType.slice(1);
-    document.getElementById('heroHealth').textContent = hero.health || '30';
 
     // Show passive ability description
     let passiveText = 'Draw 1 card (costs 2 gold per turn)';
