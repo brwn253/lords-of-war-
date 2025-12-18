@@ -3206,14 +3206,13 @@ function selectMultiplayerHero(hero) {
 
     // Show hero details
     document.getElementById('multiplayerHeroDetails').style.display = 'flex';
-    document.getElementById('selectedHeroName').textContent = hero.name;
 
-    // Show passive ability description
-    let passiveText = 'Draw 1 card (costs 2 gold per turn)';
-    if (hero.passiveAbility) {
-        passiveText = hero.passiveAbility;
+    // Show full description (or fallback to basic info)
+    let descriptionText = hero.description;
+    if (!descriptionText) {
+        descriptionText = hero.name + '\n\nHP: ' + (hero.health || 30) + '\n\nPassive: ' + (hero.passive || 'Draw 1 card');
     }
-    document.getElementById('selectedHeroPassive').textContent = passiveText;
+    document.getElementById('selectedHeroPassive').textContent = descriptionText;
 
     // Show confirm button
     document.getElementById('confirmHeroBtn').style.display = 'inline-block';
