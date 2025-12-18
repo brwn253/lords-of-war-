@@ -14,7 +14,7 @@ const HISTORIC_LEADERS = {
             passive: 'Your ranged units deal +1 damage',
             portrait: 'RH',
             color: '#2d5016',
-            description: 'RANGED UNIT - Robin Hood\n\n⚔️ UNIT TYPE: Ranged\nHP: 48\n\n📋 PASSIVE ABILITY:\nYour ranged units deal +1 damage\n\n🎯 RANGED UNIT MECHANICS:\nRanged units can attack enemies at any distance. They counter Infantry units by dealing bonus damage to slow-moving soldiers.\n\n💪 STRENGTHS:\n• Deal bonus damage to Infantry (melee countered)\n• Can attack from safe distance\n• Don\'t take return damage when attacking melee units\n• Effective against grouped enemies\n\n⚠️ WEAKNESSES:\n• Lower health than Infantry\n• Vulnerable to Cavalry charges\n• Less durable in direct combat'
+            description: 'RANGED UNIT - Robin Hood\n\n⚔️ UNIT TYPE: Ranged\nHP: 48\n\n📋 PASSIVE ABILITY:\nYour ranged units deal +1 damage\n\n🎯 UNIT TYPE MECHANICS:\n• Deal +1 attack to Infantry units\n• Do not take damage when attacking melee units\n• Can attack from any distance\n\n💪 STRENGTHS:\n• +1 attack vs Infantry\n• Take no damage from melee counter-attacks\n• Ranged positioning advantage\n\n⚠️ WEAKNESSES:\n• 48 HP (lowest of all heroes)\n• Weak to Cavalry charges\n• Direct combat vulnerable'
         },
         {
             id: 'williamTell',
@@ -27,7 +27,7 @@ const HISTORIC_LEADERS = {
             passive: 'Once per turn, your ranged attacks can target any enemy',
             portrait: 'WT',
             color: '#1a3a52',
-            description: 'RANGED UNIT - William Tell\n\n⚔️ UNIT TYPE: Ranged\nHP: 48\n\n📋 PASSIVE ABILITY:\nOnce per turn, your ranged attacks can target any enemy\n\n🎯 RANGED UNIT MECHANICS:\nRanged units can attack enemies at any distance. They counter Infantry units by dealing bonus damage to slow-moving soldiers.\n\n💪 STRENGTHS:\n• Deal bonus damage to Infantry (melee countered)\n• Can attack from safe distance\n• Don\'t take return damage when attacking melee units\n• Flexible targeting options\n\n⚠️ WEAKNESSES:\n• Lower health than Infantry\n• Vulnerable to Cavalry charges\n• Less durable in direct combat'
+            description: 'RANGED UNIT - William Tell\n\n⚔️ UNIT TYPE: Ranged\nHP: 48\n\n📋 PASSIVE ABILITY:\nOnce per turn, ranged attacks can target any enemy\n\n🎯 UNIT TYPE MECHANICS:\n• Deal +1 attack to Infantry units\n• Do not take damage when attacking melee units\n• Can attack from any distance\n\n💪 STRENGTHS:\n• +1 attack vs Infantry\n• Take no damage from melee counter-attacks\n• Flexible targeting (any enemy once/turn)\n\n⚠️ WEAKNESSES:\n• 48 HP (lowest of all heroes)\n• Weak to Cavalry charges\n• Direct combat vulnerable'
         },
         {
             id: 'houYi',
@@ -40,7 +40,7 @@ const HISTORIC_LEADERS = {
             passive: 'When you play a ranged ability, gain +1 Gold',
             portrait: 'HY',
             color: '#663300',
-            description: 'RANGED UNIT - Hou Yi\n\n⚔️ UNIT TYPE: Ranged\nHP: 48\n\n📋 PASSIVE ABILITY:\nWhen you play a ranged ability, gain +1 Gold\n\n🎯 RANGED UNIT MECHANICS:\nRanged units can attack enemies at any distance. They counter Infantry units by dealing bonus damage to slow-moving soldiers.\n\n💪 STRENGTHS:\n• Deal bonus damage to Infantry (melee countered)\n• Can attack from safe distance\n• Don\'t take return damage when attacking melee units\n• Generate additional resources\n\n⚠️ WEAKNESSES:\n• Lower health than Infantry\n• Vulnerable to Cavalry charges\n• Less durable in direct combat'
+            description: 'RANGED UNIT - Hou Yi\n\n⚔️ UNIT TYPE: Ranged\nHP: 48\n\n📋 PASSIVE ABILITY:\nWhen you play a ranged ability, gain +1 Gold\n\n🎯 UNIT TYPE MECHANICS:\n• Deal +1 attack to Infantry units\n• Do not take damage when attacking melee units\n• Can attack from any distance\n\n💪 STRENGTHS:\n• +1 attack vs Infantry\n• Take no damage from melee counter-attacks\n• Generates extra Gold for card plays\n\n⚠️ WEAKNESSES:\n• 48 HP (lowest of all heroes)\n• Weak to Cavalry charges\n• Direct combat vulnerable'
         },
         {
             id: 'artemis',
@@ -53,7 +53,7 @@ const HISTORIC_LEADERS = {
             passive: 'Your ranged units have +1 durability',
             portrait: 'AR',
             color: '#2d2d5f',
-            description: 'RANGED UNIT - Artemis\n\n⚔️ UNIT TYPE: Ranged\nHP: 48\n\n📋 PASSIVE ABILITY:\nYour ranged units have +1 durability\n\n🎯 RANGED UNIT MECHANICS:\nRanged units can attack enemies at any distance. They counter Infantry units by dealing bonus damage to slow-moving soldiers.\n\n💪 STRENGTHS:\n• Deal bonus damage to Infantry (melee countered)\n• Can attack from safe distance\n• Don\'t take return damage when attacking melee units\n• More durable than other ranged units\n\n⚠️ WEAKNESSES:\n• Lower health than Infantry\n• Vulnerable to Cavalry charges\n• Less durable in direct combat'
+            description: 'RANGED UNIT - Artemis\n\n⚔️ UNIT TYPE: Ranged\nHP: 48\n\n📋 PASSIVE ABILITY:\nYour ranged units have +1 durability\n\n🎯 UNIT TYPE MECHANICS:\n• Deal +1 attack to Infantry units\n• Do not take damage when attacking melee units\n• Can attack from any distance\n\n💪 STRENGTHS:\n• +1 attack vs Infantry\n• Take no damage from melee counter-attacks\n• +1 durability makes ranged units harder to kill\n\n⚠️ WEAKNESSES:\n• 48 HP (lowest of all heroes)\n• Weak to Cavalry charges\n• Direct combat vulnerable'
         }
     ],
     infantry: [
@@ -68,7 +68,7 @@ const HISTORIC_LEADERS = {
             passive: 'Your infantry units have +1 power',
             portrait: 'LE',
             color: '#5f1a1a',
-            description: 'INFANTRY UNIT - Leonidas\n\n⚔️ UNIT TYPE: Infantry\nHP: 57\n\n📋 PASSIVE ABILITY:\nYour infantry units have +1 power\n\n🎯 INFANTRY UNIT MECHANICS:\nInfantry are durable melee fighters. They take reduced damage from ranged attacks because of their armor and formation tactics.\n\n💪 STRENGTHS:\n• Highest health of all unit types\n• Take reduced damage from ranged units\n• Excellent durability and staying power\n• Counter to Cavalry with strong defense\n\n⚠️ WEAKNESSES:\n• Weak to Ranged units (take bonus damage)\n• Cannot counter-attack ranged enemies\n• Vulnerable when isolated\n• Slower movement in combat'
+            description: 'INFANTRY UNIT - Leonidas\n\n⚔️ UNIT TYPE: Infantry\nHP: 57\n\n📋 PASSIVE ABILITY:\nYour infantry units have +1 power\n\n🎯 UNIT TYPE MECHANICS:\n• Take -1 damage from ranged attacks\n• Receive +1 attack from ranged units\n• Highest HP of all unit types\n\n💪 STRENGTHS:\n• 57 HP (highest hero health)\n• -1 damage from ranged attacks\n• Durable melee fighters\n\n⚠️ WEAKNESSES:\n• Take +1 attack from ranged units\n• Slow to respond to ranged threats\n• Vulnerable to fast-moving Cavalry'
         },
         {
             id: 'joanOfArc',
@@ -81,7 +81,7 @@ const HISTORIC_LEADERS = {
             passive: 'When an infantry unit dies, draw a card',
             portrait: 'JA',
             color: '#8b3a3a',
-            description: 'INFANTRY UNIT - Joan of Arc\n\n⚔️ UNIT TYPE: Infantry\nHP: 57\n\n📋 PASSIVE ABILITY:\nWhen an infantry unit dies, draw a card\n\n🎯 INFANTRY UNIT MECHANICS:\nInfantry are durable melee fighters. They take reduced damage from ranged attacks because of their armor and formation tactics.\n\n💪 STRENGTHS:\n• Highest health of all unit types\n• Take reduced damage from ranged units\n• Generate resources when units fall\n• Excellent durability and staying power\n\n⚠️ WEAKNESSES:\n• Weak to Ranged units (take bonus damage)\n• Cannot counter-attack ranged enemies\n• Vulnerable when isolated\n• Slower movement in combat'
+            description: 'INFANTRY UNIT - Joan of Arc\n\n⚔️ UNIT TYPE: Infantry\nHP: 57\n\n📋 PASSIVE ABILITY:\nWhen an infantry unit dies, draw a card\n\n🎯 UNIT TYPE MECHANICS:\n• Take -1 damage from ranged attacks\n• Receive +1 attack from ranged units\n• Highest HP of all unit types\n\n💪 STRENGTHS:\n• 57 HP (highest hero health)\n• -1 damage from ranged attacks\n• Draw card when infantry dies (resource generation)\n\n⚠️ WEAKNESSES:\n• Take +1 attack from ranged units\n• Slow to respond to ranged threats\n• Vulnerable to fast-moving Cavalry'
         },
         {
             id: 'richardLionheart',
@@ -94,7 +94,7 @@ const HISTORIC_LEADERS = {
             passive: 'Your infantry units take 1 less damage',
             portrait: 'RL',
             color: '#6b4423',
-            description: 'INFANTRY UNIT - Richard the Lionheart\n\n⚔️ UNIT TYPE: Infantry\nHP: 57\n\n📋 PASSIVE ABILITY:\nYour infantry units take 1 less damage\n\n🎯 INFANTRY UNIT MECHANICS:\nInfantry are durable melee fighters. They take reduced damage from ranged attacks because of their armor and formation tactics.\n\n💪 STRENGTHS:\n• Highest health of all unit types\n• Take reduced damage from ranged units\n• Extra damage reduction makes them very tanky\n• Excellent durability and staying power\n\n⚠️ WEAKNESSES:\n• Weak to Ranged units (take bonus damage)\n• Cannot counter-attack ranged enemies\n• Vulnerable when isolated\n• Slower movement in combat'
+            description: 'INFANTRY UNIT - Richard the Lionheart\n\n⚔️ UNIT TYPE: Infantry\nHP: 57\n\n📋 PASSIVE ABILITY:\nYour infantry units take 1 less damage\n\n🎯 UNIT TYPE MECHANICS:\n• Take -1 damage from ranged attacks\n• Receive +1 attack from ranged units\n• Highest HP of all unit types\n\n💪 STRENGTHS:\n• 57 HP (highest hero health)\n• -1 damage from ALL attacks (extra reduction)\n• Most durable infantry hero\n\n⚠️ WEAKNESSES:\n• Take +1 attack from ranged units\n• Slow to respond to ranged threats\n• Vulnerable to fast-moving Cavalry'
         },
         {
             id: 'williamWallace',
@@ -107,7 +107,7 @@ const HISTORIC_LEADERS = {
             passive: 'Your infantry units can attack the turn they are played',
             portrait: 'WW',
             color: '#2d3d52',
-            description: 'INFANTRY UNIT - William Wallace\n\n⚔️ UNIT TYPE: Infantry\nHP: 57\n\n📋 PASSIVE ABILITY:\nYour infantry units can attack the turn they are played\n\n🎯 INFANTRY UNIT MECHANICS:\nInfantry are durable melee fighters. They take reduced damage from ranged attacks because of their armor and formation tactics.\n\n💪 STRENGTHS:\n• Highest health of all unit types\n• Take reduced damage from ranged units\n• Can attack immediately when deployed\n• Excellent durability and staying power\n\n⚠️ WEAKNESSES:\n• Weak to Ranged units (take bonus damage)\n• Cannot counter-attack ranged enemies\n• Vulnerable when isolated\n• Slower movement in combat'
+            description: 'INFANTRY UNIT - William Wallace\n\n⚔️ UNIT TYPE: Infantry\nHP: 57\n\n📋 PASSIVE ABILITY:\nYour infantry units can attack the turn they are played\n\n🎯 UNIT TYPE MECHANICS:\n• Take -1 damage from ranged attacks\n• Receive +1 attack from ranged units\n• Highest HP of all unit types\n\n💪 STRENGTHS:\n• 57 HP (highest hero health)\n• -1 damage from ranged attacks\n• Infantry can attack immediately (haste)\n\n⚠️ WEAKNESSES:\n• Take +1 attack from ranged units\n• Slow to respond to ranged threats\n• Vulnerable to fast-moving Cavalry'
         }
     ],
     cavalry: [
@@ -122,7 +122,7 @@ const HISTORIC_LEADERS = {
             passive: 'Your cavalry units have +1 power',
             portrait: 'GK',
             color: '#1a3a1a',
-            description: 'CAVALRY UNIT - Genghis Khan\n\n⚔️ UNIT TYPE: Cavalry\nHP: 52\n\n📋 PASSIVE ABILITY:\nYour cavalry units have +1 power\n\n🎯 CAVALRY UNIT MECHANICS:\nCavalry are fast, mobile warriors. They excel at hit-and-run tactics and can charge through enemy lines. They counter Ranged units by closing distance quickly.\n\n💪 STRENGTHS:\n• Extremely mobile and flexible\n• Counter to Ranged units (fast approach)\n• Strong damage output\n• Can quickly eliminate isolated units\n\n⚠️ WEAKNESSES:\n• Medium health (less than Infantry)\n• Vulnerable to grouped Infantry defense\n• Less durable than other units\n• Can be overwhelmed by formation tactics'
+            description: 'CAVALRY UNIT - Genghis Khan\n\n⚔️ UNIT TYPE: Cavalry\nHP: 52\n\n📋 PASSIVE ABILITY:\nYour cavalry units have +1 power\n\n🎯 UNIT TYPE MECHANICS:\n• Deal +1 attack to Ranged units\n• Can move freely across board\n• Counter to ranged positioning\n\n💪 STRENGTHS:\n• 52 HP (balanced health)\n• +1 attack vs Ranged heroes\n• Mobile and flexible positioning\n\n⚠️ WEAKNESSES:\n• Lower HP than Infantry\n• Take +1 damage from Infantry\n• Less durable in sustained combat'
         },
         {
             id: 'alexander',
@@ -135,7 +135,7 @@ const HISTORIC_LEADERS = {
             passive: 'When you play a cavalry unit, draw a card',
             portrait: 'AT',
             color: '#2d1a5f',
-            description: 'CAVALRY UNIT - Alexander the Great\n\n⚔️ UNIT TYPE: Cavalry\nHP: 52\n\n📋 PASSIVE ABILITY:\nWhen you play a cavalry unit, draw a card\n\n🎯 CAVALRY UNIT MECHANICS:\nCavalry are fast, mobile warriors. They excel at hit-and-run tactics and can charge through enemy lines. They counter Ranged units by closing distance quickly.\n\n💪 STRENGTHS:\n• Extremely mobile and flexible\n• Counter to Ranged units (fast approach)\n• Generate card draw advantage\n• Can quickly eliminate isolated units\n\n⚠️ WEAKNESSES:\n• Medium health (less than Infantry)\n• Vulnerable to grouped Infantry defense\n• Less durable than other units\n• Can be overwhelmed by formation tactics'
+            description: 'CAVALRY UNIT - Alexander the Great\n\n⚔️ UNIT TYPE: Cavalry\nHP: 52\n\n📋 PASSIVE ABILITY:\nWhen you play a cavalry unit, draw a card\n\n🎯 UNIT TYPE MECHANICS:\n• Deal +1 attack to Ranged units\n• Can move freely across board\n• Counter to ranged positioning\n\n💪 STRENGTHS:\n• 52 HP (balanced health)\n• +1 attack vs Ranged heroes\n• Draw cards when cavalry deployed\n\n⚠️ WEAKNESSES:\n• Lower HP than Infantry\n• Take +1 damage from Infantry\n• Less durable in sustained combat'
         },
         {
             id: 'saladin',
@@ -148,7 +148,7 @@ const HISTORIC_LEADERS = {
             passive: 'Your cavalry units have +1 durability',
             portrait: 'SA',
             color: '#5f3a1a',
-            description: 'CAVALRY UNIT - Saladin\n\n⚔️ UNIT TYPE: Cavalry\nHP: 52\n\n📋 PASSIVE ABILITY:\nYour cavalry units have +1 durability\n\n🎯 CAVALRY UNIT MECHANICS:\nCavalry are fast, mobile warriors. They excel at hit-and-run tactics and can charge through enemy lines. They counter Ranged units by closing distance quickly.\n\n💪 STRENGTHS:\n• Extremely mobile and flexible\n• Counter to Ranged units (fast approach)\n• More durable cavalry units\n• Can quickly eliminate isolated units\n\n⚠️ WEAKNESSES:\n• Medium health (less than Infantry)\n• Vulnerable to grouped Infantry defense\n• Still less durable than Infantry\n• Can be overwhelmed by formation tactics'
+            description: 'CAVALRY UNIT - Saladin\n\n⚔️ UNIT TYPE: Cavalry\nHP: 52\n\n📋 PASSIVE ABILITY:\nYour cavalry units have +1 durability\n\n🎯 UNIT TYPE MECHANICS:\n• Deal +1 attack to Ranged units\n• Can move freely across board\n• Counter to ranged positioning\n\n💪 STRENGTHS:\n• 52 HP (balanced health)\n• +1 attack vs Ranged heroes\n• +1 durability on cavalry units\n\n⚠️ WEAKNESSES:\n• Lower HP than Infantry\n• Take +1 damage from Infantry\n• Less durable in sustained combat'
         },
         {
             id: 'charlemagne',
@@ -161,7 +161,7 @@ const HISTORIC_LEADERS = {
             passive: 'Your cavalry units can attack the turn they are played',
             portrait: 'CH',
             color: '#1a2d5f',
-            description: 'CAVALRY UNIT - Charlemagne\n\n⚔️ UNIT TYPE: Cavalry\nHP: 52\n\n📋 PASSIVE ABILITY:\nYour cavalry units can attack the turn they are played\n\n🎯 CAVALRY UNIT MECHANICS:\nCavalry are fast, mobile warriors. They excel at hit-and-run tactics and can charge through enemy lines. They counter Ranged units by closing distance quickly.\n\n💪 STRENGTHS:\n• Extremely mobile and flexible\n• Counter to Ranged units (fast approach)\n• Attack immediately when deployed\n• Can quickly eliminate isolated units\n\n⚠️ WEAKNESSES:\n• Medium health (less than Infantry)\n• Vulnerable to grouped Infantry defense\n• Less durable than other units\n• Can be overwhelmed by formation tactics'
+            description: 'CAVALRY UNIT - Charlemagne\n\n⚔️ UNIT TYPE: Cavalry\nHP: 52\n\n📋 PASSIVE ABILITY:\nYour cavalry units can attack the turn they are played\n\n🎯 UNIT TYPE MECHANICS:\n• Deal +1 attack to Ranged units\n• Can move freely across board\n• Counter to ranged positioning\n\n💪 STRENGTHS:\n• 52 HP (balanced health)\n• +1 attack vs Ranged heroes\n• Cavalry have haste (attack immediately)\n\n⚠️ WEAKNESSES:\n• Lower HP than Infantry\n• Take +1 damage from Infantry\n• Less durable in sustained combat'
         }
     ]
 };
