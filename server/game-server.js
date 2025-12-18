@@ -349,23 +349,12 @@ function createGame() {
   playerSockets.set(player1Data.socketId, { playerId: player1Data.playerId, roomId, role: 'player1' });
   playerSockets.set(player2Data.socketId, { playerId: player2Data.playerId, roomId, role: 'player2' });
 
-  // Notify players
+  // Notify players that game is found - now wait for hero selection
+  console.log(`[MATCH] Notifying players to select heroes`);
   io.to(player1Data.socketId).emit('gameFound');
   io.to(player2Data.socketId).emit('gameFound');
 
-  // Start game
-  setTimeout(() => {
-    io.to(player1Data.socketId).emit('gameStart', {
-      roomId,
-      yourRole: 'player1',
-      gameState: room.gameState
-    });
-    io.to(player2Data.socketId).emit('gameStart', {
-      roomId,
-      yourRole: 'player2',
-      gameState: room.gameState
-    });
-  }, 500);
+  // Game initialization will happen after both players select heroes (in selectHero handler)
 }
 
 function createInitialGameState(player1Data, player2Data) {
