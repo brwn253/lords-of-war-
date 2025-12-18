@@ -87,6 +87,11 @@ Cards are defined in `lords-of-war.js` with properties:
 - Battle log sidebar (left side)
 - End turn button (only visible on player's turn)
 
+## Multiplayer Implementation (In Progress)
+- **Status**: Currently implementing multiplayer support
+- **Target**: Enable 2-player online/local matches
+- **Last Updated**: 2025-12-18
+
 ## For New Agent/Developer
 
 ### To Continue Development:
