@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lords of War - Connection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #2a1810;
+            color: #f4e4c1;
+            padding: 40px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        h1 { color: #ffd700; }
+        .status {
+            padding: 20px;
+            margin: 10px 0;
+            border: 2px solid #8b6f47;
+            border-radius: 8px;
+            background: rgba(0,0,0,0.5);
+        }
+        .success { border-color: #00ff64; }
+        .error { border-color: #ff4444; }
+        .warning { border-color: #ffd700; }
+        pre {
+            background: rgba(0,0,0,0.8);
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #4a90e2;
+            color: #f4e4c1;
+            border: 2px solid #8b6f47;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover { background: #2563eb; }
+    </style>
+</head>
+<body>
+    <h1>🎮 Lords of War - Connection Tester</h1>
+
+    <div class="status" id="status-cdnCheck">
+        <strong>CDN Check:</strong> Checking if Socket.io CDN is loaded...
+    </div>
+
+    <div class="status" id="status-connection">
+        <strong>Connection:</strong> Not yet attempted...
+    </div>
+
+    <div class="status" id="status-queue">
+        <strong>Queue:</strong> Awaiting connection...
+    </div>
+
+    <h2>Console Output:</h2>
+    <pre id="output"></pre>
+
+    <button onclick="testConnection()">Test Connection</button>
+    <button onclick="clearOutput()">Clear Output</button>
+    <button onclick="location.href='/'">Go to Game</button>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        const output = document.getElementById('output');
+        let socketIO = null;
+
+        function log(msg, type = 'info') {
+            console.log(`[${type.toUpperCase()}] ${msg}`);
+            output.textContent += `[${type.toUpperCase()}] ${msg}\n`;
+            output.parentElement.scrollTop = output.parentElement.scrollHeight;
+        }
+
+        function clearOutput() {
+            output.textContent = '';
+        }
+
+        // Check CDN
+        window.addEventListener('load', () => {
+            if (typeof io === 'undefined') {
+                updateStatus('status-cdnCheck', 'error', 'Socket.io CDN not loaded!');
+                log('Socket.io CDN not loaded', 'error');
+            } else {
+                updateStatus('status-cdnCheck', 'success', 'Socket.io CDN loaded ✓');
+                log('Socket.io CDN loaded successfully', 'success');
+            }
+        });
+
+        function updateStatus(elementId, type, message) {
+            const element = document.getElementById(elementId);
+            element.className = `status ${type}`;
+            element.innerHTML = `<strong>${element.firstChild.textContent.split(':')[0]}:</strong> ${message}`;
+        }
+
+        function testConnection() {
+            log('Starting connection test...', 'info');
+
+            if (typeof io === 'undefined') {
+                updateStatus('status-connection', 'error', 'Socket.io not loaded!');
+                log('Socket.io library is not loaded', 'error');
+                return;
+            }
+
+            try {
+                socketIO = io('http://localhost:3000', {
+                    reconnection: true,
+                    reconnectionDelay: 1000,
+                    reconnectionDelayMax: 5000,
+                    reconnectionAttempts: 5
+                });
+
+                log('Socket.io connection object created', 'info');
+
+                socketIO.on('connect', () => {
+                    log(`Connected! Socket ID: ${socketIO.id}`, 'success');
+                    updateStatus('status-connection', 'success', `Connected ✓ (ID: ${socketIO.id.substring(0, 8)}...)`);
+
+                    // Try to join queue
+                    testQueue();
+                });
+
+                socketIO.on('connect_error', (error) => {
+                    log(`Connection error: ${error}`, 'error');
+                    updateStatus('status-connection', 'error', `Connection failed: ${error}`);
+                });
+
+                socketIO.on('error', (error) => {
+                    log(`Socket error: ${error}`, 'error');
+                });
+
+                socketIO.on('disconnect', () => {
+                    log('Disconnected from server', 'warning');
+                    updateStatus('status-connection', 'warning', 'Disconnected');
+                });
+
+                socketIO.on('gameFound', () => {
+                    log('Game found!', 'success');
+                    updateStatus('status-queue', 'success', 'Game found! ✓');
+                });
+
+            } catch (error) {
+                log(`Exception: ${error.message}`, 'error');
+                updateStatus('status-connection', 'error', `Exception: ${error.message}`);
+            }
+        }
+
+        function testQueue() {
+            log('Attempting to join queue...', 'info');
+            updateStatus('status-queue', 'warning', 'Joining queue...');
+
+            const playerData = {
+                playerId: 'test_' + Math.random().toString(36).substr(2, 9),
+                name: 'Test Player',
+                unitType: 'ranged',
+                hero: null
+            };
+
+            socketIO.emit('joinQueue', playerData);
+            log(`Sent joinQueue with player ID: ${playerData.playerId}`, 'info');
+        }
+
+        // Auto-test on load
+        setTimeout(() => {
+            log('Page loaded - you can click "Test Connection" to begin', 'info');
+        }, 500);
+    </script>
+</body>
+</html>

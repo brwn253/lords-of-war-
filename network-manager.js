@@ -22,8 +22,27 @@ class NetworkManager {
       return;
     }
 
-    console.log(`Connecting to ${serverUrl}`);
-    this.socket = io(serverUrl);
+    console.log(`[NetworkManager] Connecting to ${serverUrl}`);
+
+    // Check if Socket.io is loaded
+    if (typeof io === 'undefined') {
+      console.error('[NetworkManager] Socket.io library not loaded! Make sure the CDN script is included in index.html');
+      this.emit('error', { message: 'Socket.io library not loaded' });
+      return;
+    }
+
+    try {
+      this.socket = io(serverUrl, {
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        reconnectionAttempts: 5
+      });
+    } catch (error) {
+      console.error('[NetworkManager] Error creating Socket.io connection:', error);
+      this.emit('error', { message: error.message });
+      return;
+    }
 
     // Connection events
     this.socket.on('connect', () => {
@@ -79,8 +98,19 @@ class NetworkManager {
     });
 
     this.socket.on('error', (error) => {
-      console.error('Server error:', error.message);
-      this.emit('error', error);
+      console.error('[NetworkManager] Server error:', error.message || error);
+      this.emit('error', { message: typeof error === 'string' ? error : error.message });
+    });
+
+    this.socket.on('connect_error', (error) => {
+      console.error('[NetworkManager] Connection error:', error.message || error);
+      this.emit('error', { message: 'Connection failed: ' + (error.message || error) });
+    });
+
+    this.socket.on('disconnect', () => {
+      console.log('[NetworkManager] Disconnected from server');
+      this.connected = false;
+      this.emit('disconnected');
     });
   }
 
