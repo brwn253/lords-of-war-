@@ -39,14 +39,6 @@ function initMultiplayer(serverUrl = 'http://localhost:3000') {
   networkManager.connect(serverUrl);
 
   // Register event handlers
-  networkManager.on('gameFound', () => {
-    console.log('[Game] Game found! Waiting for opponent to select hero...');
-    // Game is found, now need hero selection
-    if (document.getElementById('lobbyModal')) {
-      document.getElementById('lobbyModal').innerHTML = '<h1>🎯 Game Found!</h1><p>Select your hero...</p>';
-    }
-  });
-
   networkManager.on('gameStart', (data) => {
     console.log('[Game] Game started, initializing with state:', data.gameState);
     initializeMultiplayerGame(data);
@@ -3092,12 +3084,10 @@ function startQuickMatch() {
     document.getElementById('mainMenuModal').style.display = 'none';
     document.getElementById('lobbyModal').style.display = 'flex';
 
-    // Set up game found handler BEFORE connecting
+    // Set up game found handler to show hero selection
     const tempHandler = () => {
         console.log('[Game] Opponent found! Showing hero selection...');
-        document.getElementById('lobbyModal').style.display = 'none';
-        document.getElementById('heroSelectionModal') ? (document.getElementById('heroSelectionModal').style.display = 'flex') : 0;
-        showUnitTypeSelection();
+        showMultiplayerHeroSelection();
     };
 
     // Register game found handler FIRST
@@ -3132,6 +3122,32 @@ function startQuickMatch() {
             document.getElementById('mainMenuModal').style.display = 'flex';
         }
     }, 10000);
+}
+
+function showMultiplayerHeroSelection() {
+    document.getElementById('lobbyModal').style.display = 'none';
+    document.getElementById('multiplayerHeroModal').style.display = 'flex';
+}
+
+function selectMultiplayerUnitType(unitType) {
+    const HISTORIC_LEADERS = window.HISTORIC_LEADERS || {};
+    const heroes = HISTORIC_LEADERS[unitType] || [];
+
+    const heroList = document.getElementById('multiplayerHeroList');
+    heroList.innerHTML = '';
+
+    heroes.forEach(hero => {
+        const btn = document.createElement('button');
+        btn.textContent = `${hero.name} (${hero.unitType})`;
+        btn.style.cssText = 'padding: 10px 20px; margin: 5px; font-size: 11px; width: 200px;';
+        btn.onclick = () => selectMultiplayerHero(hero);
+        heroList.appendChild(btn);
+    });
+}
+
+function selectMultiplayerHero(hero) {
+    console.log('[Game] Selected hero:', hero.name);
+    startGame(hero.id);
 }
 
 function cancelMatchmaking() {
