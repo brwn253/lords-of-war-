@@ -19,6 +19,89 @@ const GAME_CONSTANTS = {
 let handScrollOffset = 0;
 const CARDS_VISIBLE = 5;
 
+// ===== MULTIPLAYER MODE =====
+let gameMode = 'singleplayer'; // 'singleplayer' or 'multiplayer'
+let networkManager = null;
+
+function setGameMode(mode) {
+  gameMode = mode;
+  console.log('Game mode set to:', mode);
+}
+
+function initMultiplayer(serverUrl = 'http://localhost:3000') {
+  if (window.networkManager) {
+    networkManager = window.networkManager;
+  } else {
+    networkManager = new NetworkManager();
+    window.networkManager = networkManager;
+  }
+
+  networkManager.connect(serverUrl);
+
+  // Register event handlers
+  networkManager.on('gameStart', (data) => {
+    console.log('Game started, initializing...');
+    initializeMultiplayerGame(data);
+  });
+
+  networkManager.on('stateUpdate', (gameState) => {
+    console.log('Received state update from server');
+    applyServerState(gameState);
+  });
+
+  networkManager.on('gameEnd', (result) => {
+    console.log('Game ended:', result);
+    handleGameEnd(result);
+  });
+
+  networkManager.on('opponentDisconnected', () => {
+    log('Opponent disconnected - waiting to reconnect...', 'warning');
+  });
+
+  networkManager.on('error', (error) => {
+    console.error('Network error:', error);
+    log('Network error: ' + error.message, 'error');
+  });
+}
+
+function initializeMultiplayerGame(data) {
+  gameMode = 'multiplayer';
+  setGameMode('multiplayer');
+
+  // Store game info
+  game.roomId = data.roomId;
+  game.playerRole = data.yourRole;
+
+  // Initialize with server state
+  applyServerState(data.gameState);
+
+  // Hide menu, show game
+  document.getElementById('mainMenuModal').style.display = 'none';
+  document.getElementById('lobbyModal').style.display = 'none';
+  document.getElementById('heroSelectionModal').style.display = 'none';
+
+  updateUI();
+}
+
+function applyServerState(serverState) {
+  // Map server state to our game state perspective
+  // The server sends player1 and player2, we need to map based on our role
+
+  if (networkManager.playerRole === 'player1') {
+    game.player = JSON.parse(JSON.stringify(serverState.player1));
+    game.enemy = JSON.parse(JSON.stringify(serverState.player2));
+  } else {
+    // We're player2, so enemy is player1
+    game.player = JSON.parse(JSON.stringify(serverState.player2));
+    game.enemy = JSON.parse(JSON.stringify(serverState.player1));
+  }
+
+  game.currentPlayer = (serverState.currentPlayer === networkManager.playerRole) ? 'player' : 'enemy';
+  game.turnNumber = serverState.turnNumber;
+
+  updateUI();
+}
+
 // ===== THEME DEFINITIONS (Classic Only) =====
 const THEMES = {
     blue: {
@@ -711,9 +794,15 @@ function startTurn(player) {
 
     updateUI();
 
-    // AI turn
+    // AI turn - only in single-player mode
     if (player === 'enemy') {
-        setTimeout(() => playAITurn(), 1500);
+        if (gameMode === 'multiplayer') {
+            // In multiplayer, opponent's actions come from server
+            log('Waiting for opponent...', 'enemy');
+        } else {
+            // Single-player: run AI
+            setTimeout(() => playAITurn(), 1500);
+        }
     }
 }
 
@@ -803,6 +892,12 @@ function endTurn() {
         return;
     }
 
+    // In multiplayer mode, send action to server
+    if (gameMode === 'multiplayer' && game.currentPlayer === 'player') {
+        networkManager.sendEndTurn();
+        return;
+    }
+
     // Check for available moves and show confirmation modal
     if (game.currentPlayer === 'player' && hasAvailableMoves('player')) {
         showEndTurnConfirmation();
@@ -849,6 +944,12 @@ function canPlayCard(card, player) {
 }
 
 function playCard(card, player, target = null) {
+    // In multiplayer mode, send action to server instead of executing locally
+    if (gameMode === 'multiplayer' && player === 'player') {
+        networkManager.sendPlayCard(card, target);
+        return true; // Action sent to server
+    }
+
     const playerData = player === 'player' ? game.player : game.enemy;
 
     if (!canPlayCard(card, player)) {
@@ -1256,6 +1357,13 @@ function getUnitTypeIcon(unitType) {
 }
 
 function attack(attacker, target, attackerPlayer) {
+    // In multiplayer mode, send action to server
+    if (gameMode === 'multiplayer' && attackerPlayer === 'player') {
+        const targetType = target === game.enemy.hero ? 'hero' : 'unit';
+        networkManager.sendAttack(attacker.instanceId, target.instanceId, targetType);
+        return true; // Action sent to server
+    }
+
     if (!attacker.canAttack) {
         log('That construct cannot attack yet');
         return false;
@@ -1449,6 +1557,12 @@ function destroyConstruct(construct, owner) {
 // ===== HERO POWERS =====
 
 function useHeroPower(player, target = null) {
+    // In multiplayer mode, send action to server
+    if (gameMode === 'multiplayer' && player === 'player') {
+        networkManager.sendUseHeroPower(target);
+        return true; // Action sent to server
+    }
+
     const playerData = player === 'player' ? game.player : game.enemy;
     const hero = playerData.hero;
 
@@ -1488,11 +1602,18 @@ function useHeroPower(player, target = null) {
 }
 
 function useEquipmentAttack(player, target = null) {
+    // In multiplayer mode, send action to server
+    if (gameMode === 'multiplayer' && player === 'player') {
+        const targetType = target === game.enemy.hero ? 'hero' : 'unit';
+        networkManager.sendUseEquipment(target?.instanceId, targetType);
+        return true; // Action sent to server
+    }
+
     const playerData = player === 'player' ? game.player : game.enemy;
-    
+
     // Check weapon slot (legacy support for equipment)
     const weapon = (playerData.equipmentSlots && playerData.equipmentSlots.weapon) || playerData.equipment;
-    
+
     if (!weapon) {
         log('No weapon equipped', player);
         return false;
@@ -2919,6 +3040,109 @@ function initializeGameData() {
                 showUnitTypeSelection();
             }
         }
+    }
+}
+
+// ===== MULTIPLAYER UI FUNCTIONS =====
+
+function startQuickMatch() {
+    const playerName = document.getElementById('playerNameInput')?.value || 'Player';
+
+    // Initialize network manager
+    if (!window.networkManager || !networkManager) {
+        window.networkManager = new NetworkManager();
+        networkManager = window.networkManager;
+    }
+
+    // Show lobby
+    document.getElementById('mainMenuModal').style.display = 'none';
+    document.getElementById('lobbyModal').style.display = 'flex';
+
+    // Connect and join queue
+    initMultiplayer();
+
+    const playerData = {
+        playerId: generatePlayerId(),
+        name: playerName,
+        unitType: 'ranged', // Default, can be changed
+        hero: null
+    };
+
+    networkManager.joinQueue(playerData);
+}
+
+function cancelMatchmaking() {
+    if (networkManager) {
+        networkManager.leaveQueue();
+        networkManager.disconnect();
+    }
+
+    // Return to main menu
+    document.getElementById('lobbyModal').style.display = 'none';
+    document.getElementById('mainMenuModal').style.display = 'flex';
+}
+
+function generatePlayerId() {
+    return 'player_' + Math.random().toString(36).substr(2, 9);
+}
+
+function handleGameEnd(result) {
+    console.log('Game ended:', result);
+
+    // Show game end modal
+    let message = '';
+    if (result.result === 'win') {
+        message = '🎉 YOU WIN! 🎉';
+    } else if (result.result === 'loss') {
+        message = '😔 YOU LOSE...';
+    } else if (result.result === 'draw') {
+        message = '🤝 DRAW';
+    }
+
+    log(message);
+
+    // Show result for 5 seconds then return to menu
+    setTimeout(() => {
+        resetGame();
+        document.getElementById('mainMenuModal').style.display = 'flex';
+    }, 5000);
+}
+
+function resetGame() {
+    // Reset game state
+    game.currentPlayer = 'player';
+    game.turnNumber = 1;
+    game.player = {
+        hero: null,
+        health: GAME_CONSTANTS.STARTING_HEALTH,
+        maxEssence: 0,
+        currentEssence: 0,
+        heroPowerUsed: false,
+        deck: [],
+        hand: [],
+        board: [],
+        weapon: null,
+        constructsPlayed: 0
+    };
+    game.enemy = {
+        hero: null,
+        health: GAME_CONSTANTS.STARTING_HEALTH,
+        maxEssence: 0,
+        currentEssence: 0,
+        heroPowerUsed: false,
+        deck: [],
+        hand: [],
+        board: [],
+        weapon: null,
+        constructsPlayed: 0
+    };
+
+    // Reset mode
+    gameMode = 'singleplayer';
+    if (networkManager) {
+        networkManager.disconnect();
+        networkManager = null;
+        window.networkManager = null;
     }
 }
 
