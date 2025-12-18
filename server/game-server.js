@@ -119,6 +119,26 @@ io.on('connection', (socket) => {
     broadcastGameState(room);
   });
 
+  // ===== SELECT HERO (Multiplayer) =====
+  socket.on('selectHero', ({ heroId, hero }) => {
+    const playerInfo = playerSockets.get(socket.id);
+    if (!playerInfo) return;
+
+    const room = activeGames.get(playerInfo.roomId);
+    if (!room) return;
+
+    console.log(`[HERO] ${playerInfo.role} selected hero: ${heroId}`);
+
+    // Store hero for this player
+    room.players[playerInfo.role].hero = hero;
+
+    // Check if both players have selected heroes
+    if (room.players.player1.hero && room.players.player2.hero) {
+      console.log(`[GAME] Both players ready, initializing game`);
+      initializeMultiplayerGame(room);
+    }
+  });
+
   // ===== END TURN =====
   socket.on('endTurn', () => {
     const playerInfo = playerSockets.get(socket.id);
@@ -527,6 +547,107 @@ function handlePlayerDisconnect(room, role) {
     room.status = 'finished';
     activeGames.delete(room.roomId);
   }, GAME_CONSTANTS.DISCONNECT_TIMEOUT);
+}
+
+function initializeMultiplayerGame(room) {
+  // Create decks and hands for both players based on their heroes
+  const createMultiplayerDeck = (unitType) => {
+    const deck = [];
+
+    // Simplified deck creation for multiplayer
+    // In a real game, this would use CARD_DATABASE from client
+    if (unitType === 'ranged') {
+      // Add some ranged units
+      for (let i = 0; i < 12; i++) {
+        deck.push({
+          id: 'archer',
+          name: 'Archer',
+          type: 'unit',
+          cost: 2,
+          power: 2,
+          durability: 1,
+          unitType: 'ranged'
+        });
+      }
+    } else if (unitType === 'infantry') {
+      for (let i = 0; i < 12; i++) {
+        deck.push({
+          id: 'footman',
+          name: 'Footman',
+          type: 'unit',
+          cost: 2,
+          power: 2,
+          durability: 2,
+          unitType: 'infantry'
+        });
+      }
+    } else if (unitType === 'cavalry') {
+      for (let i = 0; i < 12; i++) {
+        deck.push({
+          id: 'horseman',
+          name: 'Horseman',
+          type: 'unit',
+          cost: 3,
+          power: 3,
+          durability: 1,
+          unitType: 'cavalry'
+        });
+      }
+    }
+
+    // Shuffle deck
+    return shuffleDeck(deck);
+  };
+
+  // Initialize game state with heroes and decks
+  room.gameState.player1.hero = room.players.player1.hero;
+  room.gameState.player1.health = room.players.player1.hero.health || GAME_CONSTANTS.STARTING_HEALTH;
+  room.gameState.player1.maxHealth = room.gameState.player1.health;
+  room.gameState.player1.deck = createMultiplayerDeck(room.players.player1.hero.unitType);
+
+  room.gameState.player2.hero = room.players.player2.hero;
+  room.gameState.player2.health = room.players.player2.hero.health || GAME_CONSTANTS.STARTING_HEALTH;
+  room.gameState.player2.maxHealth = room.gameState.player2.health;
+  room.gameState.player2.deck = createMultiplayerDeck(room.players.player2.hero.unitType);
+
+  // Draw initial hands (3 cards)
+  for (let i = 0; i < 3; i++) {
+    if (room.gameState.player1.deck.length > 0) {
+      room.gameState.player1.hand.push(room.gameState.player1.deck.pop());
+    }
+    if (room.gameState.player2.deck.length > 0) {
+      room.gameState.player2.hand.push(room.gameState.player2.deck.pop());
+    }
+  }
+
+  // Set first player
+  room.gameState.currentPlayer = 'player1';
+  room.gameState.turnNumber = 1;
+  room.status = 'active';
+
+  console.log(`[GAME] Game initialized for room ${room.roomId}`);
+
+  // Send gameStart to both players
+  io.to(room.players.player1.socketId).emit('gameStart', {
+    roomId: room.roomId,
+    yourRole: 'player1',
+    gameState: room.gameState
+  });
+
+  io.to(room.players.player2.socketId).emit('gameStart', {
+    roomId: room.roomId,
+    yourRole: 'player2',
+    gameState: room.gameState
+  });
+}
+
+function shuffleDeck(deck) {
+  const shuffled = [...deck];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
 }
 
 function broadcastGameState(room) {

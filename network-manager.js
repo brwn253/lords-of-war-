@@ -64,7 +64,8 @@ class NetworkManager {
     });
 
     this.socket.on('gameStart', (data) => {
-      console.log('Game starting! Your role:', data.yourRole);
+      console.log('[NetworkManager] Game starting! Your role:', data.yourRole);
+      console.log('[NetworkManager] Game state received:', data.gameState);
       this.roomId = data.roomId;
       this.playerRole = data.yourRole;
       this.isMultiplayer = true;

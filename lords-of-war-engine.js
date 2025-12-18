@@ -39,13 +39,21 @@ function initMultiplayer(serverUrl = 'http://localhost:3000') {
   networkManager.connect(serverUrl);
 
   // Register event handlers
+  networkManager.on('gameFound', () => {
+    console.log('[Game] Game found! Waiting for opponent to select hero...');
+    // Game is found, now need hero selection
+    if (document.getElementById('lobbyModal')) {
+      document.getElementById('lobbyModal').innerHTML = '<h1>🎯 Game Found!</h1><p>Select your hero...</p>';
+    }
+  });
+
   networkManager.on('gameStart', (data) => {
-    console.log('Game started, initializing...');
+    console.log('[Game] Game started, initializing with state:', data.gameState);
     initializeMultiplayerGame(data);
   });
 
   networkManager.on('stateUpdate', (gameState) => {
-    console.log('Received state update from server');
+    console.log('[Game] Received state update from server');
     applyServerState(gameState);
   });
 
@@ -72,15 +80,19 @@ function initializeMultiplayerGame(data) {
   game.roomId = data.roomId;
   game.playerRole = data.yourRole;
 
-  // Initialize with server state
+  // Apply the server state (which has heroes, decks, hands)
   applyServerState(data.gameState);
 
-  // Hide menu, show game
-  document.getElementById('mainMenuModal').style.display = 'none';
-  document.getElementById('lobbyModal').style.display = 'none';
-  document.getElementById('heroSelectionModal').style.display = 'none';
+  // Hide all modals
+  const modals = document.querySelectorAll('.modal');
+  modals.forEach(m => m.style.display = 'none');
 
-  updateUI();
+  // Show game board
+  document.getElementById('modalOverlay').style.display = 'none';
+
+  // Start the game
+  log('Game started! Your hero: ' + game.player.hero.name);
+  startTurn('player');
 }
 
 function applyServerState(serverState) {
@@ -98,6 +110,20 @@ function applyServerState(serverState) {
 
   game.currentPlayer = (serverState.currentPlayer === networkManager.playerRole) ? 'player' : 'enemy';
   game.turnNumber = serverState.turnNumber;
+
+  // Initialize UI elements if they don't exist yet
+  if (!game.player.equipmentSlots) {
+    game.player.equipmentSlots = {
+      weapon: null, head: null, chest: null, legs: null,
+      shield: null, boots: null, gloves: null, neck: null, back: null
+    };
+  }
+  if (!game.enemy.equipmentSlots) {
+    game.enemy.equipmentSlots = {
+      weapon: null, head: null, chest: null, legs: null,
+      shield: null, boots: null, gloves: null, neck: null, back: null
+    };
+  }
 
   updateUI();
 }
@@ -635,7 +661,7 @@ function startGame(heroId) {
     // Get data from window (defined in lords-of-war.js)
     const HISTORIC_LEADERS = window.HISTORIC_LEADERS || {};
     const CARD_DATABASE = window.CARD_DATABASE || {};
-    
+
     // Find hero in HISTORIC_LEADERS
     let heroData = null;
     for (const type in HISTORIC_LEADERS) {
@@ -645,11 +671,19 @@ function startGame(heroId) {
             break;
         }
     }
-    
+
     if (!heroData) {
         console.error('Hero not found:', heroId);
         console.error('Available leaders:', HISTORIC_LEADERS);
         alert('Error: Hero not found. Please refresh the page.');
+        return;
+    }
+
+    // In multiplayer mode, send hero selection to server
+    if (gameMode === 'multiplayer' && networkManager && networkManager.isMultiplayer) {
+        console.log('Sending hero selection to server:', heroData.id);
+        networkManager.socket.emit('selectHero', { heroId: heroData.id, hero: heroData });
+        log('Hero selected! Waiting for opponent...');
         return;
     }
     
@@ -3058,8 +3092,19 @@ function startQuickMatch() {
     document.getElementById('mainMenuModal').style.display = 'none';
     document.getElementById('lobbyModal').style.display = 'flex';
 
+    // Set up game found handler BEFORE connecting
+    const tempHandler = () => {
+        console.log('[Game] Opponent found! Showing hero selection...');
+        document.getElementById('lobbyModal').style.display = 'none';
+        document.getElementById('heroSelectionModal') ? (document.getElementById('heroSelectionModal').style.display = 'flex') : 0;
+        showUnitTypeSelection();
+    };
+
     // Connect and join queue
     initMultiplayer();
+
+    // Register game found handler
+    networkManager.on('gameFound', tempHandler);
 
     const playerData = {
         playerId: generatePlayerId(),
