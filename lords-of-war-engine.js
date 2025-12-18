@@ -3124,9 +3124,17 @@ function startQuickMatch() {
     }, 10000);
 }
 
+// Store selected hero for multiplayer
+let selectedMultiplayerHero = null;
+
 function showMultiplayerHeroSelection() {
     document.getElementById('lobbyModal').style.display = 'none';
     document.getElementById('multiplayerHeroModal').style.display = 'flex';
+    document.getElementById('modalOverlay').style.display = 'block';
+
+    // Hide game board
+    const gameBoard = document.querySelector('.game-board');
+    if (gameBoard) gameBoard.style.display = 'none';
 }
 
 function selectMultiplayerUnitType(unitType) {
@@ -3138,8 +3146,10 @@ function selectMultiplayerUnitType(unitType) {
 
     heroes.forEach(hero => {
         const btn = document.createElement('button');
-        btn.textContent = `${hero.name} (${hero.unitType})`;
-        btn.style.cssText = 'padding: 10px 20px; margin: 5px; font-size: 11px; width: 200px;';
+        btn.textContent = `${hero.name}`;
+        btn.style.cssText = 'display: block; width: 100%; padding: 12px; margin: 5px 0; font-size: 12px; background: rgba(74, 144, 226, 0.3); border: 2px solid #8b6f47; border-radius: 5px; cursor: pointer; color: #f4e4c1; text-align: left;';
+        btn.onmouseover = () => btn.style.background = 'rgba(74, 144, 226, 0.6)';
+        btn.onmouseout = () => btn.style.background = 'rgba(74, 144, 226, 0.3)';
         btn.onclick = () => selectMultiplayerHero(hero);
         heroList.appendChild(btn);
     });
@@ -3147,7 +3157,37 @@ function selectMultiplayerUnitType(unitType) {
 
 function selectMultiplayerHero(hero) {
     console.log('[Game] Selected hero:', hero.name);
-    startGame(hero.id);
+    selectedMultiplayerHero = hero;
+
+    // Show hero details
+    document.getElementById('multiplayerHeroDetails').style.display = 'block';
+    document.getElementById('selectedHeroName').textContent = `${hero.name} (${hero.unitType})`;
+
+    // Show passive ability description
+    let passiveText = 'Passive: Draw 1 card (2 gold)';
+    if (hero.passiveAbility) {
+        passiveText = 'Passive: ' + hero.passiveAbility;
+    }
+    document.getElementById('selectedHeroPassive').textContent = passiveText;
+
+    // Show confirm button
+    document.getElementById('confirmHeroBtn').style.display = 'inline-block';
+}
+
+function confirmMultiplayerHero() {
+    if (!selectedMultiplayerHero) {
+        alert('Please select a hero first');
+        return;
+    }
+
+    console.log('[Game] Confirming hero:', selectedMultiplayerHero.name);
+
+    // Hide modal
+    document.getElementById('multiplayerHeroModal').style.display = 'none';
+    document.getElementById('modalOverlay').style.display = 'none';
+
+    // Start game with selected hero
+    startGame(selectedMultiplayerHero.id);
 }
 
 function cancelMatchmaking() {
