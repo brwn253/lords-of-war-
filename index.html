@@ -2176,44 +2176,36 @@
     </div>
 
     <!-- Multiplayer Hero Selection Modal -->
-    <div class="modal" id="multiplayerHeroModal" style="display: none; max-width: 1000px;">
+    <div class="modal" id="multiplayerHeroModal" style="display: none; max-width: 900px; min-height: 500px;">
         <!-- Title across the top -->
-        <h1 style="margin: 0 0 20px 0; text-align: center;">⚔️ Select your hero</h1>
+        <h1 style="margin: 0 0 15px 0; text-align: center; font-size: 24px;">⚔️ SELECT YOUR HERO</h1>
 
         <!-- Unit Type Buttons -->
-        <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px;">
-            <button onclick="selectMultiplayerUnitType('ranged')" style="padding: 5px 20px; margin: 0; font-size: 12px; background: linear-gradient(135deg, #4a5f8f 0%, #2a3f5f 100%); border: 3px solid #7a9fff;">🏹 Ranged</button>
-            <button onclick="selectMultiplayerUnitType('infantry')" style="padding: 5px 20px; margin: 0; font-size: 12px; background: linear-gradient(135deg, #5f4a4f 0%, #3f2a2f 100%); border: 3px solid #ff7a7a;">🛡️ Infantry</button>
-            <button onclick="selectMultiplayerUnitType('cavalry')" style="padding: 5px 20px; margin: 0; font-size: 12px; background: linear-gradient(135deg, #5f5f2a 0%, #3f3f0a 100%); border: 3px solid #ffff7a;">🐎 Cavalry</button>
+        <div style="display: flex; gap: 15px; justify-content: center; margin-bottom: 20px;">
+            <button onclick="selectMultiplayerUnitType('ranged')" style="padding: 8px 25px; margin: 0; font-size: 11px; background: linear-gradient(135deg, #4a5f8f 0%, #2a3f5f 100%); border: 3px solid #7a9fff; border-radius: 8px; cursor: pointer; color: #f4e4c1; font-weight: bold;">🏹 RANGED</button>
+            <button onclick="selectMultiplayerUnitType('infantry')" style="padding: 8px 25px; margin: 0; font-size: 11px; background: linear-gradient(135deg, #5f4a4f 0%, #3f2a2f 100%); border: 3px solid #ff7a7a; border-radius: 8px; cursor: pointer; color: #f4e4c1; font-weight: bold;">🛡️ INFANTRY</button>
+            <button onclick="selectMultiplayerUnitType('cavalry')" style="padding: 8px 25px; margin: 0; font-size: 11px; background: linear-gradient(135deg, #5f5f2a 0%, #3f3f0a 100%); border: 3px solid #ffff7a; border-radius: 8px; cursor: pointer; color: #f4e4c1; font-weight: bold;">🐎 CAVALRY</button>
         </div>
 
-        <!-- Two-Column Table Layout -->
-        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px; margin-bottom: 15px; height: 350px;">
+        <!-- Two-Column Layout: Hero List + Description -->
+        <div style="display: grid; grid-template-columns: 140px 1fr; gap: 15px; margin-bottom: 20px; height: 320px;">
             <!-- Left Column: Hero List -->
-            <div style="border: 2px solid #8b6f47; border-radius: 5px; overflow: hidden; display: flex; flex-direction: column;">
+            <div style="border: 3px solid #8b6f47; border-radius: 5px; background: rgba(139, 111, 71, 0.2); overflow: hidden; display: flex; flex-direction: column;">
                 <div id="multiplayerHeroList" style="flex: 1; overflow-y: auto;"></div>
             </div>
 
-            <!-- Right Column: Hero Details Table -->
-            <div style="border: 2px solid #8b6f47; border-radius: 5px; background: rgba(0,0,0,0.6); overflow: hidden; display: flex; flex-direction: column;">
-                <div id="multiplayerHeroDetails" style="flex: 1; display: flex; flex-direction: column; padding: 12px; display: none;">
-                    <!-- Headers Row -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 2px solid #8b6f47;">
-                        <div style="color: #ffd700; font-weight: bold; font-size: 12px; text-transform: uppercase;">Name</div>
-                        <div style="color: #ffd700; font-weight: bold; font-size: 12px; text-transform: uppercase;">Description</div>
-                    </div>
-                    <!-- Content Row -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <div id="selectedHeroName" style="color: #f4e4c1; font-size: 13px; font-weight: bold;"></div>
-                        <div id="selectedHeroPassive" style="color: #f4e4c1; font-size: 12px; line-height: 1.5; overflow-y: auto;"></div>
-                    </div>
+            <!-- Right Column: Hero Description (Large Black Area) -->
+            <div style="border: 3px solid #8b6f47; border-radius: 5px; background: rgba(0, 0, 0, 0.8); overflow: hidden;">
+                <div id="multiplayerHeroDetails" style="width: 100%; height: 100%; padding: 15px; display: none; overflow-y: auto;">
+                    <h2 id="selectedHeroName" style="margin: 0 0 10px 0; color: #ffd700; font-size: 14px; text-transform: uppercase;"></h2>
+                    <p id="selectedHeroPassive" style="margin: 0; color: #f4e4c1; font-size: 12px; line-height: 1.6;"></p>
                 </div>
             </div>
         </div>
 
         <!-- Confirm Button -->
         <div style="text-align: center;">
-            <button id="confirmHeroBtn" onclick="confirmMultiplayerHero()" style="padding: 10px 35px; margin: 0; font-size: 12px; background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); border: 3px solid #8b6f47; display: none; cursor: pointer;">✓ CONFIRM HERO</button>
+            <button id="confirmHeroBtn" onclick="confirmMultiplayerHero()" style="padding: 10px 40px; margin: 0; font-size: 12px; background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); border: 3px solid #8b6f47; border-radius: 5px; cursor: pointer; color: white; font-weight: bold; display: none;">✓ CONFIRM HERO</button>
             <div id="waitingMessage" style="display: none; margin-top: 10px; color: #ffd700; font-size: 12px;">Waiting for opponent to select hero...</div>
         </div>
     </div>

@@ -3192,9 +3192,9 @@ function selectMultiplayerUnitType(unitType) {
     heroes.forEach(hero => {
         const btn = document.createElement('button');
         btn.textContent = hero.name;
-        btn.style.cssText = 'display: block; width: 100%; padding: 8px 10px; margin: 0; font-size: 12px; background: rgba(74, 144, 226, 0.2); border: 1px solid #8b6f47; border-radius: 0; cursor: pointer; color: #f4e4c1; text-align: left; transition: all 0.15s;';
-        btn.onmouseover = () => btn.style.background = 'rgba(74, 144, 226, 0.5)';
-        btn.onmouseout = () => btn.style.background = 'rgba(74, 144, 226, 0.2)';
+        btn.style.cssText = 'display: block; width: 100%; padding: 10px 8px; margin: 0; font-size: 11px; background: rgba(74, 144, 226, 0.15); border: 0; border-bottom: 1px solid rgba(139, 111, 71, 0.5); border-radius: 0; cursor: pointer; color: #f4e4c1; text-align: left; transition: all 0.15s; font-weight: 500;';
+        btn.onmouseover = () => btn.style.background = 'rgba(74, 144, 226, 0.4)';
+        btn.onmouseout = () => btn.style.background = 'rgba(74, 144, 226, 0.15)';
         btn.onclick = () => selectMultiplayerHero(hero);
         heroList.appendChild(btn);
     });
