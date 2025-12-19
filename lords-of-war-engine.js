@@ -1466,7 +1466,8 @@ function attack(attacker, target, attackerPlayer) {
         const weaponBonus = attackerData.weapon ? attackerData.weapon.equipPower || 0 : 0;
         const typeAdvantage = getTypeAdvantage(attacker, target);
         const infantryBonus = attacker.unitType === 'infantry' ? 1 : 0;
-        let attackerPower = attacker.power + weaponBonus + typeAdvantage + infantryBonus;
+        const cavalryBonus = attacker.unitType === 'cavalry' ? 1 : 0;
+        let attackerPower = attacker.power + weaponBonus + typeAdvantage + infantryBonus + cavalryBonus;
         // Ensure minimum damage of 1
         attackerPower = Math.max(1, attackerPower);
         const defenderPower = target.power;
