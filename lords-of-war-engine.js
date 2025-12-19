@@ -2273,7 +2273,7 @@ function updateHand() {
         cardGroups[groupKey].push(card);
     });
 
-    // Sort cards by type: equipment (left), monsters/units (middle), abilities (right)
+    // Sort cards by type: equipment (left), bannermen/units (middle), abilities (right)
     const typeOrder = { 'equipment': 0, 'unit': 1, 'construct': 1, 'ability': 2 };
     const sortedGroups = Object.entries(cardGroups).sort((a, b) => {
         const typeA = typeOrder[a[1][0].type] ?? 3;
