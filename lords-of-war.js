@@ -65,10 +65,10 @@ const HISTORIC_LEADERS = {
             commandCost: 2,
             commandName: 'Battle Formation',
             commandText: 'Draw 1 card',
-            passive: 'Your infantry units have +1 power',
+            passive: 'Your infantry units deal +1 damage',
             portrait: 'LE',
             color: '#5f1a1a',
-            description: 'Leonidas\n\n⚔️ HERO TYPE: Infantry\nHP: 57\nStarts with: Sword\n\n📋 PASSIVE ABILITY:\nYour infantry units have +1 power\n\nInfantry Mechanics:\n• +1 attack vs Cavalry\n• Ranged deal +1 attack vs Infantry'
+            description: 'Leonidas\n\n⚔️ HERO TYPE: Infantry\nHP: 57\nStarts with: Sword\n\n📋 PASSIVE ABILITY:\nYour infantry units deal +1 damage\n\nInfantry Mechanics:\n• +1 attack vs Cavalry\n• Ranged deal +1 attack vs Infantry'
         },
         {
             id: 'joanOfArc',
@@ -119,10 +119,10 @@ const HISTORIC_LEADERS = {
             commandCost: 2,
             commandName: 'Scouts Report',
             commandText: 'Draw 1 card',
-            passive: 'Your cavalry units have +1 power',
+            passive: 'Your cavalry units deal +1 damage',
             portrait: 'GK',
             color: '#1a3a1a',
-            description: 'Genghis Khan\n\n⚔️ HERO TYPE: Cavalry\nHP: 52\n\n📋 PASSIVE ABILITY:\nYour cavalry units have +1 power\n\nCavalry Mechanics:\n• +1 attack vs Ranged\n• Infantry deal +1 attack vs Cavalry'
+            description: 'Genghis Khan\n\n⚔️ HERO TYPE: Cavalry\nHP: 52\n\n📋 PASSIVE ABILITY:\nYour cavalry units deal +1 damage\n\nCavalry Mechanics:\n• +1 attack vs Ranged\n• Infantry deal +1 attack vs Cavalry'
         },
         {
             id: 'alexander',
