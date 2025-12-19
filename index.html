@@ -2188,18 +2188,23 @@
         </div>
 
         <!-- Two-Column Layout: Hero List + Description -->
-        <div style="display: grid; grid-template-columns: 120px 1fr; gap: 15px; flex: 1; margin-bottom: 15px; width: 100%;">
+        <div style="display: grid; grid-template-columns: 120px 1fr; gap: 15px; flex: 0 0 auto; margin-bottom: 15px; width: 100%; height: auto;">
             <!-- Left Column: Hero List -->
-            <div style="border: 3px solid #8b6f47; border-radius: 5px; background: rgba(139, 111, 71, 0.2); overflow: hidden; display: flex; flex-direction: column; min-height: 0;">
+            <div style="border: 3px solid #8b6f47; border-radius: 5px; background: rgba(139, 111, 71, 0.2); overflow: hidden; display: flex; flex-direction: column; height: 300px;">
                 <div id="multiplayerHeroList" style="flex: 1; overflow-y: auto; width: 100%;"></div>
             </div>
 
-            <!-- Right Column: Hero Description (Large Black Area) -->
-            <div style="border: 3px solid #8b6f47; border-radius: 5px; background: rgba(0, 0, 0, 0.8); overflow: hidden; display: flex; flex-direction: column; min-height: 0;">
-                <div id="multiplayerHeroDetails" style="flex: 1; padding: 15px; display: none; overflow-y: auto;">
+            <!-- Right Column: Hero Description (Narrow, Fit Content) -->
+            <div style="border: 3px solid #8b6f47; border-radius: 5px; background: rgba(0, 0, 0, 0.8); overflow: hidden; display: flex; flex-direction: column; width: fit-content; max-width: 400px; height: 300px;">
+                <div id="multiplayerHeroDetails" style="padding: 15px; display: none; overflow-y: auto;">
                     <p id="selectedHeroPassive" style="margin: 0; color: #f4e4c1; font-size: 11px; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word;"></p>
                 </div>
             </div>
+        </div>
+
+        <!-- Mechanics Section Below -->
+        <div style="border: 3px solid #8b6f47; border-radius: 5px; background: rgba(0, 0, 0, 0.8); padding: 15px; margin-bottom: 15px; width: 100%; flex-shrink: 0;">
+            <p id="selectedHeroMechanics" style="margin: 0; color: #f4e4c1; font-size: 11px; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word;"></p>
         </div>
 
         <!-- Confirm Button -->

@@ -3205,7 +3205,7 @@ function selectMultiplayerHero(hero) {
     selectedMultiplayerHero = hero;
 
     // Show hero details
-    document.getElementById('multiplayerHeroDetails').style.display = 'flex';
+    document.getElementById('multiplayerHeroDetails').style.display = 'block';
 
     // Show full description (or fallback to basic info)
     let descriptionText = hero.description;
@@ -3213,16 +3213,50 @@ function selectMultiplayerHero(hero) {
         descriptionText = hero.name + '\n\nHP: ' + (hero.health || 30) + '\n\nPassive: ' + (hero.passive || 'Draw 1 card');
     }
 
-    // Parse description and apply color coding to mechanics
-    let formattedDescription = formatHeroDescription(descriptionText);
+    // Split description and mechanics
+    const lines = descriptionText.split('\n');
+    let descriptionLines = [];
+    let mechanicsLines = [];
+    let inMechanics = false;
+
+    for (const line of lines) {
+        if (line.includes('Mechanics:')) {
+            inMechanics = true;
+            mechanicsLines.push(line);
+        } else if (inMechanics) {
+            mechanicsLines.push(line);
+        } else {
+            descriptionLines.push(line);
+        }
+    }
+
+    // Format and display description
+    let formattedDescription = formatDescriptionOnly(descriptionLines);
     document.getElementById('selectedHeroPassive').innerHTML = formattedDescription;
+
+    // Format and display mechanics with color coding
+    let formattedMechanics = formatMechanicsOnly(mechanicsLines);
+    document.getElementById('selectedHeroMechanics').innerHTML = formattedMechanics;
 
     // Show confirm button
     document.getElementById('confirmHeroBtn').style.display = 'inline-block';
 }
 
-function formatHeroDescription(text) {
-    const lines = text.split('\n');
+function formatDescriptionOnly(lines) {
+    let html = '';
+
+    for (const line of lines) {
+        if (line === '') {
+            html += '<br>';
+        } else {
+            html += '<div>' + escapeHtml(line) + '</div>';
+        }
+    }
+
+    return html;
+}
+
+function formatMechanicsOnly(lines) {
     let html = '';
 
     for (const line of lines) {
@@ -3231,10 +3265,10 @@ function formatHeroDescription(text) {
             const mechanicText = line.substring(2); // Remove "• "
             if (mechanicText.includes('deal') || mechanicText.match(/^\w+ (deal|take)/)) {
                 // Red - this is what counters this hero
-                html += '<div style="color: #ff6b6b;">• ' + mechanicText + '</div>';
+                html += '<div style="color: #ff6b6b;">• ' + escapeHtml(mechanicText) + '</div>';
             } else {
                 // Green - this is what this hero counters
-                html += '<div style="color: #2ecc71;">• ' + mechanicText + '</div>';
+                html += '<div style="color: #2ecc71;">• ' + escapeHtml(mechanicText) + '</div>';
             }
         } else if (line === '') {
             html += '<br>';
@@ -3245,6 +3279,7 @@ function formatHeroDescription(text) {
 
     return html;
 }
+
 
 function escapeHtml(text) {
     const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
