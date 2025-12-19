@@ -3226,15 +3226,15 @@ function formatHeroDescription(text) {
     let html = '';
 
     for (const line of lines) {
-        if (line.startsWith('- ')) {
+        if (line.startsWith('• ')) {
             // Mechanics line - color code based on whether it's a counter or counter-to
-            const mechanicText = line.substring(2); // Remove "- "
+            const mechanicText = line.substring(2); // Remove "• "
             if (mechanicText.includes('deal') || mechanicText.match(/^\w+ (deal|take)/)) {
                 // Red - this is what counters this hero
-                html += '<div style="color: #ff6b6b;">- ' + mechanicText + '</div>';
+                html += '<div style="color: #ff6b6b;">• ' + mechanicText + '</div>';
             } else {
                 // Green - this is what this hero counters
-                html += '<div style="color: #2ecc71;">- ' + mechanicText + '</div>';
+                html += '<div style="color: #2ecc71;">• ' + mechanicText + '</div>';
             }
         } else if (line === '') {
             html += '<br>';
