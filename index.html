@@ -2176,7 +2176,7 @@
     </div>
 
     <!-- Multiplayer Hero Selection Modal -->
-    <div class="modal" id="multiplayerHeroModal" style="display: flex; flex-direction: column; max-width: 900px; min-height: 550px;">
+    <div class="modal" id="multiplayerHeroModal" style="display: none; flex-direction: column; max-width: 900px; min-height: 550px;">
         <!-- Title across the top -->
         <h1 style="margin: 0 0 10px 0; text-align: center; font-size: 24px; width: 100%;">⚔️ SELECT YOUR HERO</h1>
 
@@ -2212,7 +2212,8 @@
 
         <!-- Confirm Button -->
         <div style="text-align: center; flex-shrink: 0; width: 100%;">
-            <button id="confirmHeroBtn" onclick="confirmMultiplayerHero()" style="padding: 10px 40px; margin: 0; font-size: 12px; background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); border: 3px solid #8b6f47; border-radius: 5px; cursor: pointer; color: white; font-weight: bold; display: none;">✓ CONFIRM HERO</button>
+            <button id="confirmHeroBtn" onclick="confirmMultiplayerHero()" style="padding: 10px 40px; margin: 0 5px; font-size: 12px; background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); border: 3px solid #8b6f47; border-radius: 5px; cursor: pointer; color: white; font-weight: bold; display: none;">✓ CONFIRM HERO</button>
+            <button onclick="cancelHeroSelection()" style="padding: 10px 40px; margin: 0 5px; font-size: 12px; background: linear-gradient(135deg, #c41e3a 0%, #8b1a1a 100%); border: 3px solid #8b6f47; border-radius: 5px; cursor: pointer; color: white; font-weight: bold;">✕ CANCEL</button>
             <div id="waitingMessage" style="display: none; margin-top: 10px; color: #ffd700; font-size: 12px;">Waiting for opponent to select hero...</div>
         </div>
     </div>

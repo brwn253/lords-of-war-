@@ -38,41 +38,87 @@ function initMultiplayer(serverUrl = 'http://localhost:3000') {
 
   networkManager.connect(serverUrl);
 
-  // Register event handlers
-  networkManager.on('gameStart', (data) => {
-    console.log('[Game] Game started, initializing with state:', data.gameState);
-    initializeMultiplayerGame(data);
-  });
+  // Register event handlers (only once - check if handlers already exist)
+  // Note: NetworkManager's custom EventEmitter allows multiple handlers, but we want to ensure they're registered
+  if (!networkManager._handlersRegistered) {
+    console.log('[Game] Registering multiplayer event handlers');
+    
+    networkManager.on('gameStart', (data) => {
+      console.log('[Game] Game started, initializing with state:', data.gameState);
+      initializeMultiplayerGame(data);
+    });
 
-  networkManager.on('stateUpdate', (gameState) => {
-    console.log('[Game] Received state update from server');
-    applyServerState(gameState);
-  });
+    networkManager.on('stateUpdate', (gameState) => {
+      console.log('[Game] Received state update from server');
+      console.log('[Game] State update currentPlayer:', gameState.currentPlayer);
+      console.log('[Game] Our role:', networkManager?.playerRole);
+      console.log('[Game] Current game.currentPlayer before update:', game.currentPlayer);
+      applyServerState(gameState);
+      console.log('[Game] Current game.currentPlayer after update:', game.currentPlayer);
+      // Update UI after applying server state
+      updateUI();
+    });
 
-  networkManager.on('gameEnd', (result) => {
-    console.log('Game ended:', result);
-    handleGameEnd(result);
-  });
+    networkManager.on('gameEnd', (result) => {
+      console.log('Game ended:', result);
+      handleGameEnd(result);
+    });
 
-  networkManager.on('opponentDisconnected', () => {
-    log('Opponent disconnected - waiting to reconnect...', 'warning');
-  });
+    networkManager.on('opponentDisconnected', () => {
+      log('Opponent disconnected - waiting to reconnect...', 'warning');
+    });
 
-  networkManager.on('error', (error) => {
-    console.error('Network error:', error);
-    log('Network error: ' + error.message, 'error');
-  });
+    networkManager.on('error', (error) => {
+      console.error('Network error:', error);
+      log('Network error: ' + error.message, 'error');
+    });
+    
+    networkManager._handlersRegistered = true;
+  } else {
+    console.log('[Game] Event handlers already registered, skipping');
+  }
 }
 
 function initializeMultiplayerGame(data) {
+  console.log('[Game] Initializing multiplayer game with data:', data);
+  
   gameMode = 'multiplayer';
   setGameMode('multiplayer');
+  
+  // Record game start time to prevent immediate endTurn calls
+  gameStartTime = Date.now();
 
   // Store game info
   game.roomId = data.roomId;
   game.playerRole = data.yourRole;
+  
+  // Ensure playerAlias is set for multiplayer (use pendingPlayerName if available)
+  if (!window.playerAlias && window.pendingPlayerName) {
+    window.playerAlias = window.pendingPlayerName;
+  }
+  // If still not set, try to get it from the input field
+  if (!window.playerAlias) {
+    const playerNameInput = document.getElementById('playerNameInput');
+    if (playerNameInput && playerNameInput.value) {
+      window.playerAlias = playerNameInput.value.trim() || 'Player';
+    } else {
+      window.playerAlias = 'Player';
+    }
+  }
+  
+  // Update network manager role
+  if (networkManager) {
+    networkManager.playerRole = data.yourRole;
+    networkManager.roomId = data.roomId;
+    networkManager.isMultiplayer = true;
+  }
 
   // Apply the server state (which has heroes, decks, hands)
+  if (!data.gameState) {
+    console.error('[Game] No gameState in data!', data);
+    return;
+  }
+  
   applyServerState(data.gameState);
 
   // Show roll modal
@@ -80,73 +126,171 @@ function initializeMultiplayerGame(data) {
 }
 
 function showRollModal(firstPlayerRole) {
-  // Hide all modals
+  console.log('[Roll] Showing roll modal, firstPlayerRole:', firstPlayerRole, 'ourRole:', networkManager?.playerRole);
+  
+  // Hide all modals (including hero selection and lobby)
   const modals = document.querySelectorAll('.modal');
   modals.forEach(m => m.style.display = 'none');
+  
+  // Explicitly hide hero selection and lobby modals
+  const heroModal = document.getElementById('multiplayerHeroModal');
+  const lobbyModal = document.getElementById('lobbyModal');
+  if (heroModal) heroModal.style.display = 'none';
+  if (lobbyModal) lobbyModal.style.display = 'none';
+
+  // Reset roll modal elements
+  const rollDisplay = document.getElementById('rollDisplay');
+  const rollResult = document.getElementById('rollResult');
+  const rollStartBtn = document.getElementById('rollStartBtn');
+  
+  if (rollDisplay) rollDisplay.textContent = '🎲';
+  if (rollResult) rollResult.textContent = '';
+  if (rollStartBtn) rollStartBtn.style.display = 'none';
 
   // Show roll modal
-  document.getElementById('rollModal').style.display = 'flex';
-  document.getElementById('modalOverlay').style.display = 'block';
+  const rollModal = document.getElementById('rollModal');
+  const overlay = document.getElementById('modalOverlay');
+  if (rollModal) rollModal.style.display = 'flex';
+  if (overlay) overlay.style.display = 'block';
 
   // Animate the dice roll
   let rollCount = 0;
   const rollInterval = setInterval(() => {
     rollCount++;
     const roll = Math.floor(Math.random() * 6) + 1;
-    document.getElementById('rollDisplay').textContent = ['⚫', '🔴', '🟡', '🟢', '🔵', '🟣'][roll - 1];
+    if (rollDisplay) {
+      rollDisplay.textContent = ['⚫', '🔴', '🟡', '🟢', '🔵', '🟣'][roll - 1];
+    }
 
     if (rollCount > 15) {
       clearInterval(rollInterval);
 
       // Show result
-      const isPlayerFirst = firstPlayerRole === networkManager.playerRole;
+      const isPlayerFirst = firstPlayerRole === networkManager?.playerRole;
       const resultText = isPlayerFirst
         ? '🎯 YOU GO FIRST!'
         : '⏳ OPPONENT GOES FIRST';
       const resultColor = isPlayerFirst ? '#2ecc71' : '#ff6b6b';
 
-      document.getElementById('rollResult').textContent = resultText;
-      document.getElementById('rollResult').style.color = resultColor;
-      document.getElementById('rollStartBtn').style.display = 'inline-block';
+      if (rollResult) {
+        rollResult.textContent = resultText;
+        rollResult.style.color = resultColor;
+      }
+      if (rollStartBtn) {
+        rollStartBtn.style.display = 'inline-block';
+      }
+      console.log('[Roll] Roll complete, isPlayerFirst:', isPlayerFirst);
     }
   }, 100);
 }
 
 function startGameAfterRoll() {
+  console.log('[Game] Starting game after roll, currentPlayer:', game.currentPlayer);
+  
   // Hide modals
-  document.getElementById('rollModal').style.display = 'none';
-  document.getElementById('modalOverlay').style.display = 'none';
+  const rollModal = document.getElementById('rollModal');
+  const overlay = document.getElementById('modalOverlay');
+  if (rollModal) rollModal.style.display = 'none';
+  if (overlay) overlay.style.display = 'none';
 
-  // Show game board
+  // Show all game UI elements
   const gameBoard = document.querySelector('.game-board');
-  if (gameBoard) gameBoard.style.display = 'grid';
+  const bottomBar = document.querySelector('.bottom-bar');
+  const gameLog = document.getElementById('gameLog');
+  const endTurnBtn = document.getElementById('endTurnBtn');
+  const settingsBtn = document.getElementById('settingsBtn');
+  const handCardPreview = document.getElementById('handCardPreview');
+
+  if (gameBoard) {
+    gameBoard.style.display = 'grid';
+    console.log('[Game] Game board shown');
+  }
+  if (bottomBar) {
+    bottomBar.style.display = 'flex';
+    console.log('[Game] Bottom bar shown');
+    // Ensure hand container is visible
+    const handContainer = document.querySelector('.hand-container');
+    const playerHand = document.getElementById('playerHand');
+    if (handContainer) {
+      handContainer.style.display = 'flex';
+      console.log('[Game] Hand container shown');
+    }
+    if (playerHand) {
+      playerHand.style.display = 'flex';
+      console.log('[Game] Player hand element shown');
+      console.log('[Game] Hand has', game.player?.hand?.length || 0, 'cards');
+    }
+  }
+  if (gameLog) gameLog.style.display = 'block';
+  if (endTurnBtn) endTurnBtn.style.display = 'block';
+  if (settingsBtn) settingsBtn.classList.remove('hidden');
+  if (handCardPreview) handCardPreview.style.display = 'block';
 
   // Start the game with proper turn
-  log('Game started! Your hero: ' + game.player.hero.name);
-
-  // Determine whose turn it is
-  if (game.currentPlayer === 'player') {
-    startTurn('player');
+  if (game.player && game.player.hero) {
+    log('Game started! Your hero: ' + game.player.hero.name);
   } else {
-    startTurn('enemy');
+    console.error('[Game] Player hero not found!', game.player);
+    log('Game started!');
+  }
+
+  // Update UI to show current state
+  updateUI();
+
+  // In multiplayer, don't call startTurn - the server controls turn state
+  // The server state has already been applied, so we just need to update UI
+  // If it's our turn, the UI will show the end turn button
+  console.log('[Game] Current player:', game.currentPlayer);
+  if (game.currentPlayer === 'player') {
+    console.log('[Game] It is our turn - waiting for player actions');
+    // Don't call startTurn in multiplayer - server already started the turn
+    // Just log that it's our turn
+    log('Your turn begins!', 'player');
+  } else {
+    console.log('[Game] It is opponent\'s turn - waiting for server updates');
+    log('Opponent\'s turn...', 'enemy');
   }
 }
 
 function applyServerState(serverState) {
+  console.log('[Game] Applying server state, our role:', networkManager?.playerRole);
+  console.log('[Game] Server state currentPlayer:', serverState.currentPlayer);
+  
+  // Log what's in the server state before mapping
+  if (serverState.player1) {
+    console.log('[Game] Server player1 hand:', serverState.player1.hand?.map(c => c.name || c.id) || 'NO HAND');
+    console.log('[Game] Server player1 hand length:', serverState.player1.hand?.length || 0);
+  }
+  if (serverState.player2) {
+    console.log('[Game] Server player2 hand:', serverState.player2.hand?.map(c => c.name || c.id) || 'NO HAND');
+    console.log('[Game] Server player2 hand length:', serverState.player2.hand?.length || 0);
+  }
+  
   // Map server state to our game state perspective
   // The server sends player1 and player2, we need to map based on our role
+
+  if (!networkManager || !networkManager.playerRole) {
+    console.error('[Game] NetworkManager or playerRole not set!');
+    return;
+  }
 
   if (networkManager.playerRole === 'player1') {
     game.player = JSON.parse(JSON.stringify(serverState.player1));
     game.enemy = JSON.parse(JSON.stringify(serverState.player2));
+    console.log('[Game] Mapped as player1 - our hand:', game.player.hand?.map(c => c.name || c.id) || 'NO HAND');
   } else {
     // We're player2, so enemy is player1
     game.player = JSON.parse(JSON.stringify(serverState.player2));
     game.enemy = JSON.parse(JSON.stringify(serverState.player1));
+    console.log('[Game] Mapped as player2 - our hand:', game.player.hand?.map(c => c.name || c.id) || 'NO HAND');
   }
 
   game.currentPlayer = (serverState.currentPlayer === networkManager.playerRole) ? 'player' : 'enemy';
   game.turnNumber = serverState.turnNumber;
+
+  console.log('[Game] Mapped currentPlayer to:', game.currentPlayer);
+  console.log('[Game] Player hero:', game.player?.hero?.name);
+  console.log('[Game] Enemy hero:', game.enemy?.hero?.name);
 
   // Initialize UI elements if they don't exist yet
   if (!game.player.equipmentSlots) {
@@ -162,7 +306,65 @@ function applyServerState(serverState) {
     };
   }
 
+  // Normalize board units: ensure durability and health are synced
+  // Single-player uses durability, server uses health - sync them
+  [game.player.board, game.enemy.board].forEach(board => {
+    board.forEach(unit => {
+      if (unit.durability === undefined && unit.health !== undefined) {
+        unit.durability = unit.health;
+      } else if (unit.health === undefined && unit.durability !== undefined) {
+        unit.health = unit.durability;
+      } else if (unit.durability === undefined && unit.health === undefined) {
+        // Fallback: use maxHealth or default to 1
+        unit.durability = unit.maxHealth || 1;
+        unit.health = unit.durability;
+      } else {
+        // Both exist - keep them in sync (prefer durability as source of truth)
+        unit.health = unit.durability;
+      }
+      
+      // CRITICAL FIX: Charge units should always be able to attack when they have charge keyword
+      // Fix any charge units that have canAttack: false (server bug workaround)
+      if (unit.keywords && unit.keywords.includes('charge')) {
+        if (!unit.canAttack) {
+          console.log(`[STATE] FIXING: Charge unit ${unit.name} had canAttack=false, setting to true`);
+          unit.canAttack = true;
+          unit.exhausted = false;
+        }
+        console.log(`[STATE] Charge unit ${unit.name}: canAttack=${unit.canAttack}, exhausted=${unit.exhausted}, keywords=`, unit.keywords);
+      }
+      
+      // Ensure canAttack and exhausted are initialized if missing
+      if (unit.canAttack === undefined) {
+        // Default: all units can attack (will be set by server)
+        unit.canAttack = true;
+      }
+      if (unit.exhausted === undefined) {
+        // Default: units are not exhausted (will be set by server)
+        unit.exhausted = false;
+      }
+    });
+  });
+
   updateUI();
+  
+  // Update end turn button state based on whose turn it is (after updateUI)
+  const endTurnBtn = document.getElementById('endTurnBtn');
+  if (endTurnBtn) {
+    if (game.currentPlayer === 'player') {
+      endTurnBtn.disabled = false;
+      endTurnBtn.style.opacity = '1';
+      endTurnBtn.style.cursor = 'pointer';
+      endTurnBtn.classList.remove('hidden');
+    } else {
+      endTurnBtn.disabled = true;
+      endTurnBtn.style.opacity = '0.5';
+      endTurnBtn.style.cursor = 'not-allowed';
+      // Don't hide it, just disable it so players can see whose turn it is
+    }
+  }
+  
+  console.log('[Game] UI updated, currentPlayer:', game.currentPlayer, 'button disabled:', endTurnBtn?.disabled);
 }
 
 // ===== THEME DEFINITIONS (Classic Only) =====
@@ -817,6 +1019,20 @@ function startGame(heroId) {
 // Functions will be made global after they're defined (see end of file)
 
 function startTurn(player) {
+    // In multiplayer mode, don't modify game state - server controls everything
+    if (gameMode === 'multiplayer') {
+        console.log('[Game] startTurn called in multiplayer - server controls turn state');
+        // Just update UI to reflect current state
+        updateUI();
+        if (player === 'player') {
+            log('Your turn begins!', 'player');
+        } else {
+            log('Opponent\'s turn...', 'enemy');
+        }
+        return;
+    }
+
+    // Single-player mode: handle turn locally
     game.currentPlayer = player;
     const playerData = player === 'player' ? game.player : game.enemy;
 
@@ -867,13 +1083,8 @@ function startTurn(player) {
 
     // AI turn - only in single-player mode
     if (player === 'enemy') {
-        if (gameMode === 'multiplayer') {
-            // In multiplayer, opponent's actions come from server
-            log('Waiting for opponent...', 'enemy');
-        } else {
-            // Single-player: run AI
-            setTimeout(() => playAITurn(), 1500);
-        }
+        // Single-player: run AI
+        setTimeout(() => playAITurn(), 1500);
     }
 }
 
@@ -965,8 +1176,36 @@ function endTurn() {
 
     // In multiplayer mode, send action to server
     if (gameMode === 'multiplayer' && game.currentPlayer === 'player') {
+        // Double-check that networkManager exists and we're actually in a game
+        if (!networkManager || !networkManager.isMultiplayer) {
+            console.warn('[Game] Cannot end turn - not in multiplayer game');
+            return;
+        }
+        
+        // Prevent endTurn from being called immediately after game start (within 2 seconds)
+        const timeSinceStart = Date.now() - gameStartTime;
+        if (timeSinceStart < 2000) {
+            console.warn('[Game] Prevented endTurn call - game just started', timeSinceStart, 'ms ago');
+            return;
+        }
+        
+        // Disable end turn button immediately to prevent double-clicks
+        const endTurnBtn = document.getElementById('endTurnBtn');
+        if (endTurnBtn) {
+            endTurnBtn.disabled = true;
+            endTurnBtn.style.opacity = '0.5';
+            endTurnBtn.style.cursor = 'not-allowed';
+        }
+        
+        // Verify it's actually our turn
+        console.log('[Game] Ending turn in multiplayer mode');
+        console.log('[Game] Our role:', networkManager.playerRole);
+        console.log('[Game] Client thinks currentPlayer is:', game.currentPlayer);
+        console.log('[Game] Sending endTurn to server...');
         networkManager.sendEndTurn();
         return;
+    } else if (gameMode === 'multiplayer') {
+        console.warn('[Game] Cannot end turn - not your turn. Current player:', game.currentPlayer);
     }
 
     // Check for available moves and show confirmation modal
@@ -1430,8 +1669,25 @@ function getUnitTypeIcon(unitType) {
 function attack(attacker, target, attackerPlayer) {
     // In multiplayer mode, send action to server
     if (gameMode === 'multiplayer' && attackerPlayer === 'player') {
-        const targetType = target === game.enemy.hero ? 'hero' : 'unit';
-        networkManager.sendAttack(attacker.instanceId, target.instanceId, targetType);
+        // Determine if target is hero (check multiple ways it might be passed)
+        const isHeroTarget = target === game.enemy.hero || 
+                            target === game.enemy || 
+                            (target.type === 'hero') ||
+                            (target.name && (target.name === 'Enemy' || target.name === 'Enemy Hero'));
+        
+        const targetType = isHeroTarget ? 'hero' : 'unit';
+        // For hero attacks, use a special identifier or null since heroes don't have instanceId
+        const targetId = isHeroTarget ? 'hero' : (target.instanceId || target.id);
+        
+        console.log('[Attack] Sending attack to server:', {
+            attacker: attacker.name,
+            attackerId: attacker.instanceId,
+            targetType: targetType,
+            targetId: targetId,
+            target: target
+        });
+        
+        networkManager.sendAttack(attacker.instanceId, targetId, targetType);
         return true; // Action sent to server
     }
 
@@ -2010,7 +2266,43 @@ function updateUI() {
         const playerAliasEl = document.getElementById('playerAlias');
         if (playerAliasEl) {
             const flag = window.playerFlag || '⚔️';
-            playerAliasEl.textContent = `${flag} ${window.playerAlias || 'Player'}`;
+            // Get the base player alias (name only, without flag)
+            let playerAlias = window.playerAlias;
+            
+            // Ensure playerAlias is a string, not an HTML element
+            if (playerAlias && typeof playerAlias !== 'string') {
+                // If it's an element, try to get its value or textContent
+                if (playerAlias.value !== undefined) {
+                    playerAlias = playerAlias.value;
+                } else if (playerAlias.textContent !== undefined) {
+                    playerAlias = playerAlias.textContent;
+                } else {
+                    playerAlias = 'Player';
+                }
+            }
+            
+            // Strip any existing flag emoji from the start of the alias
+            // This prevents the flag from being concatenated multiple times
+            if (playerAlias && typeof playerAlias === 'string') {
+                // Remove flag emoji and any leading/trailing spaces
+                playerAlias = playerAlias.replace(/^[⚔️\s]+/, '').replace(/[\s]+$/, '').trim();
+                // Also check if it starts with the current flag and remove it
+                if (flag && playerAlias.startsWith(flag)) {
+                    playerAlias = playerAlias.substring(flag.length).trim();
+                }
+            }
+            
+            // In multiplayer, use pendingPlayerName if playerAlias isn't set or is invalid
+            if (!playerAlias || playerAlias === 'Player' || playerAlias.length === 0) {
+                playerAlias = window.pendingPlayerName || 'Player';
+            }
+            
+            // Ensure we only store the clean name (without flag) in window.playerAlias
+            // This prevents accumulation of flags on subsequent updates
+            window.playerAlias = playerAlias;
+            
+            // Display with flag (always use the clean name)
+            playerAliasEl.textContent = `${flag} ${playerAlias}`;
         }
 
         // Apply theme colors and effect to body
@@ -2177,8 +2469,16 @@ function updateUI() {
     if (endTurnBtn) {
         if (game.currentPlayer === 'player') {
             endTurnBtn.classList.remove('hidden');
+            // Explicitly enable the button when it's the player's turn
+            // (applyServerState also sets this, but ensure it's set here too)
+            endTurnBtn.disabled = false;
+            endTurnBtn.style.opacity = '1';
+            endTurnBtn.style.cursor = 'pointer';
         } else {
-            endTurnBtn.classList.add('hidden');
+            // Don't hide it, just disable it so players can see whose turn it is
+            endTurnBtn.disabled = true;
+            endTurnBtn.style.opacity = '0.5';
+            endTurnBtn.style.cursor = 'not-allowed';
         }
     }
 
@@ -2272,34 +2572,70 @@ function updateBoard(player) {
     playerData.board.forEach(construct => {
         const cardEl = createCardElement(construct, player, true);
         cardEl.classList.add('card-enter-animation');
+        // Store card data for click handlers
+        cardEl._cardData = construct;
+        // Add click handler for player's board only
+        if (player === 'player' && game.currentPlayer === 'player') {
+            cardEl.onclick = () => handleConstructClick(construct);
+        }
         board.appendChild(cardEl);
     });
 }
 
 function updateHand() {
     const hand = document.getElementById('playerHand');
+    if (!hand) {
+        console.error('[UI] playerHand element not found!');
+        return;
+    }
+    
+    // Check if we have cards to display
+    if (!game.player || !game.player.hand || !Array.isArray(game.player.hand)) {
+        console.warn('[UI] No hand data available:', game.player);
+        hand.innerHTML = '';
+        return;
+    }
+    
+    console.log(`[UI] Updating hand with ${game.player.hand.length} cards`);
     hand.innerHTML = '';
 
-    // Group cards by ID and tier to detect duplicates (different tiers are separate stacks)
-    const cardGroups = {};
+    // Preserve card order from hand array to prevent cards from moving positions
+    // Only group duplicates that are actually next to each other
+    const cardGroups = [];
+    const seenGroups = new Map(); // Track groups we've seen
+    
     game.player.hand.forEach((card, index) => {
         const groupKey = `${card.id}_T${card.tier || 1}`;
-        if (!cardGroups[groupKey]) {
-            cardGroups[groupKey] = [];
+        const lastGroup = cardGroups[cardGroups.length - 1];
+        
+        // If this card matches the last group's ID/tier, add to that group
+        if (lastGroup && lastGroup.key === groupKey) {
+            lastGroup.cards.push(card);
+        } else {
+            // Start a new group
+            cardGroups.push({
+                key: groupKey,
+                cards: [card],
+                originalIndex: index
+            });
         }
-        cardGroups[groupKey].push(card);
     });
 
-    // Sort cards by type: equipment (left), bannermen/units (middle), abilities (right)
+    // Sort groups by type, but preserve relative order within same type
     const typeOrder = { 'equipment': 0, 'unit': 1, 'construct': 1, 'ability': 2 };
-    const sortedGroups = Object.entries(cardGroups).sort((a, b) => {
-        const typeA = typeOrder[a[1][0].type] ?? 3;
-        const typeB = typeOrder[b[1][0].type] ?? 3;
-        return typeA - typeB;
+    cardGroups.sort((a, b) => {
+        const typeA = typeOrder[a.cards[0].type] ?? 3;
+        const typeB = typeOrder[b.cards[0].type] ?? 3;
+        if (typeA !== typeB) {
+            return typeA - typeB;
+        }
+        // If same type, preserve original order
+        return a.originalIndex - b.originalIndex;
     });
 
     // Render cards or stacks in sorted order
-    sortedGroups.forEach(([cardId, cardList]) => {
+    cardGroups.forEach((group) => {
+        const cardList = group.cards;
         if (cardList.length === 1) {
             // Single card - render normally
             const card = cardList[0];
@@ -2394,6 +2730,41 @@ function updateEnemyHandDisplay() {
     });
 }
 
+// Calculate total power including all bonuses for display
+function calculateTotalPower(card, playerData, enemyData) {
+    if (!card || card.type !== 'unit' && card.type !== 'construct') {
+        return card?.power || 0;
+    }
+    
+    let totalPower = card.power || 0;
+    
+    // Formation bonus (from keyword)
+    if (card.keywords && card.keywords.includes('formation')) {
+        totalPower += 1;
+    }
+    
+    // Formation bonus from other units
+    const formationBonusCount = playerData.board.filter(c =>
+        c.keywords && c.keywords.includes('formation') && c.instanceId !== card.instanceId
+    ).length;
+    totalPower += formationBonusCount;
+    
+    // Hero passive bonus
+    if (playerData.hero && card.unitType === playerData.hero.unitType) {
+        totalPower += 1;
+    }
+    
+    // Ranged vs Infantry bonus (already applied at play time, but include for display)
+    if (card.unitType === 'ranged' && enemyData) {
+        const hasEnemyInfantry = enemyData.board.some(c => c.unitType === 'infantry');
+        if (hasEnemyInfantry) {
+            totalPower += 1;
+        }
+    }
+    
+    return totalPower;
+}
+
 function createCardElement(card, owner, onBoard) {
     const cardEl = document.createElement('div');
 
@@ -2420,6 +2791,14 @@ function createCardElement(card, owner, onBoard) {
     cardEl._cardData = card;
     cardEl.setAttribute('data-card-id', card.id);
     
+    // Calculate total power for display (on board only)
+    let displayPower = card.power || 0;
+    if (onBoard && (card.type === 'unit' || card.type === 'construct')) {
+        const playerData = owner === 'player' ? game.player : game.enemy;
+        const enemyData = owner === 'player' ? game.enemy : game.player;
+        displayPower = calculateTotalPower(card, playerData, enemyData);
+    }
+    
     // Compact card layout: Cost, Name on header, stats on bottom
     const hasStats = (card.type === 'construct' || card.type === 'unit' || card.type === 'equipment');
     const tierClass = card.tier ? `tier-${card.tier}` : 'tier-1';
@@ -2439,7 +2818,7 @@ function createCardElement(card, owner, onBoard) {
                 ${card.type === 'equipment' ? `
                     <div style="font-size: 10px; font-weight: 900; color: #fff; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);">❤️${card.armorValue || card.attackPower || 0}</div>
                 ` : `
-                    <div class="card-stat stat-power">⚔️${card.power}</div>
+                    <div class="card-stat stat-power">⚔️${displayPower}</div>
                     ${card.unitType ? `<div class="card-type-icon">${getUnitTypeIcon(card.unitType)}</div>` : ''}
                     <div class="card-stat stat-health">❤️${card.durability}</div>
                 `}
@@ -2448,8 +2827,9 @@ function createCardElement(card, owner, onBoard) {
         ${onBoard && card.keywords ? `<div class="card-type-badge">${card.keywords.join(', ')}</div>` : ''}
     `;
 
-    // Apply theme colors to player cards
-    if (owner === 'player') {
+    // Apply theme colors to player cards ONLY when on the board (not in hand)
+    // This allows the green playable overlay to show properly on hand cards
+    if (owner === 'player' && onBoard) {
         const themeKey = window.selectedTheme || 'blue';
         const theme = THEMES[themeKey];
         if (theme) {
@@ -2654,9 +3034,17 @@ function handleConstructClick(construct) {
 
     // Only handle attacking - spell targeting is now handled by startTargeting() click handlers
     if (!game.targeting) {
-        // Attack with this construct
-        if (construct.canAttack) {
-            startAttacking(construct);
+        // Attack with this construct - check canAttack and not exhausted
+        // Also find the actual construct from the board to ensure we have the latest data
+        const actualConstruct = game.player.board.find(c => c.instanceId === construct.instanceId);
+        if (actualConstruct && actualConstruct.canAttack && !actualConstruct.exhausted) {
+            startAttacking(actualConstruct);
+        } else if (actualConstruct) {
+            console.log('[Click] Cannot attack:', {
+                canAttack: actualConstruct.canAttack,
+                exhausted: actualConstruct.exhausted,
+                name: actualConstruct.name
+            });
         }
     }
 }
@@ -3180,6 +3568,13 @@ function initializeGameData() {
         window.concedeGame = concedeGame;
         window.returnToMainMenuFromGame = returnToMainMenuFromGame;
         window.setupUnitTypeTooltips = setupUnitTypeTooltips;
+        window.startQuickMatch = startQuickMatch;
+        window.confirmMultiplayerHero = confirmMultiplayerHero;
+        window.selectMultiplayerUnitType = selectMultiplayerUnitType;
+        window.selectMultiplayerHero = selectMultiplayerHero;
+        window.cancelHeroSelection = cancelHeroSelection;
+        window.cancelMatchmaking = cancelMatchmaking;
+        window.startGameAfterRoll = startGameAfterRoll;
 
         // Initialize modal on page load
         if (document.readyState === 'loading') {
@@ -3233,58 +3628,19 @@ function initializeGameData() {
 function startQuickMatch() {
     const playerName = document.getElementById('playerNameInput')?.value || 'Player';
 
-    // Initialize network manager
-    if (!window.networkManager || !networkManager) {
-        window.networkManager = new NetworkManager();
-        networkManager = window.networkManager;
-    }
+    // Store player name for later use
+    window.pendingPlayerName = playerName;
 
-    // Show lobby
+    // Show hero selection FIRST (before joining queue)
     document.getElementById('mainMenuModal').style.display = 'none';
-    document.getElementById('lobbyModal').style.display = 'flex';
-
-    // Set up game found handler to show hero selection
-    const tempHandler = () => {
-        console.log('[Game] Opponent found! Showing hero selection...');
-        showMultiplayerHeroSelection();
-    };
-
-    // Register game found handler FIRST
-    networkManager.on('gameFound', tempHandler);
-
-    // Connect and wait for connection before joining queue
-    initMultiplayer();
-
-    const playerData = {
-        playerId: generatePlayerId(),
-        name: playerName,
-        unitType: 'ranged', // Default, can be changed
-        hero: null
-    };
-
-    // Wait for connection to be established before joining queue
-    const checkConnection = setInterval(() => {
-        if (networkManager && networkManager.isConnected()) {
-            console.log('[Game] Connected! Joining queue...');
-            clearInterval(checkConnection);
-            networkManager.joinQueue(playerData);
-        }
-    }, 100);
-
-    // Safety timeout - if not connected after 10 seconds, give up
-    setTimeout(() => {
-        if (!networkManager.isConnected()) {
-            clearInterval(checkConnection);
-            console.error('[Game] Failed to connect to server after 10 seconds');
-            alert('Failed to connect to multiplayer server. Check that the server is running on localhost:3000');
-            document.getElementById('lobbyModal').style.display = 'none';
-            document.getElementById('mainMenuModal').style.display = 'flex';
-        }
-    }, 10000);
+    showMultiplayerHeroSelection();
 }
 
 // Store selected hero for multiplayer
 let selectedMultiplayerHero = null;
+
+// Track when game started to prevent immediate endTurn calls
+let gameStartTime = 0;
 
 function showMultiplayerHeroSelection() {
     document.getElementById('lobbyModal').style.display = 'none';
@@ -3409,12 +3765,97 @@ function confirmMultiplayerHero() {
 
     console.log('[Game] Confirming hero:', selectedMultiplayerHero.name);
 
-    // Hide confirm button and show waiting message
-    document.getElementById('confirmHeroBtn').style.display = 'none';
-    document.getElementById('waitingMessage').style.display = 'block';
+    // Hide hero selection modal and show lobby (searching for opponent)
+    document.getElementById('multiplayerHeroModal').style.display = 'none';
+    document.getElementById('lobbyModal').style.display = 'flex';
 
-    // Start game with selected hero (send to server)
-    startGame(selectedMultiplayerHero.id);
+    // Disconnect any existing connection first
+    if (window.networkManager && networkManager) {
+        networkManager.disconnect();
+        networkManager = null;
+        window.networkManager = null;
+    }
+
+    // Create fresh network manager
+    window.networkManager = new NetworkManager();
+    networkManager = window.networkManager;
+
+    // Set up game found handler - if we already have a hero, send it immediately
+    const gameFoundHandler = () => {
+        console.log('[Game] Opponent found! We have hero:', selectedMultiplayerHero?.name);
+        
+        // If we already have a hero selected, send it to the server immediately
+        // This handles the case where the server didn't receive it in the queue data
+        if (selectedMultiplayerHero && networkManager && networkManager.isConnected()) {
+            console.log('[Game] Sending hero selection to server:', selectedMultiplayerHero.id);
+            networkManager.socket.emit('selectHero', { 
+                heroId: selectedMultiplayerHero.id, 
+                hero: selectedMultiplayerHero 
+            });
+        }
+    };
+
+    // Register game found handler
+    networkManager.on('gameFound', gameFoundHandler);
+    
+    // Make sure gameStart handler is registered (it should be in initMultiplayer, but ensure it's there)
+    // The gameStart handler is already registered in initMultiplayer(), so we don't need to register it again
+
+    // Connect and wait for connection before joining queue
+    initMultiplayer();
+
+    const playerName = window.pendingPlayerName || 'Player';
+    const playerData = {
+        playerId: generatePlayerId(),
+        name: playerName,
+        unitType: selectedMultiplayerHero.unitType,
+        hero: selectedMultiplayerHero // Include hero in queue data
+    };
+    
+    console.log('[Game] Player data being sent:', {
+        name: playerData.name,
+        unitType: playerData.unitType,
+        hasHero: !!playerData.hero,
+        heroName: playerData.hero?.name,
+        heroId: playerData.hero?.id
+    });
+
+    // Wait for connection to be established before joining queue
+    let connectionCheckInterval = null;
+    let connectionTimeout = null;
+
+    connectionCheckInterval = setInterval(() => {
+        if (networkManager && networkManager.isConnected()) {
+            console.log('[Game] Connected! Joining queue with hero:', selectedMultiplayerHero.name);
+            clearInterval(connectionCheckInterval);
+            if (connectionTimeout) clearTimeout(connectionTimeout);
+            networkManager.joinQueue(playerData);
+        }
+    }, 100);
+
+    // Safety timeout - if not connected after 10 seconds, give up
+    connectionTimeout = setTimeout(() => {
+        if (connectionCheckInterval) clearInterval(connectionCheckInterval);
+        if (!networkManager || !networkManager.isConnected()) {
+            console.error('[Game] Failed to connect to server after 10 seconds');
+            alert('Failed to connect to multiplayer server. Check that the server is running on localhost:3000');
+            document.getElementById('lobbyModal').style.display = 'none';
+            document.getElementById('mainMenuModal').style.display = 'flex';
+        }
+    }, 10000);
+}
+
+function cancelHeroSelection() {
+    // Reset hero selection
+    selectedMultiplayerHero = null;
+    document.getElementById('confirmHeroBtn').style.display = 'none';
+    document.getElementById('waitingMessage').style.display = 'none';
+    document.getElementById('multiplayerHeroDetails').style.display = 'none';
+    document.getElementById('mechanicsBox').style.display = 'none';
+
+    // Return to main menu
+    document.getElementById('multiplayerHeroModal').style.display = 'none';
+    document.getElementById('mainMenuModal').style.display = 'flex';
 }
 
 function cancelMatchmaking() {
@@ -3423,8 +3864,14 @@ function cancelMatchmaking() {
         networkManager.disconnect();
     }
 
+    // Reset hero selection
+    selectedMultiplayerHero = null;
+    document.getElementById('confirmHeroBtn').style.display = 'none';
+    document.getElementById('waitingMessage').style.display = 'none';
+
     // Return to main menu
     document.getElementById('lobbyModal').style.display = 'none';
+    document.getElementById('multiplayerHeroModal').style.display = 'none';
     document.getElementById('mainMenuModal').style.display = 'flex';
 }
 

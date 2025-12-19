@@ -17,9 +17,19 @@ class NetworkManager {
    * @param {string} serverUrl - Server URL (default: http://localhost:3000)
    */
   connect(serverUrl = 'http://localhost:3000') {
-    if (this.connected) {
+    // If already connected and socket is active, don't reconnect
+    if (this.connected && this.socket && this.socket.connected) {
       console.log('Already connected to server');
       return;
+    }
+
+    // Clean up any existing disconnected socket
+    if (this.socket && !this.socket.connected) {
+      console.log('[NetworkManager] Cleaning up disconnected socket');
+      this.socket.removeAllListeners();
+      this.socket.disconnect();
+      this.socket = null;
+      this.connected = false;
     }
 
     console.log(`[NetworkManager] Connecting to ${serverUrl}`);
@@ -73,7 +83,10 @@ class NetworkManager {
     });
 
     this.socket.on('stateUpdate', (gameState) => {
-      console.log('State update received');
+      console.log('[NetworkManager] ⭐ State update received from server!');
+      console.log('[NetworkManager] State update currentPlayer:', gameState.currentPlayer);
+      console.log('[NetworkManager] Our role:', this.playerRole);
+      console.log('[NetworkManager] Room ID:', this.roomId);
       this.emit('stateUpdate', gameState);
     });
 
@@ -121,8 +134,14 @@ class NetworkManager {
   disconnect() {
     if (this.socket) {
       this.socket.disconnect();
-      this.connected = false;
+      this.socket.removeAllListeners(); // Remove all event listeners
+      this.socket = null;
     }
+    this.connected = false;
+    this.roomId = null;
+    this.playerId = null;
+    this.playerRole = null;
+    this.isMultiplayer = false;
   }
 
   // ===== MATCHMAKING =====
@@ -185,10 +204,40 @@ class NetworkManager {
    * Send end turn action to server
    */
   sendEndTurn() {
-    if (!this.isMultiplayer) return;
+    if (!this.isMultiplayer) {
+      console.warn('[NetworkManager] Cannot send endTurn - not in multiplayer game');
+      return;
+    }
 
-    console.log('Sending endTurn');
+    if (!this.socket) {
+      console.error('[NetworkManager] Cannot send endTurn - socket is null!');
+      return;
+    }
+
+    if (!this.socket.connected) {
+      console.error('[NetworkManager] Cannot send endTurn - socket is not connected!');
+      return;
+    }
+
+    console.log('[NetworkManager] Sending endTurn to server');
+    console.log('[NetworkManager] Socket ID:', this.socket.id);
+    console.log('[NetworkManager] Socket connected:', this.socket.connected);
+    console.log('[NetworkManager] Room ID:', this.roomId);
+    console.log('[NetworkManager] Player role:', this.playerRole);
+    
+    // Send the event with a callback to verify server received it
     this.socket.emit('endTurn');
+    console.log('[NetworkManager] endTurn event emitted');
+    
+    // Also listen for any immediate errors
+    const errorTimeout = setTimeout(() => {
+      console.log('[NetworkManager] No immediate error received (good sign)');
+    }, 1000);
+    
+    this.socket.once('error', (error) => {
+      clearTimeout(errorTimeout);
+      console.error('[NetworkManager] Error received from server:', error);
+    });
   }
 
   /**

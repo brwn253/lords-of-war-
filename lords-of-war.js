@@ -50,10 +50,10 @@ const HISTORIC_LEADERS = {
             commandCost: 2,
             commandName: 'Divine Arrows',
             commandText: 'Draw 1 card',
-            passive: 'Your ranged units have +1 durability',
+            passive: 'Your ranged bannermen have +1 durability',
             portrait: 'AR',
             color: '#2d2d5f',
-            description: 'Artemis\n\n⚔️ HERO TYPE: Ranged\nHP: 48\n\n📋 PASSIVE ABILITY:\nYour ranged units have +1 durability\n\nRanged Mechanics:\n• +1 attack vs Infantry\n• Take no counter-damage from melee\n• Cavalry deal +1 attack vs Ranged'
+            description: 'Artemis\n\n⚔️ HERO TYPE: Ranged\nHP: 48\n\n📋 PASSIVE ABILITY:\nYour ranged bannermen have +1 durability\n\nRanged Mechanics:\n• +1 attack vs Infantry\n• Take no counter-damage from melee\n• Cavalry deal +1 attack vs Ranged'
         }
     ],
     infantry: [
@@ -145,10 +145,10 @@ const HISTORIC_LEADERS = {
             commandCost: 2,
             commandName: 'Desert Wisdom',
             commandText: 'Draw 1 card',
-            passive: 'Your cavalry units have +1 durability',
+            passive: 'Your cavalry bannermen have +1 durability',
             portrait: 'SA',
             color: '#5f3a1a',
-            description: 'Saladin\n\n⚔️ HERO TYPE: Cavalry\nHP: 52\n\n📋 PASSIVE ABILITY:\nYour cavalry units have +1 durability\n\nCavalry Mechanics:\n• +1 attack vs Ranged\n• Infantry deal +1 attack vs Cavalry'
+            description: 'Saladin\n\n⚔️ HERO TYPE: Cavalry\nHP: 52\n\n📋 PASSIVE ABILITY:\nYour cavalry bannermen have +1 durability\n\nCavalry Mechanics:\n• +1 attack vs Ranged\n• Infantry deal +1 attack vs Cavalry'
         },
         {
             id: 'charlemagne',
