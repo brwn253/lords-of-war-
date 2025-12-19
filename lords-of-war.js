@@ -68,7 +68,7 @@ const HISTORIC_LEADERS = {
             passive: 'Your infantry units have +1 power',
             portrait: 'LE',
             color: '#5f1a1a',
-            description: 'Leonidas\n\n⚔️ HERO TYPE: Infantry\nHP: 57\nStarts with: Sword\n\n📋 PASSIVE ABILITY:\nYour infantry units have +1 power\n\nInfantry Mechanics:\n• Ranged deal +1 attack vs Infantry'
+            description: 'Leonidas\n\n⚔️ HERO TYPE: Infantry\nHP: 57\nStarts with: Sword\n\n📋 PASSIVE ABILITY:\nYour infantry units have +1 power\n\nInfantry Mechanics:\n• +1 attack vs Cavalry\n• Ranged deal +1 attack vs Infantry'
         },
         {
             id: 'joanOfArc',
@@ -81,7 +81,7 @@ const HISTORIC_LEADERS = {
             passive: 'When an infantry unit dies, draw a card',
             portrait: 'JA',
             color: '#8b3a3a',
-            description: 'Joan of Arc\n\n⚔️ HERO TYPE: Infantry\nHP: 57\nStarts with: Sword\n\n📋 PASSIVE ABILITY:\nWhen an infantry unit dies, draw a card\n\nInfantry Mechanics:\n• Ranged deal +1 attack vs Infantry'
+            description: 'Joan of Arc\n\n⚔️ HERO TYPE: Infantry\nHP: 57\nStarts with: Sword\n\n📋 PASSIVE ABILITY:\nWhen an infantry unit dies, draw a card\n\nInfantry Mechanics:\n• +1 attack vs Cavalry\n• Ranged deal +1 attack vs Infantry'
         },
         {
             id: 'richardLionheart',
@@ -94,7 +94,7 @@ const HISTORIC_LEADERS = {
             passive: 'Your infantry units take 1 less damage',
             portrait: 'RL',
             color: '#6b4423',
-            description: 'Richard the Lionheart\n\n⚔️ HERO TYPE: Infantry\nHP: 57\nStarts with: Sword\n\n📋 PASSIVE ABILITY:\nYour infantry units take 1 less damage\n\nInfantry Mechanics:\n• Ranged deal +1 attack vs Infantry'
+            description: 'Richard the Lionheart\n\n⚔️ HERO TYPE: Infantry\nHP: 57\nStarts with: Sword\n\n📋 PASSIVE ABILITY:\nYour infantry units take 1 less damage\n\nInfantry Mechanics:\n• +1 attack vs Cavalry\n• Ranged deal +1 attack vs Infantry'
         },
         {
             id: 'williamWallace',
@@ -107,7 +107,7 @@ const HISTORIC_LEADERS = {
             passive: 'Your infantry units can attack the turn they are played',
             portrait: 'WW',
             color: '#2d3d52',
-            description: 'William Wallace\n\n⚔️ HERO TYPE: Infantry\nHP: 57\nStarts with: Sword\n\n📋 PASSIVE ABILITY:\nYour infantry units can attack the turn they are played\n\nInfantry Mechanics:\n• Ranged deal +1 attack vs Infantry'
+            description: 'William Wallace\n\n⚔️ HERO TYPE: Infantry\nHP: 57\nStarts with: Sword\n\n📋 PASSIVE ABILITY:\nYour infantry units can attack the turn they are played\n\nInfantry Mechanics:\n• +1 attack vs Cavalry\n• Ranged deal +1 attack vs Infantry'
         }
     ],
     cavalry: [
