@@ -158,10 +158,10 @@ const HISTORIC_LEADERS = {
             commandCost: 2,
             commandName: 'Royal Command',
             commandText: 'Give target cavalry unit +2/+2',
-            passive: 'Your cavalry units can attack the turn they are played',
+            passive: 'Your cavalry units deal +1 counter-damage',
             portrait: 'CH',
             color: '#1a2d5f',
-            description: 'Charlemagne\n\n⚔️ HERO TYPE: Cavalry\nHP: 52\n\n📋 PASSIVE ABILITY:\nYour cavalry units can attack the turn they are played\n\nCavalry Mechanics:\n• +1 attack vs Ranged\n• Infantry deal +1 attack vs Cavalry'
+            description: 'Charlemagne\n\n⚔️ HERO TYPE: Cavalry\nHP: 52\n\n📋 PASSIVE ABILITY:\nYour cavalry units deal +1 counter-damage\n\nCavalry Mechanics:\n• +1 attack vs Ranged\n• Infantry deal +1 attack vs Cavalry'
         }
     ]
 };
