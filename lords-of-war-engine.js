@@ -2458,25 +2458,70 @@ function createCardElement(card, owner, onBoard) {
         }
     }
 
-    // Add tooltip data attribute for description and effects (after innerHTML so it persists)
-    if (!onBoard) {
-        let tooltipText = card.text || '';
-        if (card.keywords && card.keywords.length > 0) {
-            tooltipText += '\n\nKeywords: ' + card.keywords.join(', ');
+    // Add tooltip data attribute for description and effects
+    let tooltipText = card.text || '';
+    if (card.keywords && card.keywords.length > 0) {
+        tooltipText += '\n\nKeywords: ' + card.keywords.join(', ');
+    }
+    if (card.scoutEffect || card.commandEffect || card.dispatchEffect) {
+        tooltipText += '\n\nEffect: Draw a card when played';
+    }
+    if (card.id === 'quiverRefill' || card.id === 'supplyLine' || card.id === 'courierNetwork') {
+        tooltipText += '\n\nEffect: Draw 3 cards';
+    }
+    if (card.id && (card.id.includes('Enchantment') || card.id.includes('Mark') || card.id.includes('Formation') || card.id.includes('Wall'))) {
+        tooltipText += '\n\nEffect: Buffs units or equipment';
+    }
+
+    // For cards on board, add bonus breakdown
+    if (onBoard && (card.type === 'construct' || card.type === 'unit')) {
+        const playerData = owner === 'player' ? game.player : game.enemy;
+        let bonusInfo = '\n\n⚔️ BONUS BREAKDOWN:';
+        let totalBonus = 0;
+
+        // Formation bonus
+        if (card.keywords && card.keywords.includes('formation')) {
+            bonusInfo += '\n• Formation: +1 (from formation keyword)';
+            totalBonus += 1;
         }
-        if (card.scoutEffect || card.commandEffect || card.dispatchEffect) {
-            tooltipText += '\n\nEffect: Draw a card when played';
+
+        // Check other units with Formation
+        const formationBonusCount = playerData.board.filter(c =>
+            c.keywords && c.keywords.includes('formation') && c.instanceId !== card.instanceId
+        ).length;
+        if (formationBonusCount > 0) {
+            bonusInfo += `\n• Formation (other units): +${formationBonusCount}`;
+            totalBonus += formationBonusCount;
         }
-        if (card.id === 'quiverRefill' || card.id === 'supplyLine' || card.id === 'courierNetwork') {
-            tooltipText += '\n\nEffect: Draw 3 cards';
+
+        // Hero passive bonus (Ranged, Infantry, Cavalry damage bonuses)
+        if (playerData.hero) {
+            const heroType = playerData.hero.unitType;
+            if (card.unitType === heroType) {
+                bonusInfo += `\n• Hero Passive: +1 (${playerData.hero.name})`;
+                totalBonus += 1;
+            }
         }
-        if (card.id && (card.id.includes('Enchantment') || card.id.includes('Mark') || card.id.includes('Formation') || card.id.includes('Wall'))) {
-            tooltipText += '\n\nEffect: Buffs units or equipment';
+
+        // Ranged vs Infantry bonus
+        if (card.unitType === 'ranged') {
+            const enemyData = owner === 'player' ? game.enemy : game.player;
+            const hasEnemyInfantry = enemyData.board.some(c => c.unitType === 'infantry');
+            if (hasEnemyInfantry) {
+                bonusInfo += '\n• Ranged Advantage: +1 (vs Infantry)';
+                totalBonus += 1;
+            }
         }
-        if (tooltipText) {
-            cardEl.setAttribute('data-description', tooltipText);
-            cardEl.classList.add('card-tooltip');
+
+        if (totalBonus > 0) {
+            bonusInfo += `\n\nTotal Bonus: +${totalBonus} damage`;
+            tooltipText += bonusInfo;
         }
+    }
+
+    if (tooltipText) {
+        cardEl.setAttribute('data-description', tooltipText);
+        cardEl.classList.add('card-tooltip');
     }
 
     // Click handlers
@@ -2927,6 +2972,57 @@ function showCardPreview(card, event) {
 
     // Build preview content
     const hasStats = (card.type === 'construct' || card.type === 'unit');
+
+    // Calculate bonus breakdown for board cards
+    let bonusHTML = '';
+    if (hasStats) {
+        const ownerClass = event.target.closest('.player-board') ? 'player' : 'enemy';
+        const playerData = ownerClass === 'player' ? game.player : game.enemy;
+        let bonusInfo = [];
+        let totalBonus = 0;
+
+        // Formation bonus
+        if (card.keywords && card.keywords.includes('formation')) {
+            bonusInfo.push('Formation: +1');
+            totalBonus += 1;
+        }
+
+        // Check other units with Formation
+        const formationBonusCount = playerData.board.filter(c =>
+            c.keywords && c.keywords.includes('formation') && c.instanceId !== card.instanceId
+        ).length;
+        if (formationBonusCount > 0) {
+            bonusInfo.push(`Formation (other units): +${formationBonusCount}`);
+            totalBonus += formationBonusCount;
+        }
+
+        // Hero passive bonus
+        if (playerData.hero && card.unitType === playerData.hero.unitType) {
+            bonusInfo.push(`Hero Passive: +1 (${playerData.hero.name})`);
+            totalBonus += 1;
+        }
+
+        // Ranged vs Infantry bonus
+        if (card.unitType === 'ranged') {
+            const enemyData = ownerClass === 'player' ? game.enemy : game.player;
+            const hasEnemyInfantry = enemyData.board.some(c => c.unitType === 'infantry');
+            if (hasEnemyInfantry) {
+                bonusInfo.push('Ranged Advantage: +1 (vs Infantry)');
+                totalBonus += 1;
+            }
+        }
+
+        if (bonusInfo.length > 0) {
+            bonusHTML = `
+                <div style="font-size: 10px; color: #2ecc71; margin-top: 3px; padding: 3px; border-top: 1px solid #555;">
+                    <strong>⚔️ BONUS BREAKDOWN:</strong><br>
+                    ${bonusInfo.map(b => `• ${b}`).join('<br>')}
+                    <br><strong style="color: #ffd700;">Total Bonus: +${totalBonus}</strong>
+                </div>
+            `;
+        }
+    }
+
     cardPreviewEl.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 3px;">
             <span style="font-size: 13px; font-weight: bold; color: #ffd700; flex: 1; word-wrap: break-word;">${card.name}</span>
@@ -2940,6 +3036,7 @@ function showCardPreview(card, event) {
         ` : ''}
         <div style="font-size: 11px; line-height: 1.2; color: #f4e4c1; flex: 1; overflow-y: auto;">${card.text || ''}</div>
         ${card.keywords ? `<div style="font-size: 10px; color: #d4af37; margin-top: 3px;"><strong>Keywords:</strong> ${card.keywords.join(', ')}</div>` : ''}
+        ${bonusHTML}
     `;
 
     cardPreviewEl.classList.add('visible');
