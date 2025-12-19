@@ -14,7 +14,7 @@ const HISTORIC_LEADERS = {
             passive: 'Your ranged units deal +1 damage',
             portrait: 'RH',
             color: '#2d5016',
-            description: 'Robin Hood\n\n⚔️ HERO TYPE: Ranged\nHP: 48\n\n📋 PASSIVE ABILITY:\nYour ranged units deal +1 damage\n\n🎯 COUNTERS:\n• [TYPE] +1 attack vs Infantry\n• [TYPE] Take no counter-damage from melee\n• [HERO] Ranged units have +1 damage\n\n🔄 COUNTERED BY:\n• [TYPE] Cavalry deal +1 attack vs Ranged'
+            description: 'Robin Hood\n\n⚔️ HERO TYPE: Ranged\nHP: 48\n\n📋 PASSIVE ABILITY:\nYour ranged units deal +1 damage\n\n🎯 COUNTERS:\nRanged Mechanics:\n• +1 attack vs Infantry\n• Take no counter-damage from melee\n\n🔄 COUNTERED BY:\nCavalry Mechanics:\n• Deal +1 attack vs Ranged'
         },
         {
             id: 'williamTell',
@@ -27,7 +27,7 @@ const HISTORIC_LEADERS = {
             passive: 'Once per turn, a random friendly bannerman heals 1 damage',
             portrait: 'WT',
             color: '#1a3a52',
-            description: 'William Tell\n\n⚔️ HERO TYPE: Ranged\nHP: 48\n\n📋 PASSIVE ABILITY:\nOnce per turn, a random friendly bannerman heals 1 damage\n\n🎯 COUNTERS:\n• [TYPE] +1 attack vs Infantry\n• [TYPE] Take no counter-damage from melee\n• [HERO] Heal 1 damage on a random bannerman each turn\n\n🔄 COUNTERED BY:\n• [TYPE] Cavalry deal +1 attack vs Ranged'
+            description: 'William Tell\n\n⚔️ HERO TYPE: Ranged\nHP: 48\n\n📋 PASSIVE ABILITY:\nOnce per turn, a random friendly bannerman heals 1 damage\n\n🎯 COUNTERS:\nRanged Mechanics:\n• +1 attack vs Infantry\n• Take no counter-damage from melee\n\n🔄 COUNTERED BY:\nCavalry Mechanics:\n• Deal +1 attack vs Ranged'
         },
         {
             id: 'houYi',
@@ -40,7 +40,7 @@ const HISTORIC_LEADERS = {
             passive: 'When you play a ranged ability, gain +1 Gold',
             portrait: 'HY',
             color: '#663300',
-            description: 'Hou Yi\n\n⚔️ HERO TYPE: Ranged\nHP: 48\n\n📋 PASSIVE ABILITY:\nWhen you play a ranged ability, gain +1 Gold\n\n🎯 COUNTERS:\n• [TYPE] +1 attack vs Infantry\n• [TYPE] Take no counter-damage from melee\n• [HERO] Gain +1 Gold when playing ranged abilities\n\n🔄 COUNTERED BY:\n• [TYPE] Cavalry deal +1 attack vs Ranged'
+            description: 'Hou Yi\n\n⚔️ HERO TYPE: Ranged\nHP: 48\n\n📋 PASSIVE ABILITY:\nWhen you play a ranged ability, gain +1 Gold\n\n🎯 COUNTERS:\nRanged Mechanics:\n• +1 attack vs Infantry\n• Take no counter-damage from melee\n\n🔄 COUNTERED BY:\nCavalry Mechanics:\n• Deal +1 attack vs Ranged'
         },
         {
             id: 'artemis',
@@ -53,7 +53,7 @@ const HISTORIC_LEADERS = {
             passive: 'Your ranged units have +1 durability',
             portrait: 'AR',
             color: '#2d2d5f',
-            description: 'Artemis\n\n⚔️ HERO TYPE: Ranged\nHP: 48\n\n📋 PASSIVE ABILITY:\nYour ranged units have +1 durability\n\n🎯 COUNTERS:\n• [TYPE] +1 attack vs Infantry\n• [TYPE] Take no counter-damage from melee\n• [HERO] Your ranged units have +1 durability\n\n🔄 COUNTERED BY:\n• [TYPE] Cavalry deal +1 attack vs Ranged'
+            description: 'Artemis\n\n⚔️ HERO TYPE: Ranged\nHP: 48\n\n📋 PASSIVE ABILITY:\nYour ranged units have +1 durability\n\n🎯 COUNTERS:\nRanged Mechanics:\n• +1 attack vs Infantry\n• Take no counter-damage from melee\n\n🔄 COUNTERED BY:\nCavalry Mechanics:\n• Deal +1 attack vs Ranged'
         }
     ],
     infantry: [
@@ -68,7 +68,7 @@ const HISTORIC_LEADERS = {
             passive: 'Your infantry units have +1 power',
             portrait: 'LE',
             color: '#5f1a1a',
-            description: 'Leonidas\n\n⚔️ HERO TYPE: Infantry\nHP: 57\n\n📋 PASSIVE ABILITY:\nYour infantry units have +1 power\n\n🎯 COUNTERS:\n• [HERO] Your infantry units have +1 power\n\n🔄 COUNTERED BY:\n• [TYPE] Ranged deal +1 attack vs Infantry'
+            description: 'Leonidas\n\n⚔️ HERO TYPE: Infantry\nHP: 57\n\n📋 PASSIVE ABILITY:\nYour infantry units have +1 power\n\n🎯 COUNTERS:\n(None - standard infantry type)\n\n🔄 COUNTERED BY:\nRanged Mechanics:\n• Deal +1 attack vs Infantry'
         },
         {
             id: 'joanOfArc',
@@ -81,7 +81,7 @@ const HISTORIC_LEADERS = {
             passive: 'When an infantry unit dies, draw a card',
             portrait: 'JA',
             color: '#8b3a3a',
-            description: 'Joan of Arc\n\n⚔️ HERO TYPE: Infantry\nHP: 57\n\n📋 PASSIVE ABILITY:\nWhen an infantry unit dies, draw a card\n\n🎯 COUNTERS:\n• [HERO] Draw a card when your infantry dies\n\n🔄 COUNTERED BY:\n• [TYPE] Ranged deal +1 attack vs Infantry'
+            description: 'Joan of Arc\n\n⚔️ HERO TYPE: Infantry\nHP: 57\n\n📋 PASSIVE ABILITY:\nWhen an infantry unit dies, draw a card\n\n🎯 COUNTERS:\n(None - standard infantry type)\n\n🔄 COUNTERED BY:\nRanged Mechanics:\n• Deal +1 attack vs Infantry'
         },
         {
             id: 'richardLionheart',
@@ -94,7 +94,7 @@ const HISTORIC_LEADERS = {
             passive: 'Your infantry units take 1 less damage',
             portrait: 'RL',
             color: '#6b4423',
-            description: 'Richard the Lionheart\n\n⚔️ HERO TYPE: Infantry\nHP: 57\n\n📋 PASSIVE ABILITY:\nYour infantry units take 1 less damage\n\n🎯 COUNTERS:\n• [HERO] Your infantry units take -1 damage from all attacks\n\n🔄 COUNTERED BY:\n• [TYPE] Ranged deal +1 attack vs Infantry'
+            description: 'Richard the Lionheart\n\n⚔️ HERO TYPE: Infantry\nHP: 57\n\n📋 PASSIVE ABILITY:\nYour infantry units take 1 less damage\n\n🎯 COUNTERS:\n(None - standard infantry type)\n\n🔄 COUNTERED BY:\nRanged Mechanics:\n• Deal +1 attack vs Infantry'
         },
         {
             id: 'williamWallace',
@@ -107,7 +107,7 @@ const HISTORIC_LEADERS = {
             passive: 'Your infantry units can attack the turn they are played',
             portrait: 'WW',
             color: '#2d3d52',
-            description: 'William Wallace\n\n⚔️ HERO TYPE: Infantry\nHP: 57\n\n📋 PASSIVE ABILITY:\nYour infantry units can attack the turn they are played\n\n🎯 COUNTERS:\n• [HERO] Your infantry units can attack the turn they are played (haste)\n\n🔄 COUNTERED BY:\n• [TYPE] Ranged deal +1 attack vs Infantry'
+            description: 'William Wallace\n\n⚔️ HERO TYPE: Infantry\nHP: 57\n\n📋 PASSIVE ABILITY:\nYour infantry units can attack the turn they are played\n\n🎯 COUNTERS:\n(None - standard infantry type)\n\n🔄 COUNTERED BY:\nRanged Mechanics:\n• Deal +1 attack vs Infantry'
         }
     ],
     cavalry: [
@@ -122,7 +122,7 @@ const HISTORIC_LEADERS = {
             passive: 'Your cavalry units have +1 power',
             portrait: 'GK',
             color: '#1a3a1a',
-            description: 'Genghis Khan\n\n⚔️ HERO TYPE: Cavalry\nHP: 52\n\n📋 PASSIVE ABILITY:\nYour cavalry units have +1 power\n\n🎯 COUNTERS:\n• [TYPE] +1 attack vs Ranged\n• [HERO] Your cavalry units have +1 power\n\n🔄 COUNTERED BY:\n• [TYPE] Infantry deal +1 attack vs Cavalry'
+            description: 'Genghis Khan\n\n⚔️ HERO TYPE: Cavalry\nHP: 52\n\n📋 PASSIVE ABILITY:\nYour cavalry units have +1 power\n\n🎯 COUNTERS:\nCavalry Mechanics:\n• +1 attack vs Ranged\n\n🔄 COUNTERED BY:\nInfantry Mechanics:\n• Deal +1 attack vs Cavalry'
         },
         {
             id: 'alexander',
@@ -135,7 +135,7 @@ const HISTORIC_LEADERS = {
             passive: 'When you play a cavalry unit, draw a card',
             portrait: 'AT',
             color: '#2d1a5f',
-            description: 'Alexander the Great\n\n⚔️ HERO TYPE: Cavalry\nHP: 52\n\n📋 PASSIVE ABILITY:\nWhen you play a cavalry unit, draw a card\n\n🎯 COUNTERS:\n• [TYPE] +1 attack vs Ranged\n• [HERO] Draw card when you play cavalry units\n\n🔄 COUNTERED BY:\n• [TYPE] Infantry take +1 damage vs Cavalry'
+            description: 'Alexander the Great\n\n⚔️ HERO TYPE: Cavalry\nHP: 52\n\n📋 PASSIVE ABILITY:\nWhen you play a cavalry unit, draw a card\n\n🎯 COUNTERS:\nCavalry Mechanics:\n• +1 attack vs Ranged\n\n🔄 COUNTERED BY:\nInfantry Mechanics:\n• Deal +1 damage vs Cavalry'
         },
         {
             id: 'saladin',
@@ -148,7 +148,7 @@ const HISTORIC_LEADERS = {
             passive: 'Your cavalry units have +1 durability',
             portrait: 'SA',
             color: '#5f3a1a',
-            description: 'Saladin\n\n⚔️ HERO TYPE: Cavalry\nHP: 52\n\n📋 PASSIVE ABILITY:\nYour cavalry units have +1 durability\n\n🎯 COUNTERS:\n• [TYPE] +1 attack vs Ranged\n• [HERO] Your cavalry units have +1 durability\n\n🔄 COUNTERED BY:\n• [TYPE] Infantry take +1 damage vs Cavalry'
+            description: 'Saladin\n\n⚔️ HERO TYPE: Cavalry\nHP: 52\n\n📋 PASSIVE ABILITY:\nYour cavalry units have +1 durability\n\n🎯 COUNTERS:\nCavalry Mechanics:\n• +1 attack vs Ranged\n\n🔄 COUNTERED BY:\nInfantry Mechanics:\n• Deal +1 damage vs Cavalry'
         },
         {
             id: 'charlemagne',
@@ -161,7 +161,7 @@ const HISTORIC_LEADERS = {
             passive: 'Your cavalry units can attack the turn they are played',
             portrait: 'CH',
             color: '#1a2d5f',
-            description: 'Charlemagne\n\n⚔️ HERO TYPE: Cavalry\nHP: 52\n\n📋 PASSIVE ABILITY:\nYour cavalry units can attack the turn they are played\n\n🎯 COUNTERS:\n• [TYPE] +1 attack vs Ranged\n• [HERO] Your cavalry units can attack the turn they are played (haste)\n\n🔄 COUNTERED BY:\n• [TYPE] Infantry take +1 damage vs Cavalry'
+            description: 'Charlemagne\n\n⚔️ HERO TYPE: Cavalry\nHP: 52\n\n📋 PASSIVE ABILITY:\nYour cavalry units can attack the turn they are played\n\n🎯 COUNTERS:\nCavalry Mechanics:\n• +1 attack vs Ranged\n\n🔄 COUNTERED BY:\nInfantry Mechanics:\n• Deal +1 damage vs Cavalry'
         }
     ]
 };
