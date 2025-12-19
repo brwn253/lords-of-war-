@@ -1703,9 +1703,25 @@ function useEquipmentAttack(player, target = null) {
         return false;
     }
     
-    const damage = weapon.attackPower || 2;
+    let damage = weapon.attackPower || 2;
     const damageType = weapon.equipType;
-    
+
+    // Apply hero type bonus
+    const heroUnitType = playerData.hero.unitType;
+    if (target.type === 'unit' || target.type === 'construct') {
+        // Hero attacking unit: apply type advantage
+        if (heroUnitType === 'ranged' && target.unitType === 'infantry') {
+            damage += 1;
+            log(`🎯 TYPE ADVANTAGE! Ranged hero deals +1 attack vs Infantry`);
+        } else if (heroUnitType === 'infantry' && target.unitType === 'cavalry') {
+            damage += 1;
+            log(`🎯 TYPE ADVANTAGE! Infantry hero deals +1 attack vs Cavalry`);
+        } else if (heroUnitType === 'cavalry' && target.unitType === 'ranged') {
+            damage += 1;
+            log(`🎯 TYPE ADVANTAGE! Cavalry hero deals +1 attack vs Ranged`);
+        }
+    }
+
     if (target.type === 'unit' || target.type === 'construct') {
         // Equipment attack on unit - melee hits back
         if (damageType !== 'ranged') {
