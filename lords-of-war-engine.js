@@ -3204,8 +3204,9 @@ function selectMultiplayerHero(hero) {
     console.log('[Game] Selected hero:', hero.name);
     selectedMultiplayerHero = hero;
 
-    // Show hero details
+    // Show hero details and mechanics
     document.getElementById('multiplayerHeroDetails').style.display = 'block';
+    document.getElementById('mechanicsBox').style.display = 'block';
 
     // Show full description (or fallback to basic info)
     let descriptionText = hero.description;
