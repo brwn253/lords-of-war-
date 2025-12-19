@@ -3212,10 +3212,43 @@ function selectMultiplayerHero(hero) {
     if (!descriptionText) {
         descriptionText = hero.name + '\n\nHP: ' + (hero.health || 30) + '\n\nPassive: ' + (hero.passive || 'Draw 1 card');
     }
-    document.getElementById('selectedHeroPassive').textContent = descriptionText;
+
+    // Parse description and apply color coding to mechanics
+    let formattedDescription = formatHeroDescription(descriptionText);
+    document.getElementById('selectedHeroPassive').innerHTML = formattedDescription;
 
     // Show confirm button
     document.getElementById('confirmHeroBtn').style.display = 'inline-block';
+}
+
+function formatHeroDescription(text) {
+    const lines = text.split('\n');
+    let html = '';
+
+    for (const line of lines) {
+        if (line.startsWith('- ')) {
+            // Mechanics line - color code based on whether it's a counter or counter-to
+            const mechanicText = line.substring(2); // Remove "- "
+            if (mechanicText.includes('deal') || mechanicText.match(/^\w+ (deal|take)/)) {
+                // Red - this is what counters this hero
+                html += '<div style="color: #ff6b6b;">- ' + mechanicText + '</div>';
+            } else {
+                // Green - this is what this hero counters
+                html += '<div style="color: #2ecc71;">- ' + mechanicText + '</div>';
+            }
+        } else if (line === '') {
+            html += '<br>';
+        } else {
+            html += '<div>' + escapeHtml(line) + '</div>';
+        }
+    }
+
+    return html;
+}
+
+function escapeHtml(text) {
+    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+    return text.replace(/[&<>"']/g, m => map[m]);
 }
 
 function confirmMultiplayerHero() {
