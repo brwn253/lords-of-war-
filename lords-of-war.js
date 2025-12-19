@@ -24,10 +24,10 @@ const HISTORIC_LEADERS = {
             commandCost: 2,
             commandName: 'Keen Eyes',
             commandText: 'Draw 1 card',
-            passive: 'Once per turn, a random friendly monster heals 1 damage',
+            passive: 'Once per turn, a random friendly creature heals 1 damage',
             portrait: 'WT',
             color: '#1a3a52',
-            description: 'William Tell\n\n⚔️ HERO TYPE: Ranged\nHP: 48\n\n📋 PASSIVE ABILITY:\nOnce per turn, a random friendly monster heals 1 damage\n\n🎯 COUNTERS:\n• [TYPE] +1 attack vs Infantry\n• [TYPE] Take no counter-damage from melee\n• [HERO] Heal 1 damage on a random unit each turn\n\n🔄 COUNTERED BY:\n• [TYPE] Cavalry deal +1 attack vs Ranged'
+            description: 'William Tell\n\n⚔️ HERO TYPE: Ranged\nHP: 48\n\n📋 PASSIVE ABILITY:\nOnce per turn, a random friendly creature heals 1 damage\n\n🎯 COUNTERS:\n• [TYPE] +1 attack vs Infantry\n• [TYPE] Take no counter-damage from melee\n• [HERO] Heal 1 damage on a random creature each turn\n\n🔄 COUNTERED BY:\n• [TYPE] Cavalry deal +1 attack vs Ranged'
         },
         {
             id: 'houYi',
@@ -354,7 +354,7 @@ const CARD_DATABASE = {
         type: 'ability',
         unitType: 'ranged',
         cost: 2,
-        text: 'Give target ranged monster +2/+2.',
+        text: 'Give target ranged creature +2/+2.',
         rarity: 'rare',
         needsTarget: true,
         targetType: 'ranged'
