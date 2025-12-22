@@ -41,13 +41,11 @@
         }
 
         .game-board {
-            display: grid;
+            display: none; /* Hidden by default, shown only when game starts */
             grid-template-rows: auto 1fr;
-            min-height: calc(100vh - 300px);
-            padding: 9px;
-            padding-left: 200px; /* Space for sidebar */
-            padding-right: 30px;
-            padding-bottom: 20px;
+            height: calc(100vh - 180px);
+            margin-top: 0px;
+            padding: 150px 170px 20px 380px;
             gap: 2px;
             position: relative;
             z-index: 0;
@@ -57,27 +55,30 @@
         /* Lord Cards (Heroes) - Hearthstone style */
         .lord-area {
             display: grid;
-            grid-template-columns: auto auto auto;
+            grid-template-columns: 1fr;
             grid-template-rows: auto auto auto;
-            align-items: center;
+            align-items: start;
             justify-content: center;
             gap: 2px;
-            padding: 6px 15px;
+            padding: 8px 12px;
             background: linear-gradient(135deg, #3e2414 0%, #2a1810 100%);
-            border: 3px solid #8b6f47;
+            border: 6px solid #8b6f47;
             border-radius: 12px;
             box-shadow:
                 inset 0 2px 10px rgba(255, 215, 0, 0.3),
                 0 10px 40px rgba(0, 0, 0, 0.8),
                 0 0 0 2px #2a1810;
             position: relative;
+            margin: 0 auto;
+            justify-self: center;
+            width: fit-content;
         }
 
         .bottom-bar .lord-area {
             background: linear-gradient(135deg, #3e2414 0%, #2a1810 100%);
-            border: 2px solid #8b6f47;
-            padding: 8px 12px;
-            border-radius: 10px;
+            border: 3px solid #8b6f47;
+            padding: 4px 8px;
+            border-radius: 8px;
         }
 
         .lord-area::before {
@@ -95,14 +96,102 @@
         .lord-area.enemy {
             background: linear-gradient(135deg, #4a1010 0%, #2a0808 100%);
             border-color: #8b4747;
+            position: fixed;
+            right: 10px;
+            left: auto;
+            top: 10px;
+            width: auto;
+            margin: 0;
+            z-index: 40;
+        }
+
+        .bottom-bar .lord-area.player {
+            position: fixed;
+            right: 10px;
+            left: auto;
+            bottom: 10px;
+            top: auto;
+            width: auto;
+            margin: 0;
+            z-index: 40;
+        }
+
+        #playerAlias {
+            position: fixed;
+            top: calc(50% + 50px);
+            right: 20px;
+            transform: translateY(-50%);
+            font-size: 22px;
+            color: #ffd700;
+            text-align: center;
+            text-transform: uppercase;
+            font-weight: 900;
+            padding: 6px 0;
+            z-index: 100;
+        }
+        
+        #playerAliasOld {
+            position: fixed !important;
+            left: 50% !important;
+            right: auto !important;
+            transform: translateX(-50%) !important;
+            bottom: 10px !important;
+            top: auto !important;
+            padding: 6px 12px !important;
+            text-align: center !important;
+            z-index: 100 !important;
+        }
+
+        #enemyAlias {
+            position: fixed;
+            top: calc(50% - 50px);
+            right: 20px;
+            transform: translateY(-50%);
+            font-size: 22px;
+            color: #ffd700;
+            text-align: center;
+            text-transform: uppercase;
+            font-weight: 900;
+            padding: 6px 0;
+            z-index: 100;
+        }
+        
+        #enemyAliasOld {
+            position: fixed;
+            top: calc(50% - 50px);
+            right: 20px;
+            transform: translateY(-50%);
+            font-size: 22px;
+            color: #ffd700;
+            text-align: center;
+            text-transform: uppercase;
+            font-weight: 900;
+            padding: 6px 0;
+            z-index: 100;
+        }
+        
+        #enemyAliasOld {
+            position: fixed !important;
+            left: 50% !important;
+            right: auto !important;
+            transform: translateX(-50%) !important;
+            top: 10px !important;
+            bottom: auto !important;
+            font-size: 22px !important;
+            color: #ffd700 !important;
+            text-align: center !important;
+            text-transform: uppercase !important;
+            font-weight: 900 !important;
+            padding: 6px 12px !important;
+            z-index: 41 !important;
         }
 
         .lord-portrait {
-            width: 120px;
-            min-width: 45px;
-            height: 160px;
+            width: 240px;
+            min-width: 90px;
+            height: 320px;
             background: linear-gradient(135deg, #d4af37 0%, #aa8b2c 100%);
-            border: 6px solid #2a1810;
+            border: 12px solid #2a1810;
             border-radius: 15px;
             position: relative;
             box-shadow:
@@ -110,7 +199,7 @@
                 inset 0 2px 8px rgba(255, 255, 255, 0.2);
             overflow: visible;
             grid-column: 2;
-            grid-row: 1;
+            grid-row: 1 / 4;
             transition: all 0.3s;
         }
         
@@ -128,6 +217,7 @@
 
         .lord-portrait.enemy {
             background: linear-gradient(135deg, #c41e3a 0%, #8b1a1a 100%);
+            grid-row: 1 / 4;
         }
 
         .lord-portrait::before {
@@ -148,65 +238,59 @@
 
         .lord-name {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            right: 10px;
+            top: 20px;
+            left: 20px;
+            right: 20px;
             text-align: center;
-            font-size: 12px;
+            font-size: 24px;
             font-weight: 900;
             text-transform: uppercase;
             color: #fff;
             text-shadow:
-                2px 2px 0 #000,
-                3px 3px 5px rgba(0, 0, 0, 0.8),
-                -1px -1px 0 #000,
-                1px -1px 0 #000,
-                -1px 1px 0 #000,
-                1px 1px 0 #000;
-            letter-spacing: 2px;
+                4px 4px 0 #000,
+                6px 6px 10px rgba(0, 0, 0, 0.8),
+                -2px -2px 0 #000,
+                2px -2px 0 #000,
+                -2px 2px 0 #000,
+                2px 2px 0 #000;
+            letter-spacing: 4px;
             z-index: 10;
         }
 
-.lord-attack {            position: absolute;            bottom: -15px;            left: -15px;            min-width: 60px;            height: 60px;            padding: 0 10px;            background: radial-gradient(circle, #ff6b35 0%, #c41e3a 100%);            border: 5px solid #2a1810;            border-radius: 50%;            display: flex;            align-items: center;            justify-content: center;            font-size: 17px;            font-weight: 900;            color: #fff;            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.8), inset 0 2px 5px rgba(255, 255, 255, 0.2);            white-space: nowrap;            overflow: visible;        }
+        .lord-attack {
+            display: none !important;
+        }
+
         .lord-health {
-            position: absolute;
-            bottom: -15px;
-            right: -15px;
-            min-width: 60px;
-            height: 60px;
-            padding: 0 10px;
-            background: radial-gradient(circle, #c41e3a 0%, #8b1a1a 100%);
-            border: 5px solid #2a1810;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 17px;
+            position: static;
+            display: inline;
+            font-size: 18px;
             font-weight: 900;
-            color: #fff;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
-            box-shadow:
-                0 5px 20px rgba(0, 0, 0, 0.8),
-                inset 0 2px 5px rgba(255, 255, 255, 0.2);
-            white-space: nowrap;
-            overflow: visible;
+            color: #ffd700;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            background: none;
+            border: none;
+            padding: 0;
+            margin: 0;
+            box-shadow: none;
         }
 
         .lord-command {
-            flex: 1;
-            padding: 4px 8px;
+            padding: 3px 6px;
             background: rgba(0, 0, 0, 0.5);
             border: 3px solid #8b6f47;
-            border-radius: 10px;
+            border-radius: 6px;
             cursor: pointer;
             transition: all 0.3s;
             text-align: center;
+            min-height: auto;
+            flex-shrink: 1;
         }
 
         .lord-command:hover:not(.disabled) {
             background: rgba(0, 0, 0, 0.7);
             border-color: #ffd700;
-            transform: translateY(-5px);
+            transform: translateY(-10px);
             box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
         }
 
@@ -225,52 +309,94 @@
             background: linear-gradient(135deg, #c41e3a 0%, #8b1a1a 100%) !important;
         }
 
+        .lord-command.deck-empty {
+            background: linear-gradient(135deg, #c41e3a 0%, #8b1a1a 100%) !important;
+            border-color: #ff0000 !important;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.6), inset 0 2px 8px rgba(255, 0, 0, 0.3) !important;
+            cursor: not-allowed !important;
+        }
+
+        .lord-command.deck-empty:hover {
+            background: linear-gradient(135deg, #c41e3a 0%, #8b1a1a 100%) !important;
+        }
+
         .command-title {
-            font-size: 11px;
+            font-size: 14px;
             font-weight: 700;
             color: #ffd700;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             text-transform: uppercase;
+            line-height: 1;
         }
 
         .command-cost {
             display: inline-block;
-            padding: 5px 15px;
+            padding: 4px 12px;
             background: linear-gradient(135deg, #d4af37 0%, #aa8b2c 100%);
-            border-radius: 20px;
+            border-radius: 15px;
             color: #2a1810;
             font-weight: 900;
-            margin-top: 5px;
+            margin-top: 4px;
+            font-size: 14px;
         }
 
         /* Gold Display (replaces Essence) */
         .gold-display {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             align-items: center;
-            padding: 4px 8px;
+            justify-content: center;
+            padding: 8px 16px;
             background: rgba(0, 0, 0, 0.6);
-            border: 3px solid #d4af37;
+            border: 6px solid #d4af37;
             border-radius: 15px;
-            min-width: 60px;
-            grid-column: 2;
-            grid-row: 2;
-            
-            
+            width: 100%;
+            grid-column: 1 / 5;
+            grid-row: 4;
+        }
+
+        .lord-area.enemy .gold-display {
+            grid-column: 1;
+            grid-row: 3;
         }
         
+        .lord-area.player .equipment-slots {
+            grid-column: 1;
+            grid-row: 2;
+        }
+        
+        .lord-area.player .gold-display {
+            grid-column: 1;
+            grid-row: 3;
+        }
+
+        .lord-area.enemy .equipment-slots {
+            grid-row: 2;
+            grid-column: 1;
+        }
+        
+        .lord-area.enemy .gold-display {
+            grid-column: 1;
+            grid-row: 3;
+        }
+        
+        .lord-area .lord-command {
+            grid-column: 1;
+            grid-row: 1;
+        }
+
         .equipment-display {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 9px;
+            padding: 18px;
             background: rgba(0, 0, 0, 0.6);
-            border: 3px solid #8b6f47;
+            border: 6px solid #8b6f47;
             border-radius: 15px;
-            min-width: 45px;
-            margin-bottom: 10px;
+            min-width: 90px;
+            margin-bottom: 20px;
             grid-column: 2;
-            grid-row: 3;
+            grid-row: 2;
             display: none !important;
         }
 
@@ -278,49 +404,49 @@
         .equipment-display:hover .equipment-stats {
             display: block;
         }
-        
+
         .equipment-name {
-            font-size: 11px;
+            font-size: 22px;
             font-weight: 700;
             color: #d4af37;
             text-align: center;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
             text-transform: uppercase;
             display: none;
         }
-        
+
         .equipment-stats {
-            font-size: 11px;
+            font-size: 22px;
             font-weight: 900;
             display: none;
             color: #ffd700;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
         }
 
         .gold-amount {
-            font-size: 16px;
+            font-size: 28px;
             font-weight: 900;
             color: #ffd700;
             text-shadow:
-                2px 2px 0 #000,
-                3px 3px 10px rgba(255, 215, 0, 0.8);
-            margin-bottom: 10px;
+                4px 4px 0 #000,
+                6px 6px 20px rgba(255, 215, 0, 0.8);
+            margin: 0;
         }
 
         .gold-coins {
             display: flex;
             flex-wrap: nowrap;
-            gap: 5px;
+            gap: 10px;
             display: none;
             justify-content: center;
         }
 
         .gold-coin {
-            width: 20px;
-            height: 20px;
+            width: 40px;
+            height: 40px;
             background: radial-gradient(circle at 30% 30%, #ffd700, #d4af37);
             border-radius: 50%;
-            border: 2px solid #aa8b2c;
+            border: 4px solid #aa8b2c;
             box-shadow:
                 0 2px 8px rgba(255, 215, 0, 0.6),
                 inset 1px 1px 3px rgba(255, 255, 255, 0.5);
@@ -353,6 +479,9 @@
             box-shadow: inset 0 5px 15px rgba(0, 0, 0, 0.8);
             position: relative;
             overflow: visible;
+            width: 100%;
+            margin: 0;
+            justify-self: stretch;
         }
         
         .battlefield::before {
@@ -402,7 +531,7 @@
                 );
             border: 3px dashed rgba(139, 111, 71, 0.5);
             border-radius: 10px;
-            min-height: 132px;
+            min-height: 160px;
             align-items: center;
             justify-content: center;
             overflow: hidden;
@@ -422,10 +551,10 @@
         /* Hearthstone-style Cards */
         .card {
             position: relative;
-            width: 70px;
-            min-width: 45px;
+            width: 135px;
+            min-width: 90px;
             flex-shrink: 1;
-            height: 90px;
+            height: 180px;
             background: #2a1810;
             border-radius: 10px;
             cursor: pointer;
@@ -438,10 +567,10 @@
             user-select: none;
             overflow: visible;
             display: grid;
-            padding: 6px;
+            padding: 12px;
             grid-template-columns: 1fr;
             grid-template-rows: auto auto auto;
-            padding: 4px;
+            padding: 8px;
         }
 
         .card:hover {
@@ -469,6 +598,183 @@
             background: linear-gradient(180deg, #b8b8b8 0%, #6a6a6a 100%);
         }
 
+        /* Hero Card - styled like bannerman card */
+        #enemyHeroCard .card,
+        #playerHeroCard .card {
+            width: 160px;
+            height: 130px;
+            padding: 6px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 15;
+            pointer-events: auto !important;
+        }
+        
+        /* Player hero card should be clickable */
+        #playerHeroCard .card {
+            cursor: pointer !important;
+        }
+        
+        /* Enemy hero card clickable when targeting */
+        #enemyHeroCard .card.valid-target {
+            cursor: pointer !important;
+            border: 3px solid #ffd700 !important;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.8) !important;
+        }
+        
+        /* Hero card - gold text, no cost */
+        #enemyHeroCard .card-name,
+        #playerHeroCard .card-name {
+            color: #ffd700 !important;
+            position: relative;
+            z-index: 20 !important;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9) !important;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 4px;
+            border-radius: 2px;
+            margin-left: 0 !important;
+            margin-top: 0 !important;
+            left: 0 !important;
+            text-align: left;
+            overflow: visible;
+            white-space: nowrap;
+        }
+        
+        #enemyHeroCard .card-cost,
+        #playerHeroCard .card-cost {
+            display: none !important;
+        }
+        
+        #enemyHeroCard .card-header,
+        #playerHeroCard .card-header {
+            padding: 4px 8px 4px 8px !important;
+            position: relative;
+            z-index: 20;
+            justify-content: flex-start !important;
+            overflow: visible !important;
+            min-height: 30px;
+        }
+        
+        /* Move stats footer down for hero cards to make room for name */
+        #enemyHeroCard .card-stats-footer,
+        #playerHeroCard .card-stats-footer {
+            position: absolute !important;
+            bottom: 4px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            gap: 2px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: auto !important;
+        }
+        
+        /* Hero card stats should be visible and properly sized - same as hand cards */
+        #enemyHeroCard .card-stat,
+        #playerHeroCard .card-stat {
+            width: 36px;
+            height: 36px;
+            font-size: 20px;
+            border: 2px solid #2a1810;
+            display: flex !important;
+        }
+        
+        /* Hero card unit type icon should be visible */
+        #enemyHeroCard .card-type-icon,
+        #playerHeroCard .card-type-icon {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            min-width: 24px;
+            height: 24px;
+        }
+        
+        /* Reduce card text box height for hero cards to make room */
+        #enemyHeroCard .card-text-box,
+        #playerHeroCard .card-text-box {
+            min-height: 0;
+            max-height: 20px;
+            overflow: hidden;
+            padding: 2px;
+            display: none; /* Hide text box for hero cards */
+        }
+        
+        /* Reduce card art frame height for hero cards */
+        #enemyHeroCard .card-art-frame,
+        #playerHeroCard .card-art-frame {
+            min-height: 0;
+            max-height: 50px;
+            margin-top: 2px;
+        }
+        
+        /* Battlefield cards - smaller */
+        .battle-row .card {
+            width: 110px;
+            height: 130px;
+            padding: 6px;
+            flex-shrink: 0;
+        }
+
+        .battle-row .card:hover {
+            transform: translateY(-15px) scale(1.15);
+        }
+
+        /* Hide keywords on battlefield */
+        .battle-row .card-type-badge {
+            display: none !important;
+        }
+        
+        /* Smaller text for battlefield cards */
+        .battle-row .card .card-cost {
+            width: 20px;
+            height: 20px;
+            font-size: 10px;
+            top: 4px;
+            left: 4px;
+            border: 1px solid #2a1810;
+        }
+        
+        .battle-row .card .card-name {
+            font-size: 12px;
+            margin-top: 4px;
+            margin-left: -20px;
+            letter-spacing: 0.2px;
+        }
+        
+        .battle-row .card .card-header {
+            padding: 4px 4px 4px 24px;
+            border-top: 1px solid #8b6f47;
+            border-bottom: 1px solid #8b6f47;
+            gap: 2px;
+        }
+        
+        .battle-row .card .card-stat {
+            width: 24px;
+            height: 24px;
+            font-size: 12px;
+            border: 1px solid #2a1810;
+        }
+        
+        .battle-row .card .card-type-icon {
+            font-size: 16px;
+            min-width: 18px;
+            height: 18px;
+        }
+
+        /* Ability indicator - blue lightning bolt */
+        .ability-indicator {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            font-size: 20px;
+            color: #00bfff;
+            text-shadow: 0 0 8px rgba(0, 191, 255, 0.8), 0 0 15px rgba(0, 191, 255, 0.5);
+            filter: drop-shadow(0 0 3px rgba(0, 191, 255, 0.6));
+        }
+
         .card-border {
             position: absolute;
             top: 8px;
@@ -484,12 +790,12 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 18px;
-            height: 18px;
+            width: 36px;
+            height: 36px;
             background: radial-gradient(circle, #d4af37 0%, #aa8b2c 100%);
-            border: 1px solid #2a1810;
+            border: 2px solid #2a1810;
             border-radius: 50%;
-            font-size: 9px;
+            font-size: 16px;
             font-weight: 900;
             color: #fff;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
@@ -498,7 +804,7 @@
                 inset 0 1px 3px rgba(255, 255, 255, 0.2);
             flex-shrink: 0;
             position: absolute;
-            top: 4px; left: 4px;
+            top: 8px; left: 8px;
         }
 
         .card-art-frame {
@@ -511,7 +817,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 29px;
+            font-size: 26px;
             background: linear-gradient(135deg, #3e2414 0%, #2a1810 100%);
             position: relative;
         }
@@ -520,11 +826,11 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 4px 4px 4px 24px;
+            padding: 8px 8px 8px 48px;
             margin: 0;
             background: linear-gradient(90deg, transparent 0%, #2a1810 20%, #2a1810 80%, transparent 100%);
-            border-top: 1px solid #8b6f47;
-            border-bottom: 1px solid #8b6f47;
+            border-top: 2px solid #8b6f47;
+            border-bottom: 2px solid #8b6f47;
             gap: 2px;
             overflow: hidden;
             flex-shrink: 0;
@@ -533,19 +839,19 @@
         }
 
         .card-name {
-            font-size: 11px;
+            font-size: 20px;
             font-weight: 700;
             text-align: left;
             color: #ffd700;
             text-transform: uppercase;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
-            letter-spacing: 0.3px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+            letter-spacing: 0.6px;
             line-height: 1.2;
             flex: 1;
             position: relative;
             z-index: 5;
-            margin-top: 6px;
-            margin-left: -15px;
+            margin-top: 12px;
+            margin-left: -30px;
         }
 
         /* Tier-based color scheme */
@@ -557,13 +863,13 @@
 
         /* Unit type icon - top right */
         .card-type-icon {
-            font-size: 16px;
+            font-size: 32px;
             flex-shrink: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-width: 18px;
-            height: 18px;
+            min-width: 36px;
+            height: 36px;
         }
 
         /* Equipment cards - White text */
@@ -598,16 +904,16 @@
         }
 
         .card-stat {
-            width: 18px;
-            height: 18px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            border: 1px solid #2a1810;
+            border: 2px solid #2a1810;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 10px;
+            font-size: 20px;
             font-weight: 900;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9);
+            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.9);
             box-shadow:
                 0 2px 6px rgba(0, 0, 0, 0.6),
                 inset 0 1px 2px rgba(255, 255, 255, 0.2);
@@ -839,18 +1145,18 @@
         .card-type-badge {
             padding: 0;
             background: #ffd700;
-            border: 2px solid #8b6f47;
-            width: 20px;
-            height: 20px;
+            border: 4px solid #8b6f47;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            font-size: 12px;
+            font-size: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #2a1810;
             position: absolute;
-            top: 4px;
-            right: 4px;
+            top: 8px;
+            right: 8px;
             z-index: 10;
             margin-top: 0;
             padding: 0;
@@ -929,12 +1235,12 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: 130px;
+            height: 260px;
             background: linear-gradient(180deg, transparent 0%, #2a1810 30%, #1a100a 100%);
             border-top: 5px solid #8b6f47;
-            display: flex;
+            display: none; /* Hidden by default, shown only when game starts */
             gap: 3px;
-            padding: 9px 20px;
+            padding: 18px 40px;
             z-index: 500;
             box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.9);
             overflow: visible;
@@ -958,6 +1264,7 @@
             gap: 2px;
             flex: 1;
             min-width: 0;
+            margin-right: 150px;
         }
 
         .hand-scroll-btn {
@@ -997,26 +1304,30 @@
         .player-hand {
             position: relative;
             display: flex;
-            gap: 3px;
-            height: 90px;
+            gap: 6px;
+            height: 180px;
             overflow: hidden;
             align-items: center;
             justify-content: flex-start;
             z-index: 1000;
-            
+
             flex: 1;
-            border-left: 3px solid #8b6f47;
-            border-radius: 8px 0 0 8px;
-            
+            border-left: 6px solid #8b6f47;
+            border-right: 6px solid #8b6f47;
+            border-radius: 0;
+            background: linear-gradient(90deg, #2a1810 0%, #3e2414 50%, #2a1810 100%);
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+            padding: 0 12px;
+
         }
 
         /* Card Stack - for duplicate cards */
         .card-stack {
             position: relative;
-            width: 70px;
-            min-width: 45px;
+            width: 140px;
+            min-width: 90px;
             flex-shrink: 1;
-            height: 90px;
+            height: 180px;
             overflow: hidden;
         }
 
@@ -1036,32 +1347,32 @@
         }
 
         .card-stack .card:nth-child(2) {
-            transform: translateX(3px) translateY(3px) rotate(1deg);
+            transform: translateX(6px) translateY(6px) rotate(1deg);
             z-index: 2;
         }
 
         .card-stack .card:nth-child(3) {
-            transform: translateX(6px) translateY(6px) rotate(2deg);
+            transform: translateX(12px) translateY(12px) rotate(2deg);
             z-index: 1;
         }
 
         .card-stack .card:nth-child(n+4) {
-            transform: translateX(9px) translateY(9px) rotate(3deg);
+            transform: translateX(18px) translateY(18px) rotate(3deg);
             z-index: 0;
         }
 
         /* Multiplier badge */
         .card-multiplier {
             position: absolute;
-            top: 4px;
-            right: 4px;
+            top: 8px;
+            right: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            font-size: 28px;
             font-weight: 900;
             color: #fff;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
             z-index: 10;
         }
 
@@ -1091,18 +1402,22 @@
         /* Enemy Hand */
         .enemy-hand {
             position: fixed;
-            top: 0px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 0px;
-            margin-left: -20px;
+            top: 50px;
+            left: 500px;
+            right: auto;
+            transform: none;
+            display: none; /* Hidden by default, shown only when game starts */
+            gap: 5px;
+            margin: 0;
             z-index: 50;
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-start;
         }
 
         .card-back {
-            width: 36px;
-            height: 40px;
+            width: 72px;
+            height: 80px;
             background: linear-gradient(135deg, #8b6f47 0%, #5a4a2a 100%);
             border: 3px solid #2a1810;
             border-radius: 8px;
@@ -1117,51 +1432,78 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 35px;
+            font-size: 70px;
             opacity: 0.6;
         }
 
         .card-back:hover {
             transform: translateY(-5px);
         }
+        
+        /* Enemy hand count card */
+        .card-back.enemy-hand-count {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .enemy-hand-count-text {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            font-size: 18px;
+            font-weight: 900;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9);
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 2px solid #ffd700;
+        }
 
         /* Game Log Sidebar */
         .game-log {
             position: fixed;
             left: 10px;
-            top: 20px;
-            width: 180px;
-            max-height: 210px;
-            background: linear-gradient(135deg, #2a1810 0%, #1a100a 100%);
-            border: 5px solid #8b6f47;
-            border-radius: 15px;
-            padding: 4px;
+            right: auto;
+            top: 10px;
+            width: 360px;
+            max-height: 200px;
+            background: linear-gradient(135deg, #2a1810 0%, #3e2414 50%, #2a1810 100%);
+            border-top: 6px solid #8b6f47;
+            border-bottom: 6px solid #8b6f47;
+            border-left: 6px solid #8b6f47;
+            border-right: 6px solid #8b6f47;
+            border-radius: 12px;
+            padding: 12px;
             overflow-y: scroll;
             box-shadow:
-                inset 0 2px 10px rgba(0, 0, 0, 0.8),
+                inset 0 0 20px rgba(0, 0, 0, 0.8),
                 0 10px 40px rgba(0, 0, 0, 0.9);
             z-index: 30;
             pointer-events: auto;
+            display: none; /* Hidden by default, shown only when game starts */
         }
 
         .log-header {
-            font-size: 9px;
+            font-size: 18px;
             font-weight: 900;
             text-align: center;
             color: #ffd700;
             text-transform: uppercase;
-            margin-bottom: 4px;
-            padding-bottom: 3px;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
             border-bottom: 2px solid #8b6f47;
         }
 
         .log-entry {
-            padding: 3px 4px;
-            margin: 2px 0;
+            padding: 6px 8px;
+            margin: 4px 0;
             background: rgba(0, 0, 0, 0.4);
             border-left: 4px solid #8b6f47;
             border-radius: 4px;
-            font-size: 9px;
+            font-size: 18px;
             line-height: 1.2;
             animation: logSlide 0.3s;
         }
@@ -1183,85 +1525,92 @@
         .hand-card-preview {
             position: fixed;
             left: 10px;
-            top: 240px;
-            width: 180px;
-            max-height: calc(100vh - 310px);
-            background: linear-gradient(135deg, #2a1810 0%, #1a100a 100%);
-            border: 5px solid #8b6f47;
-            border-radius: 15px;
-            padding: 9px;
+            right: auto;
+            top: 220px;
+            bottom: 270px;
+            width: 360px;
+            max-height: none;
+            height: auto;
+            background: linear-gradient(135deg, #2a1810 0%, #3e2414 50%, #2a1810 100%);
+            border-top: 6px solid #8b6f47;
+            border-bottom: 6px solid #8b6f47;
+            border-left: 6px solid #8b6f47;
+            border-right: 6px solid #8b6f47;
+            border-radius: 12px;
+            padding: 18px;
             overflow-y: auto;
+            display: none; /* Hidden by default, shown only when game starts */
             box-shadow:
-                inset 0 2px 10px rgba(0, 0, 0, 0.8),
+                inset 0 0 20px rgba(0, 0, 0, 0.8),
                 0 10px 40px rgba(0, 0, 0, 0.9);
             z-index: 30;
             pointer-events: none;
         }
 
         .preview-header {
-            font-size: 9px;
+            font-size: 18px;
             font-weight: 900;
             text-align: center;
             color: #ffd700;
             text-transform: uppercase;
-            margin-bottom: 4px;
-            padding-bottom: 3px;
-            border-bottom: 2px solid #8b6f47;
+            margin-bottom: 12px;
+            padding-bottom: 6px;
+            border-bottom: 3px solid #8b6f47;
         }
 
         .preview-content {
-            font-size: 9px;
+            font-size: 18px;
             color: #f4e4c1;
-            line-height: 1.2;
+            line-height: 1.4;
             display: grid;
             grid-template-columns: 1fr;
-            gap: 3px;
+            gap: 12px;
         }
 
         .preview-content .card-name {
-            font-size: 9px;
+            font-size: 20px;
             font-weight: bold;
             color: #ffd700;
             margin-bottom: 0;
-            line-height: 1.4;
+            line-height: 1.2;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 2px;
-            padding-bottom: 3px;
-            border-bottom: 1px solid #8b6f47;
+            gap: 6px;
+            padding-bottom: 4px;
+            border-bottom: 2px solid #8b6f47;
         }
 
         .preview-content .preview-stats {
             display: none;
             flex-direction: column;
-            gap: 2px;
-            margin-bottom: 18px;
+            gap: 8px;
+            margin-bottom: 36px;
             font-weight: bold;
         }
 
         .preview-content .preview-stat {
             background: rgba(0, 0, 0, 0.3);
-            padding: 4px 6px;
-            border-radius: 2px;
+            padding: 12px 16px;
+            border-radius: 4px;
             border-left: none;
-            font-size: 11px;
+            font-size: 24px;
         }
 
         .preview-content .preview-text {
             background: rgba(0, 0, 0, 0.3);
-            padding: 9px;
+            padding: 18px;
             border-radius: 2px;
-            margin-bottom: 3px;
+            margin-bottom: 6px;
             border-left: 2px solid #d4af37;
             line-height: 1.2;
-            font-size: 12px;
+            font-size: 18px;
         }
 
-.preview-content .preview-stats {            display: flex !important;            flex-direction: row !important;            gap: 12px !important;            margin-bottom: 0 !important;            justify-content: center;            margin-top: 8px;        }
+.preview-content .preview-stats {            display: flex !important;            flex-direction: row !important;            gap: 24px !important;            margin-bottom: 0 !important;            justify-content: center;            margin-top: 16px;        }
         .preview-content .preview-stat {            flex: 1;        }
         .preview-content .preview-keywords {
-            font-size: 10px;
+            font-size: 14px;
             color: #d4af37;
             background: rgba(212, 175, 55, 0.1);
             padding: 4px 8px;
@@ -1272,12 +1621,13 @@
 
         /* End Turn Button */
         .end-turn-btn {
+            display: none; /* Hidden by default, shown only when game starts */
             position: fixed;
             top: 50%;
-            right: 15px;
+            right: 20px;
             transform: translateY(-50%);
-            padding: 12px 40px;
-            font-size: 12px;
+            padding: 15px 20px;
+            font-size: 16px;
             font-weight: 900;
             font-family: 'Cinzel', serif;
             text-transform: uppercase;
@@ -1294,11 +1644,20 @@
             letter-spacing: 2px;
         }
 
-        .lord-command[id*="Weapon"] {
-            display: none !important;
-        }
         .end-turn-btn.hidden {
             display: none;
+        }
+
+        #playerEndTurnBtn:hover {
+            box-shadow: 0 10px 30px rgba(196, 30, 58, 0.8), inset 0 2px 8px rgba(255, 215, 0, 0.4) !important;
+            border-color: #ffd700 !important;
+            transform: scale(1.05);
+        }
+        
+        #playerEndTurnBtn.no-moves:hover {
+            box-shadow: 0 10px 30px rgba(46, 204, 113, 0.8), inset 0 2px 8px rgba(255, 255, 255, 0.4) !important;
+            border-color: #2ecc71 !important;
+            transform: scale(1.05);
         }
 
         .end-turn-btn:hover {
@@ -1310,8 +1669,9 @@
 
         .settings-btn {
             position: fixed;
-            top: 15px;
-            right: 15px;
+            top: 10px;
+            left: 380px;
+            right: auto;
             padding: 10px 15px;
             font-size: 16px;
             background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
@@ -1344,16 +1704,31 @@
             left: 50%;
             transform: translate(-50%, -50%);
             background: linear-gradient(135deg, #2a1810 0%, #1a100a 100%);
-            border: 8px solid #8b6f47;
-            border-radius: 20px;
-            padding: 50px;
+            border: 3px solid #8b6f47;
+            border-radius: 12px;
+            padding: 40px;
             text-align: center;
             z-index: 10001;
             box-shadow:
-                0 0 100px rgba(0, 0, 0, 0.95),
-                inset 0 2px 15px rgba(255, 215, 0, 0.2);
-            min-width: 800px;
-            max-width: 1000px;
+                0 20px 60px rgba(0, 0, 0, 0.8),
+                inset 0 0 40px rgba(0, 0, 0, 0.5);
+            max-width: 600px;
+            width: 90%;
+        }
+        
+        /* Main Menu Modal - Compact and Clean */
+        #mainMenuModal {
+            padding: 40px !important;
+            max-width: 600px !important;
+            width: 90% !important;
+        }
+        
+        /* Main Menu Modal - Compact and Clean */
+        #mainMenuModal {
+            padding: 40px !important;
+            max-width: 600px !important;
+            width: 90% !important;
+            min-width: auto !important;
         }
         
         /* Game Info Modal (Play Again) */
@@ -1499,75 +1874,105 @@
         }
 
         .modal h1 {
-            font-size: 29px;
+            font-size: 58px;
             font-weight: 900;
             color: #ffd700;
             text-transform: uppercase;
-            margin-bottom: 30px;
+            margin-bottom: 59px;
             text-shadow:
-                3px 3px 0 #000,
-                4px 4px 10px rgba(255, 215, 0, 0.6);
-            letter-spacing: 3px;
+                5px 5px 0 #000,
+                7px 7px 18px rgba(255, 215, 0, 0.6);
+            letter-spacing: 5px;
         }
 
         .modal p {
-            font-size: 12px;
-            margin-bottom: 30px;
+            font-size: 23px;
+            margin-bottom: 59px;
             color: #f4e4c1;
         }
 
         .modal button {
-            padding: 10px 30px;
-            font-size: 10px;
+            padding: 20px 59px;
+            font-size: 20px;
             font-weight: 700;
             font-family: 'Cinzel', serif;
             background: linear-gradient(135deg, #d4af37 0%, #aa8b2c 100%);
             color: #2a1810;
-            border: 4px solid #8b6f47;
-            border-radius: 10px;
+            border: 7px solid #8b6f47;
+            border-radius: 20px;
             cursor: pointer;
-            margin: 8px;
+            margin: 16px;
             transition: all 0.3s;
             text-transform: uppercase;
         }
 
         .modal button:hover {
             transform: scale(1.1);
-            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.6);
+            box-shadow: 0 18px 54px rgba(212, 175, 55, 0.6);
             border-color: #ffd700;
         }
 
-        .lord-command[id*="Weapon"] {
-            display: none !important;
-        }
         .hidden {
             display: none;
+        }
+        
+        /* Hero selection modals - 10% bigger than original */
+        #multiplayerHeroModal,
+        #gameStartModal {
+            padding: 60px !important;
+            border: 9px solid #8b6f47 !important;
+            border-radius: 22px !important;
+            min-width: 968px !important;
+            max-width: 1210px !important;
+        }
+        
+        #multiplayerHeroModal h1,
+        #gameStartModal h1 {
+            font-size: 44px !important;
+            margin-bottom: 36px !important;
+            letter-spacing: 3px !important;
+        }
+        
+        #multiplayerHeroModal p,
+        #gameStartModal p {
+            font-size: 17px !important;
+            margin-bottom: 36px !important;
+        }
+        
+        #multiplayerHeroModal button,
+        #gameStartModal button {
+            padding: 12px 36px !important;
+            font-size: 14px !important;
+            border: 4px solid #8b6f47 !important;
+            border-radius: 12px !important;
+            margin: 10px !important;
         }
         
         /* Equipment Slots */
         .equipment-slots {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 3px;
-            padding: 4px 4px 2px 4px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 4px;
+            padding: 6px 6px 3px 6px;
             background: rgba(0, 0, 0, 0.5);
-            border: 3px solid #8b6f47;
-            border-radius: 10px;
-            min-width: 45px;
-            grid-row: 1 / 3;
-            align-self: center;
-        }
-        
-        .equipment-slot {
-            width: 30px;
-            height: 30px;
-            background: #c41e3a;
-            border: 2px solid #8b6f47;
+            border: 4px solid #8b6f47;
             border-radius: 8px;
+            min-width: 105px;
+            grid-row: 2;
+            grid-column: 1;
+            align-self: start;
+        }
+
+        .equipment-slot {
+            width: 45px;
+            height: 45px;
+            background: #c41e3a;
+            border: 3px solid #8b6f47;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
+            font-size: 24px;
             position: relative;
             cursor: help;
             transition: all 0.3s;
@@ -1581,15 +1986,15 @@
         .equipment-slot::after {
             content: attr(data-slot);
             position: absolute;
-            bottom: -28px;
+            bottom: -56px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 11px;
+            font-size: 22px;
             color: #f4e4c1;
             text-transform: uppercase;
             white-space: nowrap;
             font-weight: 700;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
             display: none;
         }
         
@@ -1667,22 +2072,90 @@
         }
 
         /* Animations */
-        .card-draw-animation {
-            animation: cardDraw 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        .flying-card {
+            position: fixed !important;
+            z-index: 10000 !important;
+            pointer-events: none !important;
+            will-change: transform, opacity;
         }
 
-        @keyframes cardDraw {
+        @keyframes cardDrawToHand {
             0% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(0.8) rotate(15deg);
+            }
+            50% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.1) rotate(-5deg);
+            }
+            100% {
                 opacity: 0;
-                transform: translateY(-150px) scale(0.3) rotate(-20deg);
+                transform: translate(-50%, -50%) scale(1) rotate(0deg);
+            }
+        }
+
+        @keyframes cardDrawToEnemyHand {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(0.8) rotate(-15deg);
+            }
+            50% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.1) rotate(5deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(1) rotate(0deg);
+            }
+        }
+        
+        /* Enemy hand card draw animation */
+        .enemy-hand-draw-animation {
+            animation: enemyCardDraw 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            z-index: 10000 !important;
+            position: absolute !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            will-change: transform;
+        }
+
+        @keyframes enemyCardDraw {
+            0% {
+                opacity: 1;
+                left: calc(100vw - 120px);
+                top: 50%;
+                transform: translateY(-50%) scale(0.6) rotate(25deg);
+            }
+            20% {
+                opacity: 1;
+                left: calc(80vw - 60px);
+                top: 45%;
+                transform: translateY(-50%) scale(0.8) rotate(15deg);
+            }
+            40% {
+                opacity: 1;
+                left: calc(60vw - 60px);
+                top: 40%;
+                transform: translateY(-50%) scale(1.0) rotate(5deg);
             }
             60% {
                 opacity: 1;
-                transform: translateY(10px) scale(1.1) rotate(5deg);
+                left: calc(40vw - 60px);
+                top: 35%;
+                transform: translateY(-50%) scale(1.1) rotate(-3deg);
+            }
+            80% {
+                opacity: 1;
+                left: calc(20vw - 60px);
+                top: 30%;
+                transform: translateY(-50%) scale(1.05) rotate(-1deg);
             }
             100% {
                 opacity: 1;
-                transform: translateY(0) scale(1) rotate(0deg);
+                left: auto;
+                top: auto;
+                position: relative !important;
+                transform: translateX(0) translateY(0) scale(1) rotate(0deg);
             }
         }
 
@@ -1795,8 +2268,8 @@
             position: fixed;
             pointer-events: none;
             z-index: 10000;
-            width: 160px;
-            height: 230px;
+            width: 280px;
+            height: 400px;
             background: #2a1810;
             border-radius: 15px;
             box-shadow:
@@ -1807,7 +2280,7 @@
             border: 3px solid #8b6f47;
             display: flex;
             flex-direction: column;
-            padding: 6px;
+            padding: 12px;
             opacity: 0;
             transition: opacity 0.3s;
             overflow: hidden;
@@ -1961,40 +2434,179 @@
         .theme-classic .game-board::after {
             display: none;
         }
+
+        /* Account Dashboard Tabs */
+        .account-tab {
+            transition: all 0.3s ease;
+        }
+
+        .account-tab.active {
+            background: linear-gradient(135deg, #d4af37 0%, #aa8c2c 100%) !important;
+            border: 2px solid #d4af37 !important;
+            color: #2a1810 !important;
+            font-weight: bold !important;
+        }
+
+        .account-tab-content {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .avatar-option:hover {
+            border-color: #d4af37 !important;
+            background: rgba(212, 175, 55, 0.1) !important;
+            transform: scale(1.05);
+        }
+
+        .avatar-option.selected {
+            border-color: #d4af37 !important;
+            border-width: 3px !important;
+            background: rgba(212, 175, 55, 0.2) !important;
+        }
     </style>
 </head>
 <body>
+    <script>
+        // ===== AUTHENTICATION GUARD =====
+        window.authVerificationComplete = false;
+
+        (function() {
+          const token = localStorage.getItem('token');
+          console.log('[AUTH GUARD] Token found:', !!token);
+
+          if (token) {
+            // Verify token with server
+            fetch('/api/auth/verify', {
+              method: 'GET',
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            })
+            .then(res => res.json())
+            .then(data => {
+              console.log('[AUTH GUARD] Verification response:', data);
+              if (data.success && data.data) {
+                // Store user data in sessionStorage
+                sessionStorage.setItem('userData', JSON.stringify(data.data));
+                // Mark user as logged in
+                sessionStorage.setItem('isLoggedIn', 'true');
+                console.log('[AUTH GUARD] User authenticated:', data.data.username);
+              } else {
+                // Token invalid, clear it
+                localStorage.removeItem('token');
+                sessionStorage.removeItem('userData');
+                sessionStorage.removeItem('isLoggedIn');
+                console.log('[AUTH GUARD] Token invalid');
+              }
+              // Mark verification as complete
+              window.authVerificationComplete = true;
+              updateLoginLogoutButton();
+            })
+            .catch(err => {
+              console.error('[AUTH GUARD] Verification failed:', err);
+              localStorage.removeItem('token');
+              sessionStorage.removeItem('userData');
+              sessionStorage.removeItem('isLoggedIn');
+              // Mark verification as complete even on error
+              window.authVerificationComplete = true;
+              updateLoginLogoutButton();
+            });
+          } else {
+            // No token, mark as complete
+            console.log('[AUTH GUARD] No token - guest user');
+            window.authVerificationComplete = true;
+            updateLoginLogoutButton();
+          }
+        })();
+
+        // Function to update login/logout button based on auth status
+        function updateLoginLogoutButton() {
+          const btn = document.getElementById('loginLogoutBtn');
+          if (!btn) return;
+          
+          const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+          
+          if (isLoggedIn) {
+            btn.textContent = '🚪 Logout';
+            btn.onclick = function() { handleLogout(); };
+            btn.style.background = 'linear-gradient(135deg, #8b4a4a 0%, #6b3a3a 100%)';
+            btn.style.border = '2px solid #c41e3a';
+          } else {
+            btn.textContent = '🔐 Login';
+            btn.onclick = function() { window.location.href = 'auth.html'; };
+            btn.style.background = 'linear-gradient(135deg, #4a90e2 0%, #2563eb 100%)';
+            btn.style.border = '2px solid #4a7aff';
+          }
+        }
+
+        // Function to handle logout
+        function handleLogout() {
+          if (confirm('Are you sure you want to log out?')) {
+            // Clear authentication data
+            localStorage.removeItem('token');
+            sessionStorage.removeItem('userData');
+            sessionStorage.removeItem('isLoggedIn');
+            
+            console.log('[LOGOUT] User logged out');
+            
+            // Update button immediately
+            updateLoginLogoutButton();
+            
+            // Optionally redirect to auth page or just refresh
+            // window.location.href = '/auth.html';
+          }
+        }
+
+        // Update button when page loads (after a short delay to ensure auth check completes)
+        setTimeout(updateLoginLogoutButton, 500);
+        
+        // Make function available globally so it can be called after login
+        window.updateLoginLogoutButton = updateLoginLogoutButton;
+        window.handleLogout = handleLogout;
+    </script>
+
     <div class="game-board">
         <!-- Enemy Lord -->
-        <div class="lord-area enemy" style="padding: 6px 15px; gap: 9px; min-width: fit-content;">
-            <div class="equipment-slots" id="enemyEquipmentSlots"></div>
-            <div class="lord-portrait enemy" id="enemyLord" style="width: 120px; height: 72px;">
-                <div class="lord-name">Enemy Lord</div>
-                <div class="lord-health">❤️ <span id="enemyHealth">30</span></div>
+        <div class="lord-area enemy" style="padding: 4px 6px; gap: 4px; min-width: fit-content;">
+            <div class="lord-command" id="enemyCommand" style="grid-column: 1; grid-row: 1;">
+                <div class="command-title">Hero Ability</div>
+                <div style="font-size: 11px; color: #f4e4c1;">Enemy Power</div>
+                <div class="command-cost">2 Gold</div>
             </div>
+            <div class="equipment-slots" id="enemyEquipmentSlots"></div>
             <div class="gold-display">
                 <div class="gold-amount">💰 <span id="enemyGold">0/0</span></div>
                 <div class="gold-coins" id="enemyGoldCoins"></div>
             </div>
             <div class="equipment-display" id="enemyEquipmentDisplay" style="display: none;"></div>
-            <div style="display: flex; gap: 3px; flex-direction: column; grid-column: 3; grid-row: 1 / -1;">
-                <div class="lord-command" id="enemyCommand" style="padding: 6px 15px;">
-                    <div class="command-title">Hero Ability</div>
-                    <div style="font-size: 11px; color: #f4e4c1;">Enemy Power</div>
-                    <div class="command-cost" style="font-size: 12px;">2 Gold</div>
-                </div>
-                <div class="lord-command" id="enemyWeaponCommand" style="display: none !important; padding: 6px 15px;">
-                    <div class="command-title">Weapon Attack</div>
-                    <div style="font-size: 11px; color: #f4e4c1;">Armed</div>
-                    <div class="command-cost" id="enemyWeaponCost" style="font-size: 12px;">-</div>
-                </div>
-            </div>
+            <button id="enemyEndTurnBtn" style="grid-column: 1; grid-row: 3; width: 100px; height: 60px; padding: 0; background: linear-gradient(135deg, #c41e3a 0%, #8b1a1a 100%); color: #ffd700; border: 4px solid #8b6f47; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 900; font-family: 'Cinzel', serif; text-transform: uppercase; transition: all 0.3s; align-self: center; justify-self: center; visibility: hidden !important;"></button>
         </div>
 
         <!-- Battlefield -->
-        <div class="battlefield">
+        <div class="battlefield" style="position: relative;">
+            <!-- Enemy Hero Card above battlefield -->
+            <!-- Enemy Hero Card above battlefield -->
+            <div id="enemyHeroCardContainer" style="position: absolute; top: -150px; left: 50%; transform: translateX(-50%); z-index: 10; display: flex; align-items: center; gap: 8px; pointer-events: none;">
+                <!-- Hero Card -->
+                <div id="enemyHeroCard" style="pointer-events: auto;"></div>
+            </div>
+            
             <div class="battle-row enemy" id="enemyBoard"></div>
             <div class="battle-row player" id="playerBoard"></div>
+            
+            <!-- Player Hero Card below battlefield -->
+            <div id="playerHeroCardContainer" style="position: absolute; bottom: -150px; left: 50%; transform: translateX(-50%); z-index: 10; display: flex; align-items: center; gap: 8px; pointer-events: none;">
+                <!-- Hero Card -->
+                <div id="playerHeroCard" style="pointer-events: auto;"></div>
+            </div>
         </div>
     </div>
 
@@ -2007,32 +2619,20 @@
         </div>
         <div class="bottom-bar-right" style="display: flex; flex-direction: column; align-items: center;">
             <!-- Player Alias and Flag (above hero) -->
-            <div style="font-size: 14px; color: #ffd700; text-align: center; text-transform: uppercase; font-weight: 900; padding: 6px 0;" id="playerAlias"></div>
 
             <!-- Player Lord -->
-            <div class="lord-area player" style="padding: 6px 15px; gap: 9px; min-width: fit-content;">
-                <div class="equipment-slots" id="playerEquipmentSlots"></div>
-                <div class="lord-portrait player" id="playerLord" style="width: 120px; height: 72px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;">
-                    <div class="lord-name" style="font-size: 11px;">Your Lord</div>
-                    <div class="lord-health" style="font-size: 11px;">❤️ <span id="playerHealth">30</span></div>
+            <div class="lord-area player" style="padding: 4px 6px; gap: 4px; min-width: fit-content;">
+                <div class="lord-command" id="playerCommand" style="grid-column: 1; grid-row: 1;">
+                    <div class="command-title">Hero Ability</div>
+                    <div id="playerCommandText" style="font-size: 11px; color: #f4e4c1;">Draw 1 card</div>
+                    <div class="command-cost">2 Gold</div>
                 </div>
+                <div class="equipment-slots" id="playerEquipmentSlots"></div>
                 <div class="gold-display">
                     <div class="gold-amount">💰 <span id="playerGold">0/0</span></div>
                     <div class="gold-coins" id="playerGoldCoins"></div>
                 </div>
                 <div class="equipment-display" id="equipmentDisplay" style="display: none;"></div>
-                <div style="display: flex; gap: 3px; flex-direction: column; grid-column: 3; grid-row: 1 / -1;">
-                    <div class="lord-command" id="playerCommand" style="padding: 6px 15px;">
-                        <div class="command-title">Hero Ability</div>
-                        <div style="font-size: 11px; color: #f4e4c1;">Rally Troops</div>
-                        <div class="command-cost" style="font-size: 12px;">2 Gold</div>
-                    </div>
-                    <div class="lord-command" id="playerWeaponCommand" style="display: none !important; padding: 6px 15px;">
-                        <div class="command-title">Weapon Attack</div>
-                        <div style="font-size: 11px; color: #f4e4c1;">Armed</div>
-                        <div class="command-cost" id="weaponCost" style="font-size: 12px;">-</div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -2054,6 +2654,10 @@
     <!-- Settings Button -->
     <button class="settings-btn hidden" id="settingsBtn" onclick="openSettingsMenu()">⚙️</button>
 
+    <!-- Player Names - positioned around End Turn button -->
+    <div id="enemyAlias"></div>
+    <div id="playerAlias"></div>
+    
     <!-- End Turn Button -->
     <button class="end-turn-btn" id="endTurnBtn">End Turn</button>
 
@@ -2061,79 +2665,616 @@
     <div id="modalOverlay" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.98); z-index: 9999; width: 100%; height: 100vh;"></div>
 
     <!-- Main Menu Modal -->
-    <div class="modal" id="mainMenuModal">
-        <h1>⚔️ Lords of War ⚔️</h1>
-        <div style="margin: 20px 0;">
-            <p style="margin-bottom: 10px; font-size: 14px;">Enter Your Name & Select Flag:</p>
-            <div style="display: flex; gap: 8px; justify-content: center; align-items: center; margin-bottom: 15px;">
-                <button id="themeBoxBtn" onclick="openThemeSelector()" style="width: 50px; height: 40px; border: 2px solid #8b6f47; border-radius: 6px; background: #1a2555; cursor: pointer; transition: all 0.2s;" title="Click to select theme"></button>
+    <div class="modal" id="mainMenuModal" style="max-width: 600px; padding: 40px;">
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="margin-bottom: 8px; font-size: 32px; color: #d4af37; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;">⚔️ LORDS OF WAR</h1>
+            <p style="color: #aaa; font-size: 13px; font-style: italic;">Medieval Card Game</p>
+        </div>
+
+        <!-- Player Setup Section -->
+        <div style="margin-bottom: 25px; padding: 20px; background: rgba(0,0,0,0.3); border: 2px solid #8b6f47; border-radius: 8px;">
+            <p style="font-size: 11px; color: #d4af37; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; text-align: center;">Your Character</p>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button id="themeBoxBtn" onclick="openThemeSelector()" style="width: 40px; height: 40px; border: 2px solid #8b6f47; border-radius: 6px; background: #1a2555; cursor: pointer; transition: all 0.2s; flex-shrink: 0; padding: 0;" title="Click to select theme"></button>
                 <input
                     type="text"
                     id="playerNameInput"
-                    placeholder="Enter your alias..."
-                    style="padding: 10px 15px; font-size: 14px; width: 250px; border: 3px solid #8b6f47; border-radius: 8px; background: rgba(0,0,0,0.5); color: #f4e4c1; text-align: center;"
+                    placeholder="Your alias..."
+                    style="flex: 1; padding: 10px 14px; font-size: 13px; border: 2px solid #8b6f47; border-radius: 6px; background: rgba(0,0,0,0.5); color: #f4e4c1; text-align: center; font-family: 'Cinzel', serif;"
                 >
-                <select id="playerFlagSelect" style="padding: 10px 15px; font-size: 16px; border: 3px solid #8b6f47; border-radius: 8px; background: rgba(0,0,0,0.5); cursor: pointer; color: #f4e4c1; max-width: 200px;"></select>
+                <div style="position: relative; flex-shrink: 0;">
+                    <select id="playerFlagSelect" style="padding: 8px 28px 8px 8px; font-size: 20px; border: 2px solid #8b6f47; border-radius: 6px; background: rgba(0,0,0,0.5); cursor: pointer; color: #f4e4c1; width: 50px; appearance: none; -webkit-appearance: none; -moz-appearance: none; text-align: center; overflow: hidden; text-overflow: clip;"></select>
+                    <div id="flagDisplay" style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); pointer-events: none; font-size: 20px; line-height: 1;">🇺🇸</div>
+                </div>
             </div>
         </div>
-        <button onclick="startSinglePlayer()" style="padding: 12px 32px; margin: 8px; font-size: 11px;">🎮 Single Player</button>
-        <button onclick="startQuickMatch()" style="padding: 12px 32px; margin: 8px; font-size: 11px; background: linear-gradient(135deg, #4a90e2 0%, #2563eb 100%); border: 4px solid #4a7aff;">⚡ Quick Match (Online)</button>
-        <button onclick="showComingSoon()" style="padding: 12px 32px; margin: 8px; font-size: 11px; opacity: 0.6; cursor: not-allowed;">🌐 Create Private Lobby</button>
-        <button onclick="showComingSoon()" style="padding: 12px 32px; margin: 8px; font-size: 11px; opacity: 0.6; cursor: not-allowed;">🔑 Join Private Lobby</button>
-        <div style="margin-top: 30px; border-top: 2px solid #8b6f47; padding-top: 20px;">
-            <button onclick="showGameInstructions()" style="padding: 10px 30px; margin: 5px; font-size: 11px;">📖 Game Instructions</button>
-            <button onclick="changeLanguage()" style="padding: 10px 30px; margin: 5px; font-size: 11px;">🌍 Language - English</button>
+
+        <!-- Game Mode Buttons -->
+        <div style="margin-bottom: 20px;">
+            <p style="font-size: 11px; color: #d4af37; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; text-align: center;">Game Modes</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <button onclick="startSinglePlayer()" style="padding: 16px 20px; font-size: 15px; background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); border: 3px solid #8b6f47; cursor: pointer; border-radius: 8px; color: #2a1810; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s;">🎮 Single Player</button>
+                <button onclick="startQuickMatch()" style="padding: 16px 20px; font-size: 15px; background: linear-gradient(135deg, #4a90e2 0%, #2563eb 100%); border: 3px solid #4a7aff; cursor: pointer; border-radius: 8px; color: #f4e4c1; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s;">⚡ Quick Match</button>
+            </div>
         </div>
+
+        <!-- Secondary Actions -->
+        <div style="padding-top: 20px; border-top: 2px solid rgba(139, 111, 71, 0.3);">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px;">
+                <button onclick="showGameInstructions()" style="padding: 10px 12px; font-size: 12px; background: rgba(139, 111, 71, 0.2); border: 2px solid #8b6f47; cursor: pointer; border-radius: 6px; color: #f4e4c1; font-weight: 600; transition: all 0.2s;">📖 Guide</button>
+                <button onclick="changeLanguage()" style="padding: 10px 12px; font-size: 12px; background: rgba(139, 111, 71, 0.2); border: 2px solid #8b6f47; cursor: pointer; border-radius: 6px; color: #f4e4c1; font-weight: 600; transition: all 0.2s;">🌍 English</button>
+                <button id="loginLogoutBtn" onclick="handleLoginLogout()" style="padding: 10px 12px; font-size: 12px; background: linear-gradient(135deg, #4a90e2 0%, #2563eb 100%); border: 2px solid #4a7aff; cursor: pointer; border-radius: 6px; color: #f4e4c1; font-weight: 600; transition: all 0.2s;">🔐 Login</button>
+                <button onclick="openAccountDashboard()" style="padding: 10px 12px; font-size: 12px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 2px solid #d4af37; cursor: pointer; border-radius: 6px; color: #f4e4c1; font-weight: 700; transition: all 0.2s;">👤 Account</button>
+            </div>
+        </div>
+
     </div>
 
     <!-- Game Start Modal -->
-    <div class="modal" id="gameStartModal" style="display: none;">
-        <h1>⚔️ Lords of War ⚔️</h1>
-        <p>Choose Your Unit Type:</p>
+    <div class="modal" id="gameStartModal" style="display: none; max-width: 500px;">
+        <h1 style="font-size: 22px; margin-bottom: 15px;">⚔️ Choose Your Unit Type ⚔️</h1>
 
         <!-- Unit Type Info Display -->
-        <div id="unitTypeInfo" style="background: rgba(0, 0, 0, 0.5); border: 2px solid #8b6f47; border-radius: 8px; padding: 15px 20px; margin: 15px auto; text-align: center; color: #ffd700; font-size: 12px; min-height: 60px; max-width: 400px; line-height: 1.6;">
+        <div id="unitTypeInfo" style="background: rgba(0, 0, 0, 0.3); border: 1px solid #8b6f47; border-radius: 6px; padding: 12px 15px; margin-bottom: 15px; text-align: center; color: #d4af37; font-size: 11px; min-height: 40px; line-height: 1.5;">
             Hover over a unit type to see details
         </div>
 
-        <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin: 30px 0;">
-            <button class="unit-type-btn" data-type="ranged" onclick="chooseUnitType('ranged')" style="padding: 15px 30px; font-size: 16px; min-width: 150px;">🏹 Ranged</button>
-            <button class="unit-type-btn" data-type="infantry" onclick="chooseUnitType('infantry')" style="padding: 15px 30px; font-size: 16px; min-width: 150px;">🛡️ Infantry</button>
-            <button class="unit-type-btn" data-type="cavalry" onclick="chooseUnitType('cavalry')" style="padding: 15px 30px; font-size: 16px; min-width: 150px;">🐎 Cavalry</button>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+            <button class="unit-type-btn" data-type="ranged" onclick="chooseUnitType('ranged')" style="padding: 12px 10px; font-size: 13px; background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); border: 1px solid #8b6f47; cursor: pointer; border-radius: 4px; color: #2a1810; font-weight: bold;">🏹 Ranged</button>
+            <button class="unit-type-btn" data-type="infantry" onclick="chooseUnitType('infantry')" style="padding: 12px 10px; font-size: 13px; background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); border: 1px solid #8b6f47; cursor: pointer; border-radius: 4px; color: #2a1810; font-weight: bold;">🛡️ Infantry</button>
+            <button class="unit-type-btn" data-type="cavalry" onclick="chooseUnitType('cavalry')" style="padding: 12px 10px; font-size: 13px; background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); border: 1px solid #8b6f47; cursor: pointer; border-radius: 4px; color: #2a1810; font-weight: bold;">🐎 Cavalry</button>
         </div>
     </div>
 
     <!-- Theme Selector Modal -->
-    <div class="modal" id="themeSelectorModal" style="display: none; max-width: 550px; width: auto;">
-        <h1 style="margin-bottom: 15px; font-size: 18px;">⚔️ Choose Your Theme ⚔️</h1>
-        <div style="margin: 5px 0; max-height: 400px; overflow-y: auto;">
-            <table id="themeTable" style="width: 100%; border-collapse: collapse; margin: 5px 0;">
-                <thead style="background: rgba(139, 111, 71, 0.3);">
+    <div class="modal" id="themeSelectorModal" style="display: none; max-width: 550px;">
+        <h1 style="margin-bottom: 15px; font-size: 22px;">⚔️ Choose Your Theme ⚔️</h1>
+        <div style="max-height: 350px; overflow-y: auto;">
+            <table id="themeTable" style="width: 100%; border-collapse: collapse;">
+                <thead style="background: rgba(139, 111, 71, 0.2);">
                     <tr>
-                        <th style="padding: 6px 5px; border: 1px solid #8b6f47; color: #ffd700; text-align: center; font-size: 11px;">Preview</th>
-                        <th style="padding: 6px 8px; border: 1px solid #8b6f47; color: #ffd700; text-align: left; font-size: 11px;">Theme</th>
-                        <th style="padding: 6px 5px; border: 1px solid #8b6f47; color: #ffd700; text-align: center; font-size: 11px;">Select</th>
+                        <th style="padding: 6px; border: 1px solid #8b6f47; color: #d4af37; text-align: center; font-size: 10px;">Preview</th>
+                        <th style="padding: 6px; border: 1px solid #8b6f47; color: #d4af37; text-align: left; font-size: 10px;">Theme</th>
+                        <th style="padding: 6px; border: 1px solid #8b6f47; color: #d4af37; text-align: center; font-size: 10px;">Select</th>
                     </tr>
                 </thead>
                 <tbody id="themeTableBody"></tbody>
             </table>
         </div>
-        <button onclick="closeThemeSelector()" style="padding: 8px 20px; margin-top: 10px; font-size: 11px;">Back to Menu</button>
+        <button onclick="closeThemeSelector()" style="padding: 8px 16px; margin-top: 12px; font-size: 11px; background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%); border: 1px solid #8b6f47; cursor: pointer; border-radius: 4px; color: #f4e4c1;">Back to Menu</button>
     </div>
 
     <!-- Game Instructions Modal -->
-    <div class="modal" id="instructionsModal" style="display: none;">
-        <h1>📖 Game Instructions</h1>
-        <div style="text-align: left; font-size: 12px; line-height: 1.8; max-width: 600px; margin: 20px auto; color: #f4e4c1;">
-            <p><strong>Objective:</strong> Reduce your opponent's health to 0.</p>
-            <p><strong>Units:</strong> Play unit cards to attack enemies. Units need a turn to recover after attacking.</p>
-            <p><strong>Abilities:</strong> Special spell cards that have various effects - damage, healing, gold, equipment destruction, etc.</p>
-            <p><strong>Equipment:</strong> Equip your hero with weapons and armor to increase attack power and defense.</p>
-            <p><strong>Tier Up:</strong> Play duplicate units to increase their tier. Each tier increases power and durability.</p>
-            <p><strong>Gold:</strong> Gain gold each turn to pay for cards. Use your hero ability (costs 2 gold) to draw an extra card.</p>
-            <p><strong>Exhausted:</strong> Newly played units are exhausted and cannot attack until next turn.</p>
+    <div class="modal" id="instructionsModal" style="display: none; max-width: 600px;">
+        <h1 style="font-size: 22px; margin-bottom: 15px;">📖 Game Guide</h1>
+        
+        <!-- Tabs -->
+        <div style="display: flex; gap: 8px; margin-bottom: 15px; border-bottom: 2px solid #8b6f47;">
+            <button id="guideTabRules" onclick="switchGuideTab('rules')" style="padding: 8px 16px; font-size: 12px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 2px solid #d4af37; border-bottom: none; cursor: pointer; border-radius: 4px 4px 0 0; color: #f4e4c1; font-weight: bold;">Rules</button>
+            <button id="guideTabKeywords" onclick="switchGuideTab('keywords')" style="padding: 8px 16px; font-size: 12px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-bottom: none; cursor: pointer; border-radius: 4px 4px 0 0; color: #f4e4c1;">Keywords</button>
+            <button id="guideTabFAQ" onclick="switchGuideTab('faq')" style="padding: 8px 16px; font-size: 12px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-bottom: none; cursor: pointer; border-radius: 4px 4px 0 0; color: #f4e4c1;">FAQ</button>
+            <button id="guideTabBugReport" onclick="switchGuideTab('bugreport')" style="padding: 8px 16px; font-size: 12px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-bottom: none; cursor: pointer; border-radius: 4px 4px 0 0; color: #f4e4c1;">🐛 Report Bug</button>
         </div>
-        <button onclick="closeinstructionsModal()" style="padding: 12px 40px; margin-top: 20px; font-size: 12px;">Back to Menu</button>
+        
+        <!-- Rules Tab -->
+        <div id="guideRulesContent" style="text-align: left; font-size: 11px; line-height: 1.6; max-height: 400px; overflow-y: auto; margin-bottom: 15px; color: #f4e4c1;">
+            <p style="margin-bottom: 8px;"><strong style="color: #d4af37;">Objective:</strong> Reduce opponent's health to 0.</p>
+            <p style="margin-bottom: 8px;"><strong style="color: #d4af37;">Units:</strong> Play cards to attack. Units are exhausted after attacking.</p>
+            <p style="margin-bottom: 8px;"><strong style="color: #d4af37;">Abilities:</strong> Special spells with various effects.</p>
+            <p style="margin-bottom: 8px;"><strong style="color: #d4af37;">Equipment:</strong> Boost your hero's power and defense.</p>
+            <p style="margin-bottom: 8px;"><strong style="color: #d4af37;">Tier Up:</strong> Play duplicates to level up cards. 2 T1 = T2, 2 T2 = T3, etc. (16 T1 = T5)</p>
+            <p style="margin-bottom: 8px;"><strong style="color: #d4af37;">Gold:</strong> Earn gold each turn. Hero ability costs 2 gold.</p>
+            <p style="margin-bottom: 8px;"><strong style="color: #d4af37;">Exhausted:</strong> New units can't attack until next turn.</p>
+            <p style="margin-bottom: 8px;"><strong style="color: #d4af37;">Unit Types:</strong></p>
+            <ul style="margin-left: 20px; margin-bottom: 8px;">
+                <li><strong style="color: #d4af37;">Ranged:</strong> +1 attack vs Infantry, no counter-damage from melee</li>
+                <li><strong style="color: #d4af37;">Infantry:</strong> +1 attack vs Cavalry, high durability</li>
+                <li><strong style="color: #d4af37;">Cavalry:</strong> +1 attack vs Ranged, Charge ability</li>
+            </ul>
+        </div>
+        
+        <!-- Keywords Tab -->
+        <div id="guideKeywordsContent" style="display: none; text-align: left; font-size: 11px; line-height: 1.6; max-height: 400px; overflow-y: auto; margin-bottom: 15px; color: #f4e4c1;">
+            <div style="margin-bottom: 12px;">
+                <p style="color: #d4af37; font-weight: bold; margin-bottom: 6px;">⚔️ Unit Keywords:</p>
+                <p style="margin-bottom: 4px;"><strong style="color: #d4af37;">Charge:</strong> Unit can attack on the turn it's played</p>
+                <p style="margin-bottom: 4px;"><strong style="color: #d4af37;">Scout:</strong> Draw a card when this unit enters the battlefield</p>
+                <p style="margin-bottom: 4px;"><strong style="color: #d4af37;">Medic:</strong> Heals friendly units when entering battlefield and at end of turn</p>
+                <p style="margin-bottom: 4px;"><strong style="color: #d4af37;">Siege:</strong> Siege weapon, no hitback damage</p>
+                <p style="margin-bottom: 4px;"><strong style="color: #d4af37;">Double Attack:</strong> This unit can attack twice per turn</p>
+                <p style="margin-bottom: 4px;"><strong style="color: #d4af37;">Piercing:</strong> Deals damage even if blocked</p>
+                <p style="margin-bottom: 4px;"><strong style="color: #d4af37;">Taunt:</strong> Enemy must attack this unit first</p>
+                <p style="margin-bottom: 4px;"><strong style="color: #d4af37;">Command:</strong> Draw a card when this unit enters the battlefield</p>
+            </div>
+            <div style="margin-bottom: 12px;">
+                <p style="color: #d4af37; font-weight: bold; margin-bottom: 6px;">🎯 Ability Effects:</p>
+                <p style="margin-bottom: 4px;"><strong style="color: #d4af37;">Stun:</strong> Target cannot attack next turn</p>
+                <p style="margin-bottom: 4px;"><strong style="color: #d4af37;">Destroy Equipment:</strong> Remove enemy equipment card</p>
+                <p style="margin-bottom: 4px;"><strong style="color: #d4af37;">Draw Cards:</strong> Add cards to your hand</p>
+                <p style="margin-bottom: 4px;"><strong style="color: #d4af37;">Heal:</strong> Restore health to friendly units or hero</p>
+                <p style="margin-bottom: 4px;"><strong style="color: #d4af37;">Buff:</strong> Increase unit's attack or durability</p>
+                <p style="margin-bottom: 4px;"><strong style="color: #d4af37;">AOE (Area of Effect):</strong> Affects multiple targets</p>
+            </div>
+            <div>
+                <p style="color: #d4af37; font-weight: bold; margin-bottom: 6px;">🛡️ Equipment:</p>
+                <p style="margin-bottom: 4px;"><strong style="color: #d4af37;">Weapon:</strong> Increases hero attack power (+1 per weapon/enchantment)</p>
+                <p style="margin-bottom: 4px;"><strong style="color: #d4af37;">Armor:</strong> Increases hero maximum health</p>
+                <p style="margin-bottom: 4px;"><strong style="color: #d4af37;">Enchantment:</strong> Permanent weapon upgrade (+1 attack)</p>
+            </div>
+        </div>
+        
+        <!-- FAQ Tab -->
+        <div id="guideFAQContent" style="display: none; text-align: left; font-size: 11px; line-height: 1.6; max-height: 400px; overflow-y: auto; margin-bottom: 15px; color: #f4e4c1;">
+            <p style="margin-bottom: 8px;"><strong style="color: #d4af37;">Q: How do I win?</strong><br>A: Reduce your opponent's health to 0 by attacking with units or abilities.</p>
+            <p style="margin-bottom: 8px;"><strong style="color: #d4af37;">Q: How does tiering up work?</strong><br>A: Play 2 identical units to combine them into a higher tier. T1 + T1 = T2, T2 + T2 = T3, etc.</p>
+            <p style="margin-bottom: 8px;"><strong style="color: #d4af37;">Q: Can I attack with units on the turn I play them?</strong><br>A: Only if they have the Charge keyword. Otherwise, wait until your next turn.</p>
+            <p style="margin-bottom: 8px;"><strong style="color: #d4af37;">Q: What's the difference between unit types?</strong><br>A: Ranged deals +1 vs Infantry, Infantry deals +1 vs Cavalry, Cavalry deals +1 vs Ranged.</p>
+            <p style="margin-bottom: 8px;"><strong style="color: #d4af37;">Q: How many cards can I have in a deck?</strong><br>A: Exactly 60 cards. Max copies vary by type (Weapons: 4, Armor: 1 each, Abilities: 5, Bannermen: 16, Siege: 3)</p>
+            <p style="margin-bottom: 8px;"><strong style="color: #d4af37;">Q: What happens if I run out of cards?</strong><br>A: You can still play, but won't draw new cards. Plan your strategy carefully!</p>
+        </div>
+        
+        <!-- Bug Report Tab -->
+        <div id="guideBugReportContent" style="display: none; text-align: left; font-size: 11px; line-height: 1.6; max-height: 400px; overflow-y: auto; margin-bottom: 15px; color: #f4e4c1;">
+            <div style="margin-bottom: 15px;">
+                <p style="color: #d4af37; font-weight: bold; margin-bottom: 8px;">Report a Bug</p>
+                <p style="margin-bottom: 12px; font-size: 10px; color: #aaa;">Found an issue? Help us improve by reporting bugs!</p>
+                
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; color: #d4af37; font-size: 10px; margin-bottom: 4px;">What happened?</label>
+                    <textarea id="bugDescription" style="width: 100%; padding: 6px; border: 1px solid #8b6f47; background: rgba(0,0,0,0.5); color: #f4e4c1; border-radius: 4px; resize: vertical; min-height: 60px; font-family: 'Cinzel', serif; font-size: 10px;" placeholder="Describe what happened, what you were doing, and what you expected to happen..."></textarea>
+                </div>
+                
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; color: #d4af37; font-size: 10px; margin-bottom: 4px;">Steps to reproduce (optional)</label>
+                    <textarea id="bugSteps" style="width: 100%; padding: 6px; border: 1px solid #8b6f47; background: rgba(0,0,0,0.5); color: #f4e4c1; border-radius: 4px; resize: vertical; min-height: 40px; font-family: 'Cinzel', serif; font-size: 10px;" placeholder="1. Go to...&#10;2. Click...&#10;3. See error..."></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 8px;">
+                    <button onclick="submitBugReport()" style="flex: 1; padding: 8px; background: linear-gradient(135deg, #2a7f32 0%, #1e5d25 100%); border: 1px solid #4caf50; cursor: pointer; border-radius: 4px; color: #f4e4c1; font-size: 11px; font-weight: bold;">Submit Report</button>
+                    <button onclick="clearBugReport()" style="flex: 1; padding: 8px; background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%); border: 1px solid #8b6f47; cursor: pointer; border-radius: 4px; color: #f4e4c1; font-size: 11px;">Clear</button>
+                </div>
+                
+                <div id="bugReportAlert" style="margin-top: 10px;"></div>
+            </div>
+        </div>
+        
+        <button onclick="closeinstructionsModal()" style="padding: 8px 16px; font-size: 11px; background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%); border: 1px solid #8b6f47; cursor: pointer; border-radius: 4px; color: #f4e4c1; width: 100%;">Back to Menu</button>
+    </div>
+
+    <!-- Account Dashboard Modal -->
+    <div class="modal" id="accountDashboardModal" style="display: none; max-width: 900px; width: 95%; margin: 0 auto;">
+        <!-- Tabs at Top -->
+        <div style="display: flex; gap: 2px; margin-bottom: 10px; border-bottom: 2px solid #8b6f47; overflow-x: auto;">
+            <button id="dashboardTabAccount" onclick="switchDashboardTab('account')" style="flex: 0 0 auto; padding: 6px 8px; font-size: 11px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 2px solid #d4af37; border-bottom: none; cursor: pointer; border-radius: 4px 4px 0 0; color: #f4e4c1; font-weight: bold; white-space: nowrap; margin-right: -2px;">👤 Account</button>
+            <button id="dashboardTabHistory" onclick="switchDashboardTab('history')" style="flex: 0 0 auto; padding: 6px 8px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-bottom: none; cursor: pointer; border-radius: 4px 4px 0 0; color: #f4e4c1; white-space: nowrap; margin-right: -2px;">⚔️ History</button>
+            <button id="dashboardTabAchievements" onclick="switchDashboardTab('achievements')" style="flex: 0 0 auto; padding: 6px 8px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-bottom: none; cursor: pointer; border-radius: 4px 4px 0 0; color: #f4e4c1; white-space: nowrap; margin-right: -2px;">🏆 Achievements</button>
+            <button id="dashboardTabSocial" onclick="switchDashboardTab('social')" style="flex: 0 0 auto; padding: 6px 8px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-bottom: none; cursor: pointer; border-radius: 4px 4px 0 0; color: #f4e4c1; white-space: nowrap; margin-right: -2px;">👥 Social</button>
+            <button id="dashboardTabNotifications" onclick="switchDashboardTab('notifications')" style="flex: 0 0 auto; padding: 6px 8px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-bottom: none; cursor: pointer; border-radius: 4px 4px 0 0; color: #f4e4c1; white-space: nowrap;">🔔 Notifications</button>
+        </div>
+
+        <!-- Compact Header Section -->
+        <div style="display: grid; grid-template-columns: auto 1fr; gap: 12px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 2px solid #8b6f47;">
+            <!-- Avatar with Level Indicator -->
+            <div style="text-align: center; min-width: 80px; position: relative;">
+                <div style="position: relative; display: inline-block;">
+                    <div style="font-size: 50px; margin-bottom: 4px;" id="profileAvatarDisplay">🤴</div>
+                    <!-- Level Badge -->
+                    <div id="avatarLevelBadge" style="position: absolute; top: -5px; right: -5px; background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); border: 2px solid #d4af37; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: #2a1810; box-shadow: 0 2px 4px rgba(0,0,0,0.5);">1</div>
+                </div>
+                <button onclick="openAvatarSelector()" style="padding: 4px 8px; font-size: 10px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 1px solid #d4af37; cursor: pointer; border-radius: 3px; color: #f4e4c1; width: 100%;">Change</button>
+            </div>
+            
+            <!-- Info Grid -->
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;">
+                <!-- Username -->
+                <div style="grid-column: span 2; padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 3px;">
+                    <div style="color: #d4af37; font-size: 10px; font-weight: bold; margin-bottom: 3px; text-transform: uppercase;">Username</div>
+                    <div id="profileUsername" style="color: #f4e4c1; font-size: 12px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">-</div>
+                </div>
+                <!-- Join Date -->
+                <div style="padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 3px;">
+                    <div style="color: #d4af37; font-size: 10px; font-weight: bold; margin-bottom: 3px; text-transform: uppercase;">Joined</div>
+                    <div id="profileJoinDate" style="color: #f4e4c1; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">-</div>
+                </div>
+                <!-- Gold -->
+                <div style="text-align: center; padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 3px;">
+                    <div style="color: #ffd700; font-size: 16px; font-weight: bold;" id="statsGold">0</div>
+                    <div style="color: #aaa; font-size: 9px; margin-top: 2px;">Gold</div>
+                </div>
+                <!-- Gems -->
+                <div style="text-align: center; padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 3px;">
+                    <div style="color: #00ff00; font-size: 16px; font-weight: bold;" id="statsGems">0</div>
+                    <div style="color: #aaa; font-size: 9px; margin-top: 2px;">Gems</div>
+                </div>
+            </div>
+            
+            <!-- Second Row: Deck Builder -->
+            <div style="grid-column: 2; margin-top: 6px;">
+                <button onclick="openDeckBuilderFromDashboard()" style="padding: 6px 10px; font-size: 11px; background: linear-gradient(135deg, #8b4a8b 0%, #6b3a6b 100%); border: 1px solid #d4af37; cursor: pointer; border-radius: 3px; color: #f4e4c1; font-weight: bold; white-space: nowrap;">🃏 Deck Builder</button>
+            </div>
+        </div>
+
+        <!-- Tab Content -->
+        <div style="min-height: 350px; max-height: 500px; overflow-y: auto; overflow-x: hidden; padding-right: 5px;">
+            <!-- Account Tab (Profile + Settings merged) -->
+            <div id="dashboardContentAccount" style="display: block;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <!-- Left Column: Profile -->
+                    <div>
+                        <p style="color: #d4af37; font-size: 12px; font-weight: bold; margin-bottom: 6px; text-transform: uppercase;">Profile</p>
+                        <div style="padding: 8px; background: rgba(0,0,0,0.2); border: 1px solid #8b6f47; border-radius: 4px;">
+                            <div style="margin-bottom: 8px;">
+                                <label style="color: #d4af37; font-size: 11px; display: block; margin-bottom: 3px; font-weight: bold;">Display Name</label>
+                                <input id="profileDisplayName" type="text" style="width: 100%; padding: 6px; border: 1px solid #8b6f47; background: rgba(0,0,0,0.5); color: #f4e4c1; border-radius: 3px; font-size: 12px;" placeholder="Display name">
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <label style="color: #d4af37; font-size: 11px; display: block; margin-bottom: 3px; font-weight: bold;">Email</label>
+                                <input id="profileEmail" type="text" style="width: 100%; padding: 6px; border: 1px solid #8b6f47; background: rgba(0,0,0,0.5); color: #f4e4c1; border-radius: 3px; font-size: 12px;" readonly>
+                            </div>
+                            <div style="margin-bottom: 8px;">
+                                <label style="color: #d4af37; font-size: 11px; display: block; margin-bottom: 3px; font-weight: bold;">Unit Type</label>
+                                <input id="profilePreferredUnitType" type="text" style="width: 100%; padding: 6px; border: 1px solid #8b6f47; background: rgba(0,0,0,0.5); color: #f4e4c1; border-radius: 3px; font-size: 12px;" readonly>
+                            </div>
+                            <div>
+                                <label style="color: #d4af37; font-size: 11px; display: block; margin-bottom: 3px; font-weight: bold;">Bio <span id="bioCharCount" style="color: #777; font-size: 10px;">(0/200)</span></label>
+                                <textarea id="profileBio" style="width: 100%; padding: 6px; border: 1px solid #8b6f47; background: rgba(0,0,0,0.5); color: #f4e4c1; border-radius: 3px; resize: vertical; min-height: 50px; font-family: 'Cinzel', serif; font-size: 12px;" placeholder="Bio..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column: Settings -->
+                    <div>
+                        <p style="color: #d4af37; font-size: 12px; font-weight: bold; margin-bottom: 6px; text-transform: uppercase;">Security</p>
+                        <div style="display: grid; gap: 4px; margin-bottom: 10px;">
+                            <button onclick="openChangePasswordModal()" style="width: 100%; padding: 6px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 1px solid #d4af37; font-size: 11px; cursor: pointer; border-radius: 3px; color: #f4e4c1; font-weight: bold;">🔒 Change Password</button>
+                            <button onclick="openChangeEmailModal()" style="width: 100%; padding: 6px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 1px solid #d4af37; font-size: 11px; cursor: pointer; border-radius: 3px; color: #f4e4c1; font-weight: bold;">📧 Change Email</button>
+                            <button onclick="logoutAllSessions()" style="width: 100%; padding: 6px; background: linear-gradient(135deg, #8b4a4a 0%, #6b3a3a 100%); border: 1px solid #d4af37; font-size: 11px; cursor: pointer; border-radius: 3px; color: #f4e4c1; font-weight: bold;">🚪 Log Out All</button>
+                        </div>
+                        
+                        <p style="color: #d4af37; font-size: 12px; font-weight: bold; margin-bottom: 6px; margin-top: 10px; text-transform: uppercase;">Account</p>
+                        <div id="deletionStatus" style="margin-bottom: 6px; padding: 6px; background: rgba(139, 111, 71, 0.2); border: 1px solid #8b6f47; border-radius: 3px; font-size: 11px; color: #f4e4c1;">
+                            <div style="text-align: center; color: #888;">Loading...</div>
+                        </div>
+                        <button onclick="openAccountDeletionModal()" style="width: 100%; padding: 6px; background: linear-gradient(135deg, #8b1a1a 0%, #5a0f0f 100%); border: 1px solid #c41e3a; font-size: 11px; cursor: pointer; border-radius: 3px; color: #f4e4c1; font-weight: bold; margin-bottom: 10px;">🗑️ Delete Account</button>
+                        
+                        <p style="color: #d4af37; font-size: 12px; font-weight: bold; margin-bottom: 6px; margin-top: 10px; text-transform: uppercase;">Audio</p>
+                        <div style="display: grid; gap: 4px; margin-bottom: 10px;">
+                            <label style="display: flex; align-items: center; color: #f4e4c1; font-size: 11px;">
+                                <input type="checkbox" id="toggleSoundEffects" style="margin-right: 6px;"> Sound Effects
+                            </label>
+                            <label style="display: flex; align-items: center; color: #f4e4c1; font-size: 11px;">
+                                <input type="checkbox" id="toggleMusic" style="margin-right: 6px;"> Music
+                            </label>
+                        </div>
+                        
+                        <p style="color: #d4af37; font-size: 12px; font-weight: bold; margin-bottom: 6px; margin-top: 10px; text-transform: uppercase;">Visual</p>
+                        <div style="display: grid; gap: 4px;">
+                            <label style="display: flex; align-items: center; color: #f4e4c1; font-size: 11px;">
+                                <input type="checkbox" id="toggleReduceAnimations" style="margin-right: 6px;"> Reduce Animations
+                            </label>
+                            <label style="display: flex; align-items: center; color: #f4e4c1; font-size: 11px;">
+                                <input type="checkbox" id="toggleDisableVisualEffects" style="margin-right: 6px;"> Disable Effects
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History Tab -->
+            <div id="dashboardContentHistory" style="display: none;">
+                <p style="color: #d4af37; font-size: 14px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Recent Matches</p>
+                <div id="matchHistoryList" style="font-size: 12px;">
+                    <div style="text-align: center; color: #888; padding: 20px;">Loading...</div>
+                </div>
+            </div>
+
+            <!-- Achievements Tab -->
+            <div id="dashboardContentAchievements" style="display: none;">
+                <!-- Stats Section -->
+                <div style="margin-bottom: 15px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid #8b6f47; border-radius: 4px;">
+                    <p style="color: #d4af37; font-size: 12px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">📊 Statistics</p>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+                        <div style="text-align: center; padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 3px;">
+                            <div style="color: #4caf50; font-size: 20px; font-weight: bold;" id="statsWins">0</div>
+                            <div style="color: #aaa; font-size: 11px; margin-top: 4px;">Wins</div>
+                        </div>
+                        <div style="text-align: center; padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 3px;">
+                            <div style="color: #ff6b6b; font-size: 20px; font-weight: bold;" id="statsLosses">0</div>
+                            <div style="color: #aaa; font-size: 11px; margin-top: 4px;">Losses</div>
+                        </div>
+                        <div style="text-align: center; padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 3px;">
+                            <div style="color: #d4af37; font-size: 20px; font-weight: bold;" id="statsWinRate">0%</div>
+                            <div style="color: #aaa; font-size: 11px; margin-top: 4px;">Win Rate</div>
+                        </div>
+                        <div style="text-align: center; padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 3px;">
+                            <div style="color: #ffd700; font-size: 20px; font-weight: bold;" id="statsLevel">1</div>
+                            <div style="color: #aaa; font-size: 11px; margin-top: 4px;">Level</div>
+                        </div>
+                    </div>
+                    <!-- XP Progress -->
+                    <div style="margin-top: 10px; padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 3px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <span style="color: #d4af37; font-size: 12px; font-weight: bold;" id="profileLevel">Level 1</span>
+                            <span style="color: #aaa; font-size: 11px;" id="profileXP">0 / 100 XP</span>
+                        </div>
+                        <div style="width: 100%; height: 12px; background: rgba(139, 111, 71, 0.3); border-radius: 4px; overflow: hidden;">
+                            <div id="profileXPProgress" style="height: 100%; background: linear-gradient(90deg, #4caf50 0%, #2e7d32 100%); width: 0%; transition: width 0.3s;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Achievements Section -->
+                <p style="color: #d4af37; font-size: 14px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">🏆 Achievements</p>
+                <div id="achievementsList" style="font-size: 12px;">
+                    <div style="text-align: center; color: #888; padding: 20px;">Loading...</div>
+                </div>
+            </div>
+
+            <!-- Social Tab (Friends + Messages + Alliances merged) -->
+            <div id="dashboardContentSocial" style="display: none;">
+                <!-- Sub-tabs for Social -->
+                <div style="display: flex; gap: 5px; margin-bottom: 15px; border-bottom: 1px solid #8b6f47;">
+                    <button onclick="switchSocialView('friends')" id="socialTabFriends" style="padding: 6px 12px; font-size: 11px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 1px solid #d4af37; cursor: pointer; border-radius: 3px 3px 0 0; color: #f4e4c1; font-weight: bold;">👥 Friends</button>
+                    <button onclick="switchSocialView('messages')" id="socialTabMessages" style="padding: 6px 12px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px 3px 0 0; color: #f4e4c1;">💬 Messages</button>
+                    <button onclick="switchSocialView('alliances')" id="socialTabAlliances" style="padding: 6px 12px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px 3px 0 0; color: #f4e4c1;">⚔️ Alliances</button>
+                </div>
+                
+                <!-- Friends View -->
+                <div id="socialViewFriends" style="display: block;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <p style="color: #d4af37; font-size: 14px; font-weight: bold; text-transform: uppercase; margin: 0;">👥 Friends</p>
+                        <button onclick="openAddFriendModal()" style="padding: 6px 12px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px; color: #f4e4c1;">+ Add Friend</button>
+                    </div>
+                    
+                    <!-- Friend Requests Section -->
+                    <div style="margin-bottom: 15px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid #8b6f47; border-radius: 4px;">
+                        <p style="color: #d4af37; font-size: 12px; font-weight: bold; margin-bottom: 8px;">📨 Friend Requests</p>
+                        <div id="friendRequestsList" style="font-size: 12px;">
+                            <div style="text-align: center; color: #888; padding: 10px;">Loading...</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Friends List -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <p style="color: #d4af37; font-size: 12px; font-weight: bold; margin: 0;">Your Friends</p>
+                        <button onclick="switchFriendsView('blocked')" id="friendsViewBlocked" style="padding: 4px 8px; font-size: 10px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px; color: #f4e4c1;">Blocked Users</button>
+                    </div>
+                    <div id="friendsList" style="font-size: 12px;">
+                        <div style="text-align: center; color: #888; padding: 20px;">Loading...</div>
+                    </div>
+                </div>
+                
+                <!-- Messages View -->
+                <div id="socialViewMessages" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <p style="color: #d4af37; font-size: 14px; font-weight: bold; text-transform: uppercase; margin: 0;">💬 Messages</p>
+                        <div style="display: flex; gap: 5px;">
+                            <button onclick="switchMessagesView('inbox')" id="messagesTabInbox" style="padding: 6px 12px; font-size: 11px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 1px solid #d4af37; cursor: pointer; border-radius: 3px; color: #f4e4c1; font-weight: bold;">Inbox</button>
+                            <button onclick="switchMessagesView('sent')" id="messagesTabSent" style="padding: 6px 12px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px; color: #f4e4c1;">Sent</button>
+                            <button onclick="openComposeMessageModal()" style="padding: 6px 12px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px; color: #f4e4c1;">+ Compose</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Messages List -->
+                    <div id="messagesList" style="font-size: 12px;">
+                        <div style="text-align: center; color: #888; padding: 20px;">Loading...</div>
+                    </div>
+                </div>
+                
+                <!-- Alliances View -->
+                <div id="socialViewAlliances" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <p style="color: #d4af37; font-size: 14px; font-weight: bold; text-transform: uppercase; margin: 0;">⚔️ Alliances</p>
+                        <button onclick="alert('Alliance feature coming soon!')" style="padding: 6px 12px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px; color: #f4e4c1;">+ Create Alliance</button>
+                    </div>
+                    <div style="text-align: center; color: #888; padding: 40px; background: rgba(0,0,0,0.2); border: 1px solid #8b6f47; border-radius: 4px;">
+                        <p style="font-size: 14px; margin-bottom: 10px;">Alliances feature coming soon!</p>
+                        <p style="font-size: 12px; color: #aaa;">Join or create alliances with other players to compete together.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notifications Tab -->
+            <div id="dashboardContentNotifications" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <p style="color: #d4af37; font-size: 14px; font-weight: bold; text-transform: uppercase; margin: 0;">🔔 Notifications</p>
+                    <button onclick="markAllNotificationsRead()" style="padding: 6px 12px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px; color: #f4e4c1;">Mark All Read</button>
+                </div>
+                <div id="notificationsList" style="font-size: 12px;">
+                    <div style="text-align: center; color: #888; padding: 20px;">Loading...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Buttons -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 2px solid #8b6f47;">
+            <button onclick="saveProfile()" style="padding: 8px 16px; background: linear-gradient(135deg, #2a7f32 0%, #1e5d25 100%); border: 1px solid #4caf50; font-size: 12px; cursor: pointer; border-radius: 3px; color: #f4e4c1; font-weight: bold;">💾 Save Profile</button>
+            <button onclick="logout()" style="padding: 6px 12px; font-size: 11px; background: linear-gradient(135deg, #8b3a3a 0%, #5a1e1e 100%); border: 1px solid #c94c4c; cursor: pointer; border-radius: 3px; color: #f4e4c1;">Logout</button>
+            <button onclick="closeAccountDashboard()" style="padding: 8px 16px; background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%); border: 1px solid #8b6f47; font-size: 12px; cursor: pointer; border-radius: 3px; color: #f4e4c1; font-weight: bold;">← Back</button>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal" id="changePasswordModal" style="display: none; max-width: 500px;">
+        <h1 style="font-size: 22px; margin-bottom: 20px;">🔒 Change Password</h1>
+        <div id="changePasswordMessage" style="margin-bottom: 15px; padding: 10px; border-radius: 4px; display: none;"></div>
+        <div style="text-align: left;">
+            <div style="margin-bottom: 15px;">
+                <label style="color: #d4af37; font-size: 12px; display: block; margin-bottom: 5px;">Current Password</label>
+                <input type="password" id="currentPassword" style="width: 100%; padding: 10px; border: 2px solid #8b6f47; background: rgba(0,0,0,0.5); color: #f4e4c1; border-radius: 6px; font-size: 13px;" placeholder="Enter current password">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="color: #d4af37; font-size: 12px; display: block; margin-bottom: 5px;">New Password</label>
+                <input type="password" id="newPassword" style="width: 100%; padding: 10px; border: 2px solid #8b6f47; background: rgba(0,0,0,0.5); color: #f4e4c1; border-radius: 6px; font-size: 13px;" placeholder="Enter new password (min 6 characters)">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="color: #d4af37; font-size: 12px; display: block; margin-bottom: 5px;">Confirm New Password</label>
+                <input type="password" id="confirmNewPassword" style="width: 100%; padding: 10px; border: 2px solid #8b6f47; background: rgba(0,0,0,0.5); color: #f4e4c1; border-radius: 6px; font-size: 13px;" placeholder="Confirm new password">
+            </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <button onclick="submitChangePassword()" style="padding: 10px 20px; font-size: 13px; background: linear-gradient(135deg, #2a7f32 0%, #1e5d25 100%); border: 2px solid #4caf50; cursor: pointer; border-radius: 6px; color: #f4e4c1; font-weight: bold;">Change Password</button>
+            <button onclick="closeChangePasswordModal()" style="padding: 10px 20px; font-size: 13px; background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%); border: 2px solid #8b6f47; cursor: pointer; border-radius: 6px; color: #f4e4c1;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Change Email Modal -->
+    <div class="modal" id="changeEmailModal" style="display: none; max-width: 500px;">
+        <h1 style="font-size: 22px; margin-bottom: 20px;">📧 Change Email</h1>
+        <div id="changeEmailMessage" style="margin-bottom: 15px; padding: 10px; border-radius: 4px; display: none;"></div>
+        <div style="text-align: left;">
+            <div style="margin-bottom: 15px;">
+                <label style="color: #d4af37; font-size: 12px; display: block; margin-bottom: 5px;">Current Password</label>
+                <input type="password" id="changeEmailPassword" style="width: 100%; padding: 10px; border: 2px solid #8b6f47; background: rgba(0,0,0,0.5); color: #f4e4c1; border-radius: 6px; font-size: 13px;" placeholder="Enter your password">
+            </div>
+            <div style="margin-bottom: 20px;">
+                <label style="color: #d4af37; font-size: 12px; display: block; margin-bottom: 5px;">New Email</label>
+                <input type="email" id="newEmail" style="width: 100%; padding: 10px; border: 2px solid #8b6f47; background: rgba(0,0,0,0.5); color: #f4e4c1; border-radius: 6px; font-size: 13px;" placeholder="Enter new email address">
+            </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <button onclick="submitChangeEmail()" style="padding: 10px 20px; font-size: 13px; background: linear-gradient(135deg, #2a7f32 0%, #1e5d25 100%); border: 2px solid #4caf50; cursor: pointer; border-radius: 6px; color: #f4e4c1; font-weight: bold;">Change Email</button>
+            <button onclick="closeChangeEmailModal()" style="padding: 10px 20px; font-size: 13px; background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%); border: 2px solid #8b6f47; cursor: pointer; border-radius: 6px; color: #f4e4c1;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal" style="display: none; max-width: 500px;">
+        <h1 style="font-size: 22px; margin-bottom: 20px;">⚙️ Settings</h1>
+        <div style="text-align: left;">
+            <div style="margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.3); border: 2px solid #8b6f47; border-radius: 8px;">
+                <p style="color: #d4af37; font-size: 13px; font-weight: bold; margin-bottom: 12px; text-transform: uppercase;">Audio Settings</p>
+                <div style="margin-bottom: 12px;">
+                    <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                        <span style="color: #f4e4c1; font-size: 12px;">Sound Effects</span>
+                        <input type="checkbox" id="settingSoundEffects" checked style="width: 20px; height: 20px; cursor: pointer;">
+                    </label>
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                        <span style="color: #f4e4c1; font-size: 12px;">Card Draw Sound</span>
+                        <input type="checkbox" id="settingCardDrawSound" checked style="width: 20px; height: 20px; cursor: pointer;">
+                    </label>
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                        <span style="color: #f4e4c1; font-size: 12px;">Attack Sound</span>
+                        <input type="checkbox" id="settingAttackSound" checked style="width: 20px; height: 20px; cursor: pointer;">
+                    </label>
+                </div>
+                <div>
+                    <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                        <span style="color: #f4e4c1; font-size: 12px;">Unit Death Sound</span>
+                        <input type="checkbox" id="settingDeathSound" checked style="width: 20px; height: 20px; cursor: pointer;">
+                    </label>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.3); border: 2px solid #8b6f47; border-radius: 8px;">
+                <p style="color: #d4af37; font-size: 13px; font-weight: bold; margin-bottom: 12px; text-transform: uppercase;">Visual Settings</p>
+                <div style="margin-bottom: 12px;">
+                    <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                        <span style="color: #f4e4c1; font-size: 12px;">Reduce Animations</span>
+                        <input type="checkbox" id="settingReduceAnimations" style="width: 20px; height: 20px; cursor: pointer;">
+                    </label>
+                </div>
+                <div>
+                    <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+                        <span style="color: #f4e4c1; font-size: 12px;">Disable Visual Effects</span>
+                        <input type="checkbox" id="settingDisableEffects" style="width: 20px; height: 20px; cursor: pointer;">
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <button onclick="saveSettings()" style="padding: 10px 20px; font-size: 13px; background: linear-gradient(135deg, #2a7f32 0%, #1e5d25 100%); border: 2px solid #4caf50; cursor: pointer; border-radius: 6px; color: #f4e4c1; font-weight: bold;">Save Settings</button>
+            <button onclick="closeSettingsModal()" style="padding: 10px 20px; font-size: 13px; background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%); border: 2px solid #8b6f47; cursor: pointer; border-radius: 6px; color: #f4e4c1;">Close</button>
+        </div>
+    </div>
+
+    <!-- Avatar Selector Modal -->
+    <div class="modal" id="avatarSelectorModal" style="display: none; max-width: 500px;">
+        <h1>👑 Choose Your Avatar 👑</h1>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin: 30px 0; text-align: center;">
+            <div style="cursor: pointer; padding: 10px; border: 3px solid transparent; border-radius: 8px; transition: all 0.2s;" onclick="selectAvatar(1)" class="avatar-option" data-avatar="1">
+                <div style="font-size: 50px; margin-bottom: 8px;">🤴</div>
+                <div style="font-size: 10px; color: #ffd700;">King</div>
+            </div>
+            <div style="cursor: pointer; padding: 10px; border: 3px solid transparent; border-radius: 8px; transition: all 0.2s;" onclick="selectAvatar(2)" class="avatar-option" data-avatar="2">
+                <div style="font-size: 50px; margin-bottom: 8px;">👸</div>
+                <div style="font-size: 10px; color: #ffd700;">Queen</div>
+            </div>
+            <div style="cursor: pointer; padding: 10px; border: 3px solid transparent; border-radius: 8px; transition: all 0.2s;" onclick="selectAvatar(3)" class="avatar-option" data-avatar="3">
+                <div style="font-size: 50px; margin-bottom: 8px;">🧙</div>
+                <div style="font-size: 10px; color: #ffd700;">Wizard</div>
+            </div>
+            <div style="cursor: pointer; padding: 10px; border: 3px solid transparent; border-radius: 8px; transition: all 0.2s;" onclick="selectAvatar(4)" class="avatar-option" data-avatar="4">
+                <div style="font-size: 50px; margin-bottom: 8px;">🧝</div>
+                <div style="font-size: 10px; color: #ffd700;">Elf</div>
+            </div>
+            <div style="cursor: pointer; padding: 10px; border: 3px solid transparent; border-radius: 8px; transition: all 0.2s;" onclick="selectAvatar(5)" class="avatar-option" data-avatar="5">
+                <div style="font-size: 50px; margin-bottom: 8px;">⚔️</div>
+                <div style="font-size: 10px; color: #ffd700;">Warrior</div>
+            </div>
+            <div style="cursor: pointer; padding: 10px; border: 3px solid transparent; border-radius: 8px; transition: all 0.2s;" onclick="selectAvatar(6)" class="avatar-option" data-avatar="6">
+                <div style="font-size: 50px; margin-bottom: 8px;">🛡️</div>
+                <div style="font-size: 10px; color: #ffd700;">Knight</div>
+            </div>
+            <div style="cursor: pointer; padding: 10px; border: 3px solid transparent; border-radius: 8px; transition: all 0.2s;" onclick="selectAvatar(7)" class="avatar-option" data-avatar="7">
+                <div style="font-size: 50px; margin-bottom: 8px;">👑</div>
+                <div style="font-size: 10px; color: #ffd700;">Crown</div>
+            </div>
+            <div style="cursor: pointer; padding: 10px; border: 3px solid transparent; border-radius: 8px; transition: all 0.2s;" onclick="selectAvatar(8)" class="avatar-option" data-avatar="8">
+                <div style="font-size: 50px; margin-bottom: 8px;">🦅</div>
+                <div style="font-size: 10px; color: #ffd700;">Eagle</div>
+            </div>
+        </div>
+        <button onclick="saveProfile()" style="padding: 10px 20px; background: linear-gradient(135deg, #2a7f32 0%, #1e5d25 100%); border: 3px solid #4caf50; font-size: 14px; cursor: pointer; border-radius: 6px;">✓ Save Avatar</button>
+        <button onclick="closeAvatarSelector()" style="padding: 10px 20px; margin-left: 10px; background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%); border: 3px solid #8b6f47; font-size: 14px; cursor: pointer; border-radius: 6px;">Cancel</button>
+    </div>
+
+    <!-- Account Deletion Modal -->
+    <div class="modal" id="accountDeletionModal" style="display: none; max-width: 500px;">
+        <h1 style="font-size: 22px; margin-bottom: 20px; color: #c41e3a;">🗑️ Request Account Deletion</h1>
+        <div id="deletionMessage" style="margin-bottom: 15px; padding: 10px; border-radius: 4px; display: none;"></div>
+        <div style="text-align: left; margin-bottom: 20px;">
+            <p style="color: #f4e4c1; font-size: 12px; line-height: 1.6; margin-bottom: 15px;">
+                <strong style="color: #c41e3a;">Warning:</strong> This action cannot be undone. Requesting account deletion will:
+            </p>
+            <ul style="color: #f4e4c1; font-size: 11px; line-height: 1.8; margin-left: 20px; margin-bottom: 15px;">
+                <li>Schedule your account for deletion within 7 days</li>
+                <li>Permanently delete all your data (profile, stats, decks, match history)</li>
+                <li>Log you out of all sessions</li>
+                <li>Prevent you from logging in after deletion</li>
+            </ul>
+            <p style="color: #d4af37; font-size: 11px; font-style: italic;">
+                You can cancel this request at any time before the 7-day period expires.
+            </p>
+        </div>
+        <div style="text-align: left;">
+            <div style="margin-bottom: 15px;">
+                <label style="color: #d4af37; font-size: 12px; display: block; margin-bottom: 5px;">Confirm Password <span style="color: red;">*</span></label>
+                <input type="password" id="deletionPassword" style="width: 100%; padding: 10px; border: 2px solid #8b6f47; background: rgba(0,0,0,0.5); color: #f4e4c1; border-radius: 6px; font-size: 13px;" placeholder="Enter your password to confirm">
+            </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <button onclick="submitAccountDeletion()" style="padding: 10px 20px; font-size: 13px; background: linear-gradient(135deg, #c41e3a 0%, #8b1a1a 100%); border: 2px solid #c41e3a; cursor: pointer; border-radius: 6px; color: #f4e4c1; font-weight: bold;">Request Deletion</button>
+            <button onclick="closeAccountDeletionModal()" style="padding: 10px 20px; font-size: 13px; background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%); border: 2px solid #8b6f47; cursor: pointer; border-radius: 6px; color: #f4e4c1;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Guest Prompt Modal -->
+    <div class="modal" id="guestPromptModal" style="display: none; max-width: 500px;">
+        <h1>⚠️ Account Required ⚠️</h1>
+        <p style="margin: 30px 0; font-size: 16px; text-align: center; line-height: 1.6;">
+            The Account dashboard is only available for registered users.<br>
+            Create an account to access your profile, stats, and progress!
+        </p>
+        <div style="display: flex; gap: 10px; justify-content: center; margin-top: 30px;">
+            <button onclick="window.location.href='/auth.html'" style="padding: 12px 30px; background: linear-gradient(135deg, #4a90e2 0%, #2563eb 100%); border: 3px solid #4a7aff; font-size: 14px; cursor: pointer; border-radius: 6px;">🔐 Create Account</button>
+            <button onclick="closeGuestPrompt()" style="padding: 12px 30px; background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%); border: 3px solid #8b6f47; font-size: 14px; cursor: pointer; border-radius: 6px;">Continue as Guest</button>
+        </div>
     </div>
 
     <!-- Settings Modal -->
@@ -2164,57 +3305,204 @@
     </div>
 
     <!-- First Player Roll Modal -->
-    <div class="modal" id="rollModal" style="display: none;">
-        <h1>🎲 Rolling for First Player...</h1>
-        <div style="margin: 40px 0; text-align: center;">
-            <div id="rollDisplay" style="font-size: 60px; color: #ffd700; font-weight: bold; margin: 20px 0;">🎲</div>
-            <div id="rollResult" style="font-size: 24px; color: #f4e4c1; margin: 20px 0; min-height: 40px;"></div>
+    <div class="modal" id="rollModal" style="display: none; flex-direction: column; justify-content: space-between; min-height: 400px;">
+        <div>
+            <h1>🎲 Rolling for First Player...</h1>
+            <div style="margin: 40px 0; text-align: center;">
+                <div id="rollDisplay" style="font-size: 60px; color: #ffd700; font-weight: bold; margin: 20px 0;">🎲</div>
+                <div id="rollResult" style="font-size: 24px; color: #f4e4c1; margin: 20px 0; min-height: 40px;"></div>
+            </div>
         </div>
-        <div style="text-align: center; margin-top: 30px;">
-            <button id="rollStartBtn" onclick="startGameAfterRoll()" style="padding: 12px 40px; font-size: 12px; background: linear-gradient(135deg, #4a90e2 0%, #2563eb 100%); border: 4px solid #8b6f47; display: none;">READY TO BATTLE!</button>
+        <div style="text-align: center; margin-top: auto; padding-bottom: 20px;">
+            <button id="rollStartBtn" onclick="startGameAfterRoll()" style="padding: 20px 60px; font-size: 24px; font-weight: 900; background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); border: 6px solid #8b6f47; border-radius: 12px; cursor: pointer; color: white; text-transform: uppercase; letter-spacing: 2px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.8), inset 0 2px 8px rgba(255, 255, 255, 0.2); transition: all 0.3s; display: none;">READY TO BATTLE!</button>
         </div>
     </div>
 
     <!-- Multiplayer Hero Selection Modal -->
-    <div class="modal" id="multiplayerHeroModal" style="display: none; flex-direction: column; max-width: 900px; min-height: 550px;">
+    <div class="modal" id="multiplayerHeroModal" style="display: none; flex-direction: column; max-width: 990px; min-height: 605px;">
         <!-- Title across the top -->
-        <h1 style="margin: 0 0 10px 0; text-align: center; font-size: 24px; width: 100%;">⚔️ SELECT YOUR HERO</h1>
+        <h1 style="margin: 0 0 11px 0; text-align: center; font-size: 44px; width: 100%;">⚔️ SELECT YOUR HERO</h1>
 
         <!-- Unit Type Buttons -->
-        <div style="display: flex; gap: 15px; justify-content: center; margin: 5px 0 15px 0; width: 100%; flex-shrink: 0;">
-            <button onclick="selectMultiplayerUnitType('ranged')" style="padding: 5px 25px; margin: 0; font-size: 11px; background: linear-gradient(135deg, #4a5f8f 0%, #2a3f5f 100%); border: 3px solid #7a9fff; border-radius: 8px; cursor: pointer; color: #f4e4c1; font-weight: bold;">🏹 RANGED</button>
-            <button onclick="selectMultiplayerUnitType('infantry')" style="padding: 5px 25px; margin: 0; font-size: 11px; background: linear-gradient(135deg, #5f4a4f 0%, #3f2a2f 100%); border: 3px solid #ff7a7a; border-radius: 8px; cursor: pointer; color: #f4e4c1; font-weight: bold;">🛡️ INFANTRY</button>
-            <button onclick="selectMultiplayerUnitType('cavalry')" style="padding: 5px 25px; margin: 0; font-size: 11px; background: linear-gradient(135deg, #5f5f2a 0%, #3f3f0a 100%); border: 3px solid #ffff7a; border-radius: 8px; cursor: pointer; color: #f4e4c1; font-weight: bold;">🐎 CAVALRY</button>
+        <div style="display: flex; gap: 17px; justify-content: center; margin: 6px 0 17px 0; width: 100%; flex-shrink: 0;">
+            <button id="rangedBtn" onclick="selectMultiplayerUnitType('ranged')" style="padding: 9px 33px; margin: 0; font-size: 24px; background: linear-gradient(135deg, #4a5f8f 0%, #2a3f5f 100%); border: 3px solid #7a9fff; border-radius: 9px; cursor: pointer; color: #f4e4c1; font-weight: bold;">🏹 RANGED</button>
+            <button id="infantryBtn" onclick="selectMultiplayerUnitType('infantry')" style="padding: 9px 33px; margin: 0; font-size: 24px; background: linear-gradient(135deg, #5f4a4f 0%, #3f2a2f 100%); border: 3px solid #ff7a7a; border-radius: 9px; cursor: pointer; color: #f4e4c1; font-weight: bold;">🛡️ INFANTRY</button>
+            <button id="cavalryBtn" onclick="selectMultiplayerUnitType('cavalry')" style="padding: 9px 33px; margin: 0; font-size: 24px; background: linear-gradient(135deg, #5f5f2a 0%, #3f3f0a 100%); border: 3px solid #ffff7a; border-radius: 9px; cursor: pointer; color: #f4e4c1; font-weight: bold;">🐎 CAVALRY</button>
+            <button id="customBtn" onclick="selectCustomDecks()" style="padding: 9px 33px; margin: 0; font-size: 24px; background: linear-gradient(135deg, #4a8f5f 0%, #2a5f3f 100%); border: 3px solid #7aff9f; border-radius: 9px; cursor: pointer; color: #f4e4c1; font-weight: bold;">🃏 CUSTOM</button>
+            <button id="randomBtn" onclick="selectRandomHero()" style="padding: 9px 33px; margin: 0; font-size: 24px; background: linear-gradient(135deg, #8f5f4a 0%, #5f3f2a 100%); border: 3px solid #ffaa7a; border-radius: 9px; cursor: pointer; color: #f4e4c1; font-weight: bold;">🎲 RANDOM</button>
         </div>
 
         <!-- Two-Column Layout: Hero List + Description & Mechanics -->
-        <div style="display: grid; grid-template-columns: 120px 1fr; gap: 15px; flex: 0 0 auto; margin-bottom: 15px; width: 100%; align-items: start;">
+        <div style="display: grid; grid-template-columns: 220px 1fr; gap: 17px; flex: 0 0 auto; margin-bottom: 17px; width: 100%; align-items: start;">
             <!-- Left Column: Hero List -->
-            <div style="border: 3px solid #8b6f47; border-radius: 5px; background: rgba(139, 111, 71, 0.2); overflow: hidden; display: flex; flex-direction: column; height: 300px;">
-                <div id="multiplayerHeroList" style="flex: 1; overflow-y: auto; width: 100%;"></div>
+            <div style="border: 3px solid #8b6f47; border-radius: 6px; background: rgba(139, 111, 71, 0.2); overflow: hidden; display: flex; flex-direction: column; height: 330px;">
+                <div id="multiplayerHeroList" style="flex: 1; overflow-y: auto; width: 100%; display: flex; flex-direction: column;"></div>
             </div>
 
             <!-- Right Column: Hero Description and Mechanics Stacked -->
-            <div style="display: flex; flex-direction: column; gap: 15px;">
+            <div style="display: flex; flex-direction: column; gap: 17px;">
                 <!-- Hero Description Box -->
-                <div style="border: 3px solid #8b6f47; border-radius: 5px; background: rgba(0, 0, 0, 0.8); overflow: hidden; display: flex; flex-direction: column; width: 400px;">
-                    <div id="multiplayerHeroDetails" style="padding: 15px; display: none; overflow-y: auto;">
-                        <p id="selectedHeroPassive" style="margin: 0; color: #f4e4c1; font-size: 11px; line-height: 1.6; word-wrap: break-word; word-break: break-word;"></p>
+                <div style="border: 3px solid #8b6f47; border-radius: 6px; background: rgba(0, 0, 0, 0.8); overflow: hidden; display: flex; flex-direction: column; width: 440px;">
+                    <div id="multiplayerHeroDetails" style="padding: 17px; display: none; overflow-y: auto;">
+                        <p id="selectedHeroPassive" style="margin: 0; color: #f4e4c1; font-size: 24px; line-height: 1.6; word-wrap: break-word; word-break: break-word;"></p>
                     </div>
                 </div>
 
                 <!-- Mechanics Section -->
-                <div style="border: 3px solid #8b6f47; border-radius: 5px; background: rgba(0, 0, 0, 0.8); padding: 15px; width: 400px; display: none;" id="mechanicsBox">
-                    <p id="selectedHeroMechanics" style="margin: 0; color: #f4e4c1; font-size: 11px; line-height: 1.6; word-wrap: break-word; word-break: break-word;"></p>
+                <div style="border: 3px solid #8b6f47; border-radius: 6px; background: rgba(0, 0, 0, 0.8); padding: 17px; width: 440px; display: none;" id="mechanicsBox">
+                    <p id="selectedHeroMechanics" style="margin: 0; color: #f4e4c1; font-size: 24px; line-height: 1.6; word-wrap: break-word; word-break: break-word;"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Deck Selection Section -->
+        <div id="heroDeckSelection" style="display: none; margin-bottom: 17px; width: 100%; border: 3px solid #8b6f47; border-radius: 6px; background: rgba(0, 0, 0, 0.8); padding: 17px;">
+            <h3 style="margin: 0 0 11px 0; color: #ffd700; font-size: 20px; text-align: center;">🃏 Select Your Deck</h3>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <label style="display: flex; align-items: center; gap: 8px; padding: 8px; background: rgba(139, 111, 71, 0.2); border: 2px solid #8b6f47; border-radius: 4px; cursor: pointer; color: #f4e4c1;">
+                    <input type="radio" name="heroDeckSelect" value="default" checked style="width: 18px; height: 18px; cursor: pointer;" onchange="selectHeroDeck('default')">
+                    <span style="font-size: 16px;">Default Deck</span>
+                </label>
+                <div id="heroDeckList" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto;">
+                    <!-- User's saved decks will be populated here -->
                 </div>
             </div>
         </div>
 
         <!-- Confirm Button -->
         <div style="text-align: center; flex-shrink: 0; width: 100%;">
-            <button id="confirmHeroBtn" onclick="confirmMultiplayerHero()" style="padding: 10px 40px; margin: 0 5px; font-size: 12px; background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); border: 3px solid #8b6f47; border-radius: 5px; cursor: pointer; color: white; font-weight: bold; display: none;">✓ CONFIRM HERO</button>
-            <button onclick="cancelHeroSelection()" style="padding: 10px 40px; margin: 0 5px; font-size: 12px; background: linear-gradient(135deg, #c41e3a 0%, #8b1a1a 100%); border: 3px solid #8b6f47; border-radius: 5px; cursor: pointer; color: white; font-weight: bold;">✕ CANCEL</button>
-            <div id="waitingMessage" style="display: none; margin-top: 10px; color: #ffd700; font-size: 12px;">Waiting for opponent to select hero...</div>
+            <button id="confirmHeroBtn" onclick="confirmMultiplayerHero()" style="padding: 13px 55px; margin: 0 6px; font-size: 24px; background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); border: 3px solid #8b6f47; border-radius: 6px; cursor: pointer; color: white; font-weight: bold; display: none;">✓ CONFIRM HERO</button>
+            <button onclick="cancelHeroSelection()" style="padding: 13px 55px; margin: 0 6px; font-size: 24px; background: linear-gradient(135deg, #c41e3a 0%, #8b1a1a 100%); border: 3px solid #8b6f47; border-radius: 6px; cursor: pointer; color: white; font-weight: bold;">✕ CANCEL</button>
+            <div id="waitingMessage" style="display: none; margin-top: 11px; color: #ffd700; font-size: 24px;">Waiting for opponent to select hero...</div>
+        </div>
+    </div>
+
+    <!-- Deck Builder Modal -->
+    <div class="modal" id="deckBuilderModal" style="display: none; max-width: 1000px; width: 95%; max-height: 90vh; overflow-y: auto;">
+        <!-- Step 1: Hero Selection -->
+        <div id="deckBuilderHeroSelection" style="display: block;">
+            <!-- Header -->
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="margin-bottom: 8px; font-size: 28px; color: #d4af37; font-weight: 700; letter-spacing: 2px;">🃏 DECK BUILDER</h1>
+                <p style="color: #aaa; font-size: 13px; font-style: italic;">Choose a hero to build your deck</p>
+            </div>
+            
+            <!-- Unit Type Selection -->
+            <div style="margin-bottom: 30px; padding: 20px; background: rgba(0,0,0,0.3); border: 2px solid #8b6f47; border-radius: 8px;">
+                <p style="font-size: 12px; color: #d4af37; margin-bottom: 12px; text-align: center; text-transform: uppercase; letter-spacing: 1px;">Select Unit Type</p>
+                <div style="display: flex; gap: 12px; justify-content: center;">
+                    <button onclick="selectDeckBuilderUnitType('ranged')" style="flex: 1; padding: 14px 20px; font-size: 15px; background: linear-gradient(135deg, #4a5f8f 0%, #2a3f5f 100%); border: 3px solid #7a9fff; border-radius: 6px; cursor: pointer; color: #f4e4c1; font-weight: 600; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px;">🏹 Ranged</button>
+                    <button onclick="selectDeckBuilderUnitType('infantry')" style="flex: 1; padding: 14px 20px; font-size: 15px; background: linear-gradient(135deg, #5f4a4f 0%, #3f2a2f 100%); border: 3px solid #ff7a7a; border-radius: 6px; cursor: pointer; color: #f4e4c1; font-weight: 600; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px;">🛡️ Infantry</button>
+                    <button onclick="selectDeckBuilderUnitType('cavalry')" style="flex: 1; padding: 14px 20px; font-size: 15px; background: linear-gradient(135deg, #5f5f2a 0%, #3f3f0a 100%); border: 3px solid #ffff7a; border-radius: 6px; cursor: pointer; color: #f4e4c1; font-weight: 600; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px;">🐎 Cavalry</button>
+                </div>
+            </div>
+
+            <!-- Saved Decks Section -->
+            <div id="deckBuilderSavedDecksSection" style="margin-bottom: 30px; display: none;">
+                <div style="padding: 20px; background: rgba(0,0,0,0.3); border: 2px solid #8b6f47; border-radius: 8px;">
+                    <h2 style="font-size: 14px; color: #d4af37; margin-bottom: 15px; text-align: center; text-transform: uppercase; letter-spacing: 1px;">Your Saved Decks</h2>
+                    <div id="deckBuilderSavedDecksList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px;">
+                        <!-- Saved decks will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hero List -->
+            <div style="margin-bottom: 30px;">
+                <div style="padding: 20px; background: rgba(0,0,0,0.3); border: 2px solid #8b6f47; border-radius: 8px;">
+                    <h2 style="font-size: 14px; color: #d4af37; margin-bottom: 15px; text-align: center; text-transform: uppercase; letter-spacing: 1px;">Create New Deck</h2>
+                    <div id="deckBuilderHeroList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px;">
+                        <!-- Heroes will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hero Confirmation Section -->
+            <div id="deckBuilderHeroConfirmation" style="display: none; margin-bottom: 30px; padding: 25px; background: rgba(212, 175, 55, 0.1); border: 3px solid #d4af37; border-radius: 8px; box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h3 style="font-size: 16px; color: #d4af37; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px; font-weight: 700;">Selected Hero</h3>
+                    <p style="font-size: 22px; font-weight: 700; color: #f4e4c1; margin-bottom: 8px; letter-spacing: 1px;" id="confirmHeroName">-</p>
+                    <p style="font-size: 12px; color: #aaa; margin-bottom: 15px; text-transform: uppercase;" id="confirmHeroType">-</p>
+                    <div style="padding: 12px; background: rgba(0,0,0,0.4); border-radius: 6px; margin-bottom: 15px;">
+                        <p style="font-size: 11px; color: #d4af37; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;">Passive Ability</p>
+                        <p style="font-size: 12px; color: #f4e4c1; line-height: 1.5; font-style: italic;" id="confirmHeroPassive">-</p>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 12px; justify-content: center;">
+                    <button onclick="confirmDeckBuilderHero()" style="padding: 12px 30px; font-size: 14px; background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%); border: 3px solid #8b6f47; border-radius: 6px; cursor: pointer; color: white; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s;">✓ Confirm & Build</button>
+                    <button onclick="cancelDeckBuilderHeroSelection()" style="padding: 12px 30px; font-size: 14px; background: linear-gradient(135deg, #c41e3a 0%, #8b1a1a 100%); border: 3px solid #8b6f47; border-radius: 6px; cursor: pointer; color: white; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s;">✕ Cancel</button>
+                </div>
+            </div>
+
+            <!-- Footer Actions -->
+            <div style="display: flex; justify-content: center; padding-top: 20px; border-top: 2px solid rgba(139, 111, 71, 0.3);">
+                <button onclick="closeDeckBuilder()" style="padding: 12px 40px; font-size: 14px; background: linear-gradient(135deg, #8b6f47 0%, #6b5344 100%); border: 3px solid #8b6f47; border-radius: 6px; cursor: pointer; color: #f4e4c1; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s;">✕ Close</button>
+            </div>
+        </div>
+
+        <!-- Step 2: Deck Builder -->
+        <div id="deckBuilderCardSelection" style="display: none;">
+            <h1 style="margin-bottom: 15px; font-size: 24px;">🃏 Build Your Deck</h1>
+            
+            <!-- Selected Hero & Deck Name -->
+            <div style="margin-bottom: 15px; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 6px;">
+                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 10px; align-items: start;">
+                    <div>
+                        <p style="font-size: 11px; color: #d4af37; margin-bottom: 5px;">Selected Hero:</p>
+                        <p style="font-size: 14px; color: #f4e4c1; font-weight: bold; margin-bottom: 8px;" id="selectedHeroName">-</p>
+                        <p style="font-size: 10px; color: #d4af37; margin-bottom: 3px;">Passive Ability:</p>
+                        <p style="font-size: 11px; color: #f4e4c1; font-style: italic; line-height: 1.3;" id="selectedHeroPassiveAbility">-</p>
+                    </div>
+                    <div>
+                        <label style="font-size: 11px; color: #d4af37; display: block; margin-bottom: 5px;">Deck Name:</label>
+                        <input type="text" id="deckNameInput" placeholder="Enter deck name..." maxlength="50" style="width: 100%; padding: 6px; border: 1px solid #8b6f47; background: rgba(0,0,0,0.5); color: #f4e4c1; border-radius: 3px; font-size: 12px;" oninput="updateDeckDisplay()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deck Info -->
+            <div style="margin-bottom: 15px; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 6px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div style="text-align: center; padding: 8px; background: rgba(139, 111, 71, 0.2); border: 1px solid #8b6f47; border-radius: 4px;">
+                        <div style="color: #d4af37; font-size: 16px; font-weight: bold;">60</div>
+                        <div style="color: #aaa; font-size: 10px; margin-top: 2px;">Deck Limit: 60</div>
+                    </div>
+                    <div style="text-align: center; padding: 8px; background: rgba(139, 111, 71, 0.2); border: 1px solid #8b6f47; border-radius: 4px;">
+                        <div style="color: #4caf50; font-size: 16px; font-weight: bold;" id="currentDeckSize">0</div>
+                        <div style="color: #aaa; font-size: 10px; margin-top: 2px;">Current Deck</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Type Tabs -->
+            <div style="margin-bottom: 15px; display: flex; gap: 8px; justify-content: center;">
+                <button id="deckBuilderTabAll" onclick="selectDeckBuilderTab('all')" style="padding: 8px 16px; font-size: 12px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 2px solid #d4af37; border-radius: 4px; cursor: pointer; color: #f4e4c1; font-weight: bold;">All</button>
+                <button id="deckBuilderTabBannerman" onclick="selectDeckBuilderTab('unit')" style="padding: 8px 16px; font-size: 12px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-radius: 4px; cursor: pointer; color: #f4e4c1;">⚔️ Bannerman</button>
+                <button id="deckBuilderTabAbility" onclick="selectDeckBuilderTab('ability')" style="padding: 8px 16px; font-size: 12px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-radius: 4px; cursor: pointer; color: #f4e4c1;">✨ Ability</button>
+                <button id="deckBuilderTabEquipment" onclick="selectDeckBuilderTab('equipment')" style="padding: 8px 16px; font-size: 12px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-radius: 4px; cursor: pointer; color: #f4e4c1;">🛡️ Equipment</button>
+                <button id="deckBuilderTabSiege" onclick="selectDeckBuilderTab('siege')" style="padding: 8px 16px; font-size: 12px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-radius: 4px; cursor: pointer; color: #f4e4c1;">🏰 Siege</button>
+            </div>
+
+            <!-- Current Deck List -->
+            <div style="margin-bottom: 15px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid #8b6f47; border-radius: 4px; max-height: 100px; overflow-y: auto;">
+                <p style="font-size: 11px; color: #d4af37; margin-bottom: 6px; font-weight: bold;">Your Deck:</p>
+                <div id="currentDeckList" style="font-size: 10px; color: #f4e4c1; line-height: 1.6;">
+                    Empty - Add cards to build your deck
+                </div>
+            </div>
+
+            <!-- Cards Display -->
+            <div id="deckBuilderCardsContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-bottom: 15px; max-height: 400px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid #8b6f47; border-radius: 6px;">
+                <!-- Cards will be populated here -->
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button onclick="saveDeckPreset()" id="saveDeckBtn" style="padding: 10px 25px; font-size: 14px; background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); border: 2px solid #8b6f47; border-radius: 4px; cursor: pointer; color: white; font-weight: bold;" disabled>💾 Save Deck</button>
+                <button onclick="resetDeckBuilder()" style="padding: 10px 25px; font-size: 14px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-radius: 4px; cursor: pointer; color: #f4e4c1;">🔄 Reset</button>
+                <button onclick="backToHeroSelection()" style="padding: 10px 25px; font-size: 14px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-radius: 4px; cursor: pointer; color: #f4e4c1;">← Back</button>
+                <button onclick="closeDeckBuilder()" style="padding: 10px 25px; font-size: 14px; background: linear-gradient(135deg, #c41e3a 0%, #8b1a1a 100%); border: 2px solid #8b6f47; border-radius: 4px; cursor: pointer; color: white; font-weight: bold;">✕ Cancel</button>
+            </div>
         </div>
     </div>
 
