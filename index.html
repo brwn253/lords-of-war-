@@ -2499,11 +2499,36 @@
                 // Mark user as logged in
                 sessionStorage.setItem('isLoggedIn', 'true');
                 console.log('[AUTH GUARD] User authenticated:', data.data.username);
+                
+                // Load profile to get displayName and update player name input
+                if (data.data.userId) {
+                  fetch(`/api/profile/${data.data.userId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                  })
+                  .then(res => res.json())
+                  .then(profileData => {
+                    if (profileData.success && profileData.profile) {
+                      // Update player name input with displayName
+                      const playerNameInput = document.getElementById('playerNameInput');
+                      if (playerNameInput) {
+                        const nameToUse = profileData.profile.displayName || profileData.profile.username || '';
+                        if (nameToUse) {
+                          playerNameInput.value = nameToUse;
+                          sessionStorage.setItem('userDisplayName', nameToUse);
+                        }
+                      }
+                    }
+                  })
+                  .catch(err => {
+                    console.error('[AUTH GUARD] Failed to load profile:', err);
+                  });
+                }
               } else {
                 // Token invalid, clear it
                 localStorage.removeItem('token');
                 sessionStorage.removeItem('userData');
                 sessionStorage.removeItem('isLoggedIn');
+                sessionStorage.removeItem('userDisplayName');
                 console.log('[AUTH GUARD] Token invalid');
               }
               // Mark verification as complete
@@ -2847,124 +2872,107 @@
         <!-- Tabs at Top -->
         <div style="display: flex; gap: 2px; margin-bottom: 10px; border-bottom: 2px solid #8b6f47; overflow-x: auto;">
             <button id="dashboardTabAccount" onclick="switchDashboardTab('account')" style="flex: 0 0 auto; padding: 6px 8px; font-size: 11px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 2px solid #d4af37; border-bottom: none; cursor: pointer; border-radius: 4px 4px 0 0; color: #f4e4c1; font-weight: bold; white-space: nowrap; margin-right: -2px;">👤 Account</button>
+            <button id="dashboardTabDecks" onclick="switchDashboardTab('decks')" style="flex: 0 0 auto; padding: 6px 8px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-bottom: none; cursor: pointer; border-radius: 4px 4px 0 0; color: #f4e4c1; white-space: nowrap; margin-right: -2px;">🃏 Decks</button>
             <button id="dashboardTabHistory" onclick="switchDashboardTab('history')" style="flex: 0 0 auto; padding: 6px 8px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-bottom: none; cursor: pointer; border-radius: 4px 4px 0 0; color: #f4e4c1; white-space: nowrap; margin-right: -2px;">⚔️ History</button>
             <button id="dashboardTabAchievements" onclick="switchDashboardTab('achievements')" style="flex: 0 0 auto; padding: 6px 8px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-bottom: none; cursor: pointer; border-radius: 4px 4px 0 0; color: #f4e4c1; white-space: nowrap; margin-right: -2px;">🏆 Achievements</button>
             <button id="dashboardTabSocial" onclick="switchDashboardTab('social')" style="flex: 0 0 auto; padding: 6px 8px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-bottom: none; cursor: pointer; border-radius: 4px 4px 0 0; color: #f4e4c1; white-space: nowrap; margin-right: -2px;">👥 Social</button>
             <button id="dashboardTabNotifications" onclick="switchDashboardTab('notifications')" style="flex: 0 0 auto; padding: 6px 8px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-bottom: none; cursor: pointer; border-radius: 4px 4px 0 0; color: #f4e4c1; white-space: nowrap;">🔔 Notifications</button>
         </div>
 
-        <!-- Compact Header Section -->
-        <div style="display: grid; grid-template-columns: auto 1fr; gap: 12px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 2px solid #8b6f47;">
-            <!-- Avatar with Level Indicator -->
-            <div style="text-align: center; min-width: 80px; position: relative;">
-                <div style="position: relative; display: inline-block;">
-                    <div style="font-size: 50px; margin-bottom: 4px;" id="profileAvatarDisplay">🤴</div>
-                    <!-- Level Badge -->
-                    <div id="avatarLevelBadge" style="position: absolute; top: -5px; right: -5px; background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); border: 2px solid #d4af37; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: #2a1810; box-shadow: 0 2px 4px rgba(0,0,0,0.5);">1</div>
-                </div>
-                <button onclick="openAvatarSelector()" style="padding: 4px 8px; font-size: 10px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 1px solid #d4af37; cursor: pointer; border-radius: 3px; color: #f4e4c1; width: 100%;">Change</button>
-            </div>
-            
-            <!-- Info Grid -->
-            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;">
-                <!-- Username -->
-                <div style="grid-column: span 2; padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 3px;">
-                    <div style="color: #d4af37; font-size: 10px; font-weight: bold; margin-bottom: 3px; text-transform: uppercase;">Username</div>
-                    <div id="profileUsername" style="color: #f4e4c1; font-size: 12px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">-</div>
-                </div>
-                <!-- Join Date -->
-                <div style="padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 3px;">
-                    <div style="color: #d4af37; font-size: 10px; font-weight: bold; margin-bottom: 3px; text-transform: uppercase;">Joined</div>
-                    <div id="profileJoinDate" style="color: #f4e4c1; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">-</div>
-                </div>
-                <!-- Gold -->
-                <div style="text-align: center; padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 3px;">
-                    <div style="color: #ffd700; font-size: 16px; font-weight: bold;" id="statsGold">0</div>
-                    <div style="color: #aaa; font-size: 9px; margin-top: 2px;">Gold</div>
-                </div>
-                <!-- Gems -->
-                <div style="text-align: center; padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 3px;">
-                    <div style="color: #00ff00; font-size: 16px; font-weight: bold;" id="statsGems">0</div>
-                    <div style="color: #aaa; font-size: 9px; margin-top: 2px;">Gems</div>
-                </div>
-            </div>
-            
-            <!-- Second Row: Deck Builder -->
-            <div style="grid-column: 2; margin-top: 6px;">
-                <button onclick="openDeckBuilderFromDashboard()" style="padding: 6px 10px; font-size: 11px; background: linear-gradient(135deg, #8b4a8b 0%, #6b3a6b 100%); border: 1px solid #d4af37; cursor: pointer; border-radius: 3px; color: #f4e4c1; font-weight: bold; white-space: nowrap;">🃏 Deck Builder</button>
-            </div>
-        </div>
-
         <!-- Tab Content -->
         <div style="min-height: 350px; max-height: 500px; overflow-y: auto; overflow-x: hidden; padding-right: 5px;">
-            <!-- Account Tab (Profile + Settings merged) -->
+            <!-- Account Tab -->
             <div id="dashboardContentAccount" style="display: block;">
+                <!-- Compact Header: Avatar, Username, Joined, Gold, Gems -->
+                <div style="display: grid; grid-template-columns: auto 1fr; gap: 10px; margin-bottom: 12px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid #8b6f47; border-radius: 4px;">
+                    <!-- Avatar -->
+                    <div style="text-align: center; min-width: 70px; position: relative;">
+                        <div style="position: relative; display: inline-block;">
+                            <div style="font-size: 50px; margin-bottom: 4px;" id="profileAvatarDisplay">🤴</div>
+                            <div id="avatarLevelBadge" style="position: absolute; top: -3px; right: -3px; background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); border: 2px solid #d4af37; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: #2a1810; box-shadow: 0 2px 4px rgba(0,0,0,0.5);">1</div>
+                        </div>
+                        <button onclick="openAvatarSelector()" style="padding: 4px 8px; font-size: 11px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 1px solid #d4af37; cursor: pointer; border-radius: 3px; color: #f4e4c1; width: auto; min-width: 60px;">Change</button>
+                    </div>
+                    
+                    <!-- Info Grid: Username, Joined, Gold, Gems -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px;">
+                        <div style="padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 3px;">
+                            <div style="color: #d4af37; font-size: 11px; font-weight: bold; margin-bottom: 3px; text-transform: uppercase;">Username</div>
+                            <div id="profileUsername" style="color: #f4e4c1; font-size: 14px; font-weight: bold; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">-</div>
+                        </div>
+                        <div style="padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 3px;">
+                            <div style="color: #d4af37; font-size: 11px; font-weight: bold; margin-bottom: 3px; text-transform: uppercase;">Joined</div>
+                            <div id="profileJoinDate" style="color: #f4e4c1; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">-</div>
+                        </div>
+                        <div style="text-align: center; padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 3px;">
+                            <div style="color: #ffd700; font-size: 20px; font-weight: bold;" id="statsGold">0</div>
+                            <div style="color: #aaa; font-size: 11px; margin-top: 2px;">Gold</div>
+                        </div>
+                        <div style="text-align: center; padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 3px;">
+                            <div style="color: #00ff00; font-size: 20px; font-weight: bold;" id="statsGems">0</div>
+                            <div style="color: #aaa; font-size: 11px; margin-top: 2px;">Gems</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Profile and Settings - Compact Grid -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     <!-- Left Column: Profile -->
                     <div>
-                        <p style="color: #d4af37; font-size: 12px; font-weight: bold; margin-bottom: 6px; text-transform: uppercase;">Profile</p>
-                        <div style="padding: 8px; background: rgba(0,0,0,0.2); border: 1px solid #8b6f47; border-radius: 4px;">
+                        <p style="color: #d4af37; font-size: 13px; font-weight: bold; margin-bottom: 6px; text-transform: uppercase;">Profile</p>
+                        <div style="padding: 8px; background: rgba(0,0,0,0.2); border: 1px solid #8b6f47; border-radius: 3px;">
                             <div style="margin-bottom: 8px;">
-                                <label style="color: #d4af37; font-size: 11px; display: block; margin-bottom: 3px; font-weight: bold;">Display Name</label>
-                                <input id="profileDisplayName" type="text" style="width: 100%; padding: 6px; border: 1px solid #8b6f47; background: rgba(0,0,0,0.5); color: #f4e4c1; border-radius: 3px; font-size: 12px;" placeholder="Display name">
+                                <label style="color: #d4af37; font-size: 12px; display: block; margin-bottom: 3px; font-weight: bold;">Display Name</label>
+                                <input id="profileDisplayName" type="text" style="width: 100%; padding: 6px; border: 1px solid #8b6f47; background: rgba(0,0,0,0.5); color: #f4e4c1; border-radius: 3px; font-size: 13px;" placeholder="Display name">
                             </div>
                             <div style="margin-bottom: 8px;">
-                                <label style="color: #d4af37; font-size: 11px; display: block; margin-bottom: 3px; font-weight: bold;">Email</label>
-                                <input id="profileEmail" type="text" style="width: 100%; padding: 6px; border: 1px solid #8b6f47; background: rgba(0,0,0,0.5); color: #f4e4c1; border-radius: 3px; font-size: 12px;" readonly>
+                                <label style="color: #d4af37; font-size: 12px; display: block; margin-bottom: 3px; font-weight: bold;">Email</label>
+                                <input id="profileEmail" type="text" style="width: 100%; padding: 6px; border: 1px solid #8b6f47; background: rgba(0,0,0,0.5); color: #f4e4c1; border-radius: 3px; font-size: 13px;" readonly>
                             </div>
                             <div style="margin-bottom: 8px;">
-                                <label style="color: #d4af37; font-size: 11px; display: block; margin-bottom: 3px; font-weight: bold;">Unit Type</label>
-                                <input id="profilePreferredUnitType" type="text" style="width: 100%; padding: 6px; border: 1px solid #8b6f47; background: rgba(0,0,0,0.5); color: #f4e4c1; border-radius: 3px; font-size: 12px;" readonly>
+                                <label style="color: #d4af37; font-size: 12px; display: block; margin-bottom: 3px; font-weight: bold;">Unit Type</label>
+                                <input id="profilePreferredUnitType" type="text" style="width: 100%; padding: 6px; border: 1px solid #8b6f47; background: rgba(0,0,0,0.5); color: #f4e4c1; border-radius: 3px; font-size: 13px;" readonly>
                             </div>
                             <div>
-                                <label style="color: #d4af37; font-size: 11px; display: block; margin-bottom: 3px; font-weight: bold;">Bio <span id="bioCharCount" style="color: #777; font-size: 10px;">(0/200)</span></label>
-                                <textarea id="profileBio" style="width: 100%; padding: 6px; border: 1px solid #8b6f47; background: rgba(0,0,0,0.5); color: #f4e4c1; border-radius: 3px; resize: vertical; min-height: 50px; font-family: 'Cinzel', serif; font-size: 12px;" placeholder="Bio..."></textarea>
+                                <label style="color: #d4af37; font-size: 12px; display: block; margin-bottom: 3px; font-weight: bold;">Bio <span id="bioCharCount" style="color: #777; font-size: 10px;">(0/200)</span></label>
+                                <textarea id="profileBio" style="width: 100%; padding: 6px; border: 1px solid #8b6f47; background: rgba(0,0,0,0.5); color: #f4e4c1; border-radius: 3px; resize: vertical; min-height: 50px; font-family: 'Cinzel', serif; font-size: 13px;" placeholder="Bio..."></textarea>
                             </div>
                         </div>
                     </div>
                     
                     <!-- Right Column: Settings -->
                     <div>
-                        <p style="color: #d4af37; font-size: 12px; font-weight: bold; margin-bottom: 6px; text-transform: uppercase;">Security</p>
-                        <div style="display: grid; gap: 4px; margin-bottom: 10px;">
-                            <button onclick="openChangePasswordModal()" style="width: 100%; padding: 6px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 1px solid #d4af37; font-size: 11px; cursor: pointer; border-radius: 3px; color: #f4e4c1; font-weight: bold;">🔒 Change Password</button>
-                            <button onclick="openChangeEmailModal()" style="width: 100%; padding: 6px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 1px solid #d4af37; font-size: 11px; cursor: pointer; border-radius: 3px; color: #f4e4c1; font-weight: bold;">📧 Change Email</button>
-                            <button onclick="logoutAllSessions()" style="width: 100%; padding: 6px; background: linear-gradient(135deg, #8b4a4a 0%, #6b3a3a 100%); border: 1px solid #d4af37; font-size: 11px; cursor: pointer; border-radius: 3px; color: #f4e4c1; font-weight: bold;">🚪 Log Out All</button>
+                        <p style="color: #d4af37; font-size: 13px; font-weight: bold; margin-bottom: 6px; text-transform: uppercase;">Security</p>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 8px;">
+                            <button onclick="openChangePasswordModal()" style="padding: 6px 8px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 1px solid #d4af37; font-size: 12px; cursor: pointer; border-radius: 3px; color: #f4e4c1; font-weight: bold;">🔒 Password</button>
+                            <button onclick="openChangeEmailModal()" style="padding: 6px 8px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 1px solid #d4af37; font-size: 12px; cursor: pointer; border-radius: 3px; color: #f4e4c1; font-weight: bold;">📧 Email</button>
                         </div>
+                        <button onclick="logoutAllSessions()" style="width: auto; min-width: 120px; padding: 6px; background: linear-gradient(135deg, #8b4a4a 0%, #6b3a3a 100%); border: 1px solid #d4af37; font-size: 12px; cursor: pointer; border-radius: 3px; color: #f4e4c1; font-weight: bold; margin-bottom: 8px;">🚪 Log Out All</button>
                         
-                        <p style="color: #d4af37; font-size: 12px; font-weight: bold; margin-bottom: 6px; margin-top: 10px; text-transform: uppercase;">Account</p>
-                        <div id="deletionStatus" style="margin-bottom: 6px; padding: 6px; background: rgba(139, 111, 71, 0.2); border: 1px solid #8b6f47; border-radius: 3px; font-size: 11px; color: #f4e4c1;">
-                            <div style="text-align: center; color: #888;">Loading...</div>
-                        </div>
-                        <button onclick="openAccountDeletionModal()" style="width: 100%; padding: 6px; background: linear-gradient(135deg, #8b1a1a 0%, #5a0f0f 100%); border: 1px solid #c41e3a; font-size: 11px; cursor: pointer; border-radius: 3px; color: #f4e4c1; font-weight: bold; margin-bottom: 10px;">🗑️ Delete Account</button>
+                        <p style="color: #d4af37; font-size: 13px; font-weight: bold; margin-bottom: 6px; margin-top: 8px; text-transform: uppercase;">Game Settings</p>
+                        <button onclick="openGameSettingsModal()" style="width: auto; min-width: 120px; padding: 6px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 1px solid #d4af37; font-size: 12px; cursor: pointer; border-radius: 3px; color: #f4e4c1; font-weight: bold; margin-bottom: 8px;">⚙️ Settings</button>
                         
-                        <p style="color: #d4af37; font-size: 12px; font-weight: bold; margin-bottom: 6px; margin-top: 10px; text-transform: uppercase;">Audio</p>
-                        <div style="display: grid; gap: 4px; margin-bottom: 10px;">
-                            <label style="display: flex; align-items: center; color: #f4e4c1; font-size: 11px;">
-                                <input type="checkbox" id="toggleSoundEffects" style="margin-right: 6px;"> Sound Effects
-                            </label>
-                            <label style="display: flex; align-items: center; color: #f4e4c1; font-size: 11px;">
-                                <input type="checkbox" id="toggleMusic" style="margin-right: 6px;"> Music
-                            </label>
-                        </div>
-                        
-                        <p style="color: #d4af37; font-size: 12px; font-weight: bold; margin-bottom: 6px; margin-top: 10px; text-transform: uppercase;">Visual</p>
-                        <div style="display: grid; gap: 4px;">
-                            <label style="display: flex; align-items: center; color: #f4e4c1; font-size: 11px;">
-                                <input type="checkbox" id="toggleReduceAnimations" style="margin-right: 6px;"> Reduce Animations
-                            </label>
-                            <label style="display: flex; align-items: center; color: #f4e4c1; font-size: 11px;">
-                                <input type="checkbox" id="toggleDisableVisualEffects" style="margin-right: 6px;"> Disable Effects
-                            </label>
-                        </div>
+                        <button onclick="openAccountDeletionModal()" style="width: auto; min-width: 120px; padding: 6px; background: linear-gradient(135deg, #8b1a1a 0%, #5a0f0f 100%); border: 1px solid #c41e3a; font-size: 12px; cursor: pointer; border-radius: 3px; color: #f4e4c1; font-weight: bold; margin-top: 8px;">🗑️ Delete Account</button>
                     </div>
+                </div>
+            </div>
+
+            <!-- Decks Tab -->
+            <div id="dashboardContentDecks" style="display: none;">
+                <div style="margin-bottom: 15px;">
+                    <button onclick="openDeckBuilderFromDashboard()" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #8b4a8b 0%, #6b3a6b 100%); border: 2px solid #d4af37; font-size: 16px; cursor: pointer; border-radius: 4px; color: #f4e4c1; font-weight: bold; margin-bottom: 15px;">🃏 Deck Builder</button>
+                </div>
+                
+                <p style="color: #d4af37; font-size: 15px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Your Custom Decks</p>
+                <div id="dashboardDecksList" style="font-size: 14px;">
+                    <div style="text-align: center; color: #888; padding: 20px;">Loading decks...</div>
                 </div>
             </div>
 
             <!-- History Tab -->
             <div id="dashboardContentHistory" style="display: none;">
-                <p style="color: #d4af37; font-size: 14px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Recent Matches</p>
-                <div id="matchHistoryList" style="font-size: 12px;">
+                <p style="color: #d4af37; font-size: 15px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Recent Matches</p>
+                <div id="matchHistoryList" style="font-size: 14px;">
                     <div style="text-align: center; color: #888; padding: 20px;">Loading...</div>
                 </div>
             </div>
@@ -2972,41 +2980,41 @@
             <!-- Achievements Tab -->
             <div id="dashboardContentAchievements" style="display: none;">
                 <!-- Stats Section -->
-                <div style="margin-bottom: 15px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid #8b6f47; border-radius: 4px;">
-                    <p style="color: #d4af37; font-size: 12px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase;">📊 Statistics</p>
-                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
-                        <div style="text-align: center; padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 3px;">
-                            <div style="color: #4caf50; font-size: 20px; font-weight: bold;" id="statsWins">0</div>
-                            <div style="color: #aaa; font-size: 11px; margin-top: 4px;">Wins</div>
+                <div style="margin-bottom: 15px; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid #8b6f47; border-radius: 4px;">
+                    <p style="color: #d4af37; font-size: 15px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">📊 Statistics</p>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+                        <div style="text-align: center; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 4px;">
+                            <div style="color: #4caf50; font-size: 24px; font-weight: bold;" id="statsWins">0</div>
+                            <div style="color: #aaa; font-size: 14px; margin-top: 4px;">Wins</div>
                         </div>
-                        <div style="text-align: center; padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 3px;">
-                            <div style="color: #ff6b6b; font-size: 20px; font-weight: bold;" id="statsLosses">0</div>
-                            <div style="color: #aaa; font-size: 11px; margin-top: 4px;">Losses</div>
+                        <div style="text-align: center; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 4px;">
+                            <div style="color: #ff6b6b; font-size: 24px; font-weight: bold;" id="statsLosses">0</div>
+                            <div style="color: #aaa; font-size: 14px; margin-top: 4px;">Losses</div>
                         </div>
-                        <div style="text-align: center; padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 3px;">
-                            <div style="color: #d4af37; font-size: 20px; font-weight: bold;" id="statsWinRate">0%</div>
-                            <div style="color: #aaa; font-size: 11px; margin-top: 4px;">Win Rate</div>
+                        <div style="text-align: center; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 4px;">
+                            <div style="color: #d4af37; font-size: 24px; font-weight: bold;" id="statsWinRate">0%</div>
+                            <div style="color: #aaa; font-size: 14px; margin-top: 4px;">Win Rate</div>
                         </div>
-                        <div style="text-align: center; padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 3px;">
-                            <div style="color: #ffd700; font-size: 20px; font-weight: bold;" id="statsLevel">1</div>
-                            <div style="color: #aaa; font-size: 11px; margin-top: 4px;">Level</div>
+                        <div style="text-align: center; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 4px;">
+                            <div style="color: #ffd700; font-size: 24px; font-weight: bold;" id="statsLevel">1</div>
+                            <div style="color: #aaa; font-size: 14px; margin-top: 4px;">Level</div>
                         </div>
                     </div>
                     <!-- XP Progress -->
-                    <div style="margin-top: 10px; padding: 8px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 3px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                            <span style="color: #d4af37; font-size: 12px; font-weight: bold;" id="profileLevel">Level 1</span>
-                            <span style="color: #aaa; font-size: 11px;" id="profileXP">0 / 100 XP</span>
+                    <div style="margin-top: 12px; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 4px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="color: #d4af37; font-size: 14px; font-weight: bold;" id="profileLevel">Level 1</span>
+                            <span style="color: #aaa; font-size: 14px;" id="profileXP">0 / 100 XP</span>
                         </div>
-                        <div style="width: 100%; height: 12px; background: rgba(139, 111, 71, 0.3); border-radius: 4px; overflow: hidden;">
+                        <div style="width: 100%; height: 14px; background: rgba(139, 111, 71, 0.3); border-radius: 4px; overflow: hidden;">
                             <div id="profileXPProgress" style="height: 100%; background: linear-gradient(90deg, #4caf50 0%, #2e7d32 100%); width: 0%; transition: width 0.3s;"></div>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Achievements Section -->
-                <p style="color: #d4af37; font-size: 14px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">🏆 Achievements</p>
-                <div id="achievementsList" style="font-size: 12px;">
+                <p style="color: #d4af37; font-size: 15px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">🏆 Achievements</p>
+                <div id="achievementsList" style="font-size: 14px;">
                     <div style="text-align: center; color: #888; padding: 20px;">Loading...</div>
                 </div>
             </div>
@@ -3015,32 +3023,32 @@
             <div id="dashboardContentSocial" style="display: none;">
                 <!-- Sub-tabs for Social -->
                 <div style="display: flex; gap: 5px; margin-bottom: 15px; border-bottom: 1px solid #8b6f47;">
-                    <button onclick="switchSocialView('friends')" id="socialTabFriends" style="padding: 6px 12px; font-size: 11px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 1px solid #d4af37; cursor: pointer; border-radius: 3px 3px 0 0; color: #f4e4c1; font-weight: bold;">👥 Friends</button>
-                    <button onclick="switchSocialView('messages')" id="socialTabMessages" style="padding: 6px 12px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px 3px 0 0; color: #f4e4c1;">💬 Messages</button>
-                    <button onclick="switchSocialView('alliances')" id="socialTabAlliances" style="padding: 6px 12px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px 3px 0 0; color: #f4e4c1;">⚔️ Alliances</button>
+                    <button onclick="switchSocialView('friends')" id="socialTabFriends" style="padding: 8px 14px; font-size: 13px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 1px solid #d4af37; cursor: pointer; border-radius: 3px 3px 0 0; color: #f4e4c1; font-weight: bold;">👥 Friends</button>
+                    <button onclick="switchSocialView('messages')" id="socialTabMessages" style="padding: 8px 14px; font-size: 13px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px 3px 0 0; color: #f4e4c1;">💬 Messages</button>
+                    <button onclick="switchSocialView('alliances')" id="socialTabAlliances" style="padding: 8px 14px; font-size: 13px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px 3px 0 0; color: #f4e4c1;">⚔️ Alliances</button>
                 </div>
                 
                 <!-- Friends View -->
                 <div id="socialViewFriends" style="display: block;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <p style="color: #d4af37; font-size: 14px; font-weight: bold; text-transform: uppercase; margin: 0;">👥 Friends</p>
-                        <button onclick="openAddFriendModal()" style="padding: 6px 12px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px; color: #f4e4c1;">+ Add Friend</button>
+                        <p style="color: #d4af37; font-size: 15px; font-weight: bold; text-transform: uppercase; margin: 0;">👥 Friends</p>
+                        <button onclick="openAddFriendModal()" style="padding: 8px 14px; font-size: 13px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px; color: #f4e4c1;">+ Add Friend</button>
                     </div>
                     
                     <!-- Friend Requests Section -->
-                    <div style="margin-bottom: 15px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid #8b6f47; border-radius: 4px;">
-                        <p style="color: #d4af37; font-size: 12px; font-weight: bold; margin-bottom: 8px;">📨 Friend Requests</p>
-                        <div id="friendRequestsList" style="font-size: 12px;">
+                    <div style="margin-bottom: 15px; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid #8b6f47; border-radius: 4px;">
+                        <p style="color: #d4af37; font-size: 14px; font-weight: bold; margin-bottom: 8px;">📨 Friend Requests</p>
+                        <div id="friendRequestsList" style="font-size: 14px;">
                             <div style="text-align: center; color: #888; padding: 10px;">Loading...</div>
                         </div>
                     </div>
                     
                     <!-- Friends List -->
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <p style="color: #d4af37; font-size: 12px; font-weight: bold; margin: 0;">Your Friends</p>
-                        <button onclick="switchFriendsView('blocked')" id="friendsViewBlocked" style="padding: 4px 8px; font-size: 10px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px; color: #f4e4c1;">Blocked Users</button>
+                        <p style="color: #d4af37; font-size: 14px; font-weight: bold; margin: 0;">Your Friends</p>
+                        <button onclick="switchFriendsView('blocked')" id="friendsViewBlocked" style="padding: 6px 10px; font-size: 12px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px; color: #f4e4c1;">Blocked Users</button>
                     </div>
-                    <div id="friendsList" style="font-size: 12px;">
+                    <div id="friendsList" style="font-size: 14px;">
                         <div style="text-align: center; color: #888; padding: 20px;">Loading...</div>
                     </div>
                 </div>
@@ -3048,16 +3056,16 @@
                 <!-- Messages View -->
                 <div id="socialViewMessages" style="display: none;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <p style="color: #d4af37; font-size: 14px; font-weight: bold; text-transform: uppercase; margin: 0;">💬 Messages</p>
+                        <p style="color: #d4af37; font-size: 15px; font-weight: bold; text-transform: uppercase; margin: 0;">💬 Messages</p>
                         <div style="display: flex; gap: 5px;">
-                            <button onclick="switchMessagesView('inbox')" id="messagesTabInbox" style="padding: 6px 12px; font-size: 11px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 1px solid #d4af37; cursor: pointer; border-radius: 3px; color: #f4e4c1; font-weight: bold;">Inbox</button>
-                            <button onclick="switchMessagesView('sent')" id="messagesTabSent" style="padding: 6px 12px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px; color: #f4e4c1;">Sent</button>
-                            <button onclick="openComposeMessageModal()" style="padding: 6px 12px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px; color: #f4e4c1;">+ Compose</button>
+                            <button onclick="switchMessagesView('inbox')" id="messagesTabInbox" style="padding: 8px 14px; font-size: 13px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 1px solid #d4af37; cursor: pointer; border-radius: 3px; color: #f4e4c1; font-weight: bold;">Inbox</button>
+                            <button onclick="switchMessagesView('sent')" id="messagesTabSent" style="padding: 8px 14px; font-size: 13px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px; color: #f4e4c1;">Sent</button>
+                            <button onclick="openComposeMessageModal()" style="padding: 8px 14px; font-size: 13px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px; color: #f4e4c1;">+ Compose</button>
                         </div>
                     </div>
                     
                     <!-- Messages List -->
-                    <div id="messagesList" style="font-size: 12px;">
+                    <div id="messagesList" style="font-size: 14px;">
                         <div style="text-align: center; color: #888; padding: 20px;">Loading...</div>
                     </div>
                 </div>
@@ -3065,12 +3073,12 @@
                 <!-- Alliances View -->
                 <div id="socialViewAlliances" style="display: none;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <p style="color: #d4af37; font-size: 14px; font-weight: bold; text-transform: uppercase; margin: 0;">⚔️ Alliances</p>
-                        <button onclick="alert('Alliance feature coming soon!')" style="padding: 6px 12px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px; color: #f4e4c1;">+ Create Alliance</button>
+                        <p style="color: #d4af37; font-size: 15px; font-weight: bold; text-transform: uppercase; margin: 0;">⚔️ Alliances</p>
+                        <button onclick="alert('Alliance feature coming soon!')" style="padding: 8px 14px; font-size: 13px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px; color: #f4e4c1;">+ Create Alliance</button>
                     </div>
                     <div style="text-align: center; color: #888; padding: 40px; background: rgba(0,0,0,0.2); border: 1px solid #8b6f47; border-radius: 4px;">
-                        <p style="font-size: 14px; margin-bottom: 10px;">Alliances feature coming soon!</p>
-                        <p style="font-size: 12px; color: #aaa;">Join or create alliances with other players to compete together.</p>
+                        <p style="font-size: 16px; margin-bottom: 10px;">Alliances feature coming soon!</p>
+                        <p style="font-size: 14px; color: #aaa;">Join or create alliances with other players to compete together.</p>
                     </div>
                 </div>
             </div>
@@ -3078,10 +3086,10 @@
             <!-- Notifications Tab -->
             <div id="dashboardContentNotifications" style="display: none;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <p style="color: #d4af37; font-size: 14px; font-weight: bold; text-transform: uppercase; margin: 0;">🔔 Notifications</p>
-                    <button onclick="markAllNotificationsRead()" style="padding: 6px 12px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px; color: #f4e4c1;">Mark All Read</button>
+                    <p style="color: #d4af37; font-size: 15px; font-weight: bold; text-transform: uppercase; margin: 0;">🔔 Notifications</p>
+                    <button onclick="markAllNotificationsRead()" style="padding: 8px 14px; font-size: 13px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px; color: #f4e4c1;">Mark All Read</button>
                 </div>
-                <div id="notificationsList" style="font-size: 12px;">
+                <div id="notificationsList" style="font-size: 14px;">
                     <div style="text-align: center; color: #888; padding: 20px;">Loading...</div>
                 </div>
             </div>
@@ -3288,6 +3296,37 @@
             <br>
             <button onclick="closeSettingsMenu()" style="padding: 12px 30px; margin-top: 20px; font-size: 11px;">Continue Game</button>
         </div>
+    </div>
+
+    <!-- Game Settings Modal (Account Dashboard) -->
+    <div class="modal" id="gameSettingsModal" style="display: none; max-width: 500px;">
+        <h1 style="font-size: 22px; margin-bottom: 20px; color: #d4af37;">⚙️ Game Settings</h1>
+        
+        <div style="margin-bottom: 20px;">
+            <p style="color: #d4af37; font-size: 14px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Audio</p>
+            <div style="display: grid; gap: 8px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid #8b6f47; border-radius: 4px;">
+                <label style="display: flex; align-items: center; color: #f4e4c1; font-size: 14px;">
+                    <input type="checkbox" id="toggleSoundEffects" style="margin-right: 8px; width: 18px; height: 18px;"> Sound Effects
+                </label>
+                <label style="display: flex; align-items: center; color: #f4e4c1; font-size: 14px;">
+                    <input type="checkbox" id="toggleMusic" style="margin-right: 8px; width: 18px; height: 18px;"> Music
+                </label>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <p style="color: #d4af37; font-size: 14px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Visual</p>
+            <div style="display: grid; gap: 8px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid #8b6f47; border-radius: 4px;">
+                <label style="display: flex; align-items: center; color: #f4e4c1; font-size: 14px;">
+                    <input type="checkbox" id="toggleReduceAnimations" style="margin-right: 8px; width: 18px; height: 18px;"> Reduce Animations
+                </label>
+                <label style="display: flex; align-items: center; color: #f4e4c1; font-size: 14px;">
+                    <input type="checkbox" id="toggleDisableVisualEffects" style="margin-right: 8px; width: 18px; height: 18px;"> Disable Visual Effects
+                </label>
+            </div>
+        </div>
+        
+        <button onclick="closeGameSettingsModal()" style="width: 100%; padding: 10px; background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%); border: 1px solid #8b6f47; font-size: 13px; cursor: pointer; border-radius: 4px; color: #f4e4c1; font-weight: bold;">Close</button>
     </div>
 
     <!-- Lobby Modal (Multiplayer) -->

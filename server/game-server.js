@@ -1699,13 +1699,30 @@ function executeAttack(room, role, attacker, target, targetType) {
   const infantryBonus = attacker.unitType === 'infantry' ? 1 : 0;
   const cavalryBonus = attacker.unitType === 'cavalry' ? 1 : 0;
   
-  damage = damage + weaponBonus + typeAdvantage + infantryBonus + cavalryBonus;
+  // Hero passive bonus - only for specific heroes with damage passives
+  let heroPassiveBonus = 0;
+  if (player.hero) {
+    // Robin Hood: Your ranged units deal +1 damage
+    if (player.hero.id === 'robinHood' && attacker.unitType === 'ranged') {
+      heroPassiveBonus = 1;
+    }
+    // Leonidas: Your infantry units deal +1 damage
+    else if (player.hero.id === 'leonidas' && attacker.unitType === 'infantry') {
+      heroPassiveBonus = 1;
+    }
+    // Genghis Khan: Your cavalry units deal +1 damage
+    else if (player.hero.id === 'genghisKhan' && attacker.unitType === 'cavalry') {
+      heroPassiveBonus = 1;
+    }
+  }
+  
+  damage = damage + weaponBonus + typeAdvantage + infantryBonus + cavalryBonus + heroPassiveBonus;
   damage = Math.max(1, damage); // Ensure minimum damage of 1
   
   // Log attacker properties for debugging
   console.log(`[ATTACK] ${role} ${attacker.name} attacks ${targetType} ${target.name || 'hero'}`);
   console.log(`[ATTACK] Attacker stats: power=${attacker.power}, health=${attacker.health}, unitType=${attacker.unitType}, ranged=${attacker.ranged}`);
-  console.log(`[ATTACK] Bonuses: weapon=${weaponBonus}, typeAdv=${typeAdvantage}, infantry=${infantryBonus}, cavalry=${cavalryBonus}`);
+  console.log(`[ATTACK] Bonuses: weapon=${weaponBonus}, typeAdv=${typeAdvantage}, infantry=${infantryBonus}, cavalry=${cavalryBonus}, heroPassive=${heroPassiveBonus}`);
   console.log(`[ATTACK] Total damage: ${damage}`);
 
   if (targetType === 'hero') {

@@ -2117,6 +2117,7 @@ function initializePlayerGame() {
     const gameLog = document.getElementById('gameLog');
     const endTurnBtn = document.getElementById('endTurnBtn');
     const settingsBtn = document.getElementById('settingsBtn');
+    const handCardPreview = document.getElementById('handCardPreview');
 
     if (modal) modal.style.display = 'none';
     if (overlay) overlay.style.display = 'none';
@@ -2125,6 +2126,7 @@ function initializePlayerGame() {
     if (gameLog) gameLog.style.display = 'block';
     if (endTurnBtn) endTurnBtn.style.display = 'block';
     if (settingsBtn) settingsBtn.classList.remove('hidden');
+    if (handCardPreview) handCardPreview.style.display = 'block';
 
     // Draw starting hands
     console.log('[Game] Drawing starting hands. Player deck size:', game.player.deck.length);
@@ -2457,6 +2459,35 @@ function playCard(card, player, target = null) {
         return false;
     }
 
+    // Tactical Retreat: Check for valid friendly target BEFORE paying cost or removing card
+    if (card.id === 'tacticalRetreat' && card.needsTarget) {
+        // Check if target is valid (friendly bannerman)
+        if (!target || (target.type !== 'unit' && target.type !== 'construct')) {
+            // Invalid or no target - don't consume card, start targeting instead
+            if (player === 'player') {
+                startTargeting(card);
+                return true; // Return early, card not consumed yet
+            } else {
+                // AI: return false to not consume card
+                return false;
+            }
+        }
+        // Check if target is friendly (on player's board)
+        const boardIndex = playerData.board.findIndex(u => u.instanceId === target.instanceId);
+        if (boardIndex < 0) {
+            // Target is not on friendly board - don't consume card, show error and start targeting
+            if (player === 'player') {
+                log(`${card.name} must target a friendly bannerman!`, player);
+                startTargeting(card);
+                return true; // Return early, card not consumed yet
+            } else {
+                // AI: return false to not consume card
+                return false;
+            }
+        }
+        // Valid friendly target - proceed with card play
+    }
+
     // Calculate cost
     let cost = card.cost;
     if (playerData.hero && playerData.hero.id === 'shadowBlade' && card.type === 'ability' && playerData.constructsPlayed === 0) {
@@ -2478,6 +2509,11 @@ function playCard(card, player, target = null) {
             // Will combine - playConstruct will handle hand removal
             cardHandledRemoval = true;
         }
+    }
+    
+    // Tactical Retreat: Mark that playTechnique will handle removal (we already validated target above)
+    if (card.id === 'tacticalRetreat') {
+        cardHandledRemoval = true;
     }
 
     // Remove from hand only if not handled by the play function
@@ -2640,33 +2676,18 @@ function playConstruct(card, player) {
         }
     }
 
-    // Ranger: Destroy target enemy equipment on enter
+    // Ranger: Destroy random enemy bannerman on enter
     if (construct.id === 'ranger' && construct.keywords && construct.keywords.includes('ranger')) {
         const enemyData = player === 'player' ? game.enemy : game.player;
-        const equipmentSlots = enemyData.equipmentSlots || {};
-        const equippedItems = Object.values(equipmentSlots).filter(eq => eq !== null);
+        const enemyBoard = enemyData.board || [];
         
-        if (equippedItems.length > 0) {
-            // Need to target equipment - set up targeting mode
-            if (player === 'player') {
-                game.targeting = { 
-                    mode: 'rangerEquipment', 
-                    player: player,
-                    construct: construct
-                };
-                startRangerEquipmentTargeting(player);
-            } else {
-                // AI: Randomly destroy equipment
-                const randomEquipment = equippedItems[Math.floor(Math.random() * equippedItems.length)];
-                const slot = Object.keys(equipmentSlots).find(key => equipmentSlots[key] === randomEquipment);
-                if (slot) {
-                    equipmentSlots[slot] = null;
-                    updateHeroMaxHealth(player === 'player' ? 'enemy' : 'player');
-                    log(`${construct.name} destroyed enemy ${randomEquipment.name}!`, player);
-                }
-            }
+        if (enemyBoard.length > 0) {
+            // Destroy random enemy bannerman
+            const randomBannerman = enemyBoard[Math.floor(Math.random() * enemyBoard.length)];
+            destroyConstruct(randomBannerman, player === 'player' ? 'enemy' : 'player');
+            log(`${construct.name} destroyed enemy ${randomBannerman.name}!`, player);
         } else {
-            log(`${construct.name}: No enemy equipment to destroy.`, player);
+            log(`${construct.name}: No enemy bannermen to destroy.`, player);
         }
     }
 
@@ -2841,8 +2862,20 @@ function playTechnique(card, player, target) {
                 const slot = Object.keys(equipmentSlots).find(key => equipmentSlots[key] === randomEquipment);
                 if (slot) {
                     equipmentSlots[slot] = null;
+                    
+                    // If weapon was destroyed, reset weapon tracking
+                    if (slot === 'weapon') {
+                        enemyData.weaponCount = 0;
+                        enemyData.weaponEnchantments = 0;
+                        // Also clear legacy equipment reference
+                        enemyData.equipment = null;
+                    }
+                    
                     updateHeroMaxHealth(player === 'player' ? 'enemy' : 'player');
                     log(`${card.name} destroyed enemy ${randomEquipment.name}!`, player);
+                    
+                    // Update UI to refresh hero card with new attack power
+                    updateUI();
                 }
             } else {
                 log(`${card.name}: No enemy equipment to destroy.`, player);
@@ -2964,17 +2997,35 @@ function playTechnique(card, player, target) {
             log(`${card.name}: Dealt 3 to all enemies, drew 2 cards, gained +1 max essence permanently!`, player);
         } else if (card.id === 'tacticalRetreat') {
             // Tactical Retreat: Return unit to hand, draw 2
+            // Target validation and card removal already handled in playCard()
+            // At this point, we know target is valid and card is marked for removal
             if (target && (target.type === 'unit' || target.type === 'construct')) {
                 const boardIndex = playerData.board.findIndex(u => u.instanceId === target.instanceId);
                 if (boardIndex >= 0) {
+                    // Remove card from hand (if not already removed)
+                    const handIndex = playerData.hand.findIndex(c => 
+                        c.id === card.id && 
+                        (c.tier || 1) === (card.tier || 1) &&
+                        (!card.instanceId || c.instanceId === card.instanceId)
+                    );
+                    if (handIndex >= 0) {
+                        playerData.hand.splice(handIndex, 1);
+                    }
+                    
+                    // Return unit to hand and draw cards
                     playerData.board.splice(boardIndex, 1);
                     playerData.hand.push(target);
                     for (let i = 0; i < 2; i++) {
                         drawCard(player);
                     }
                     log(`${card.name}: Returned ${target.name} to hand and drew 2 cards!`, player);
+                } else {
+                    // This shouldn't happen if validation worked correctly, but handle it anyway
+                    log(`${card.name}: Target must be a friendly bannerman!`, player);
+                    return false;
                 }
-            } else if (card.needsTarget) {
+            } else {
+                // This shouldn't happen if validation worked correctly, but handle it anyway
                 log(`${card.name} requires a target!`, player);
                 return false;
             }
@@ -3063,11 +3114,14 @@ function updateHeroMaxHealth(player) {
         }
     });
     
-    // Base health is 30, armor adds to max health
-    const newMaxHealth = 30 + armorBonus;
-    const oldMaxHealth = playerData.maxHealth || 30;
+    // Base health is hero's starting health (from hero data), armor adds to max health
+    // Always use hero.health as the base, never use maxHealth (which may already include armor)
+    const baseHealth = playerData.hero?.health || GAME_CONSTANTS.STARTING_HEALTH || 30;
+    const newMaxHealth = baseHealth + armorBonus;
+    const oldMaxHealth = playerData.maxHealth || baseHealth;
     
     if (newMaxHealth !== oldMaxHealth) {
+        const oldHealth = playerData.health;
         playerData.maxHealth = newMaxHealth;
         
         // If max health decreased, cap current health at new max (don't go below 0)
@@ -3079,7 +3133,11 @@ function updateHeroMaxHealth(player) {
             // Max health increased - add the difference to current health
             const healthIncrease = newMaxHealth - oldMaxHealth;
             playerData.health += healthIncrease;
-            log(`${player} gained ${healthIncrease} health from armor!`, player);
+            // Ensure health doesn't exceed max health
+            if (playerData.health > playerData.maxHealth) {
+                playerData.health = playerData.maxHealth;
+            }
+            log(`${player} gained ${healthIncrease} health from armor! (${oldHealth} -> ${playerData.health}, max: ${newMaxHealth})`, player);
         }
     }
 }
@@ -3228,7 +3286,25 @@ function attack(attacker, target, attackerPlayer) {
         const typeAdvantage = getTypeAdvantage(attacker, target);
         const infantryBonus = attacker.unitType === 'infantry' ? 1 : 0;
         const cavalryBonus = attacker.unitType === 'cavalry' ? 1 : 0;
-        let attackerPower = attacker.power + weaponBonus + typeAdvantage + infantryBonus + cavalryBonus;
+        
+        // Hero passive bonus - only for specific heroes with damage passives
+        let heroPassiveBonus = 0;
+        if (attackerData.hero) {
+            // Robin Hood: Your ranged units deal +1 damage
+            if (attackerData.hero.id === 'robinHood' && attacker.unitType === 'ranged') {
+                heroPassiveBonus = 1;
+            }
+            // Leonidas: Your infantry units deal +1 damage
+            else if (attackerData.hero.id === 'leonidas' && attacker.unitType === 'infantry') {
+                heroPassiveBonus = 1;
+            }
+            // Genghis Khan: Your cavalry units deal +1 damage
+            else if (attackerData.hero.id === 'genghisKhan' && attacker.unitType === 'cavalry') {
+                heroPassiveBonus = 1;
+            }
+        }
+        
+        let attackerPower = attacker.power + weaponBonus + typeAdvantage + infantryBonus + cavalryBonus + heroPassiveBonus;
         // Ensure minimum damage of 1
         attackerPower = Math.max(1, attackerPower);
         const defenderPower = target.power;
@@ -3978,16 +4054,48 @@ function returnToMainMenu() {
     if (playerNameInput) {
         const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
         if (isLoggedIn) {
-            // Use logged-in user's username
-            try {
-                const userData = JSON.parse(sessionStorage.getItem('userData'));
-                if (userData && userData.username) {
-                    playerNameInput.value = userData.username;
+            // First check if we have displayName stored in sessionStorage
+            const storedDisplayName = sessionStorage.getItem('userDisplayName');
+            if (storedDisplayName) {
+                playerNameInput.value = storedDisplayName;
+            } else {
+                // Try to get displayName from profile, fallback to username
+                try {
+                    const userData = JSON.parse(sessionStorage.getItem('userData'));
+                    if (userData) {
+                        // Try to load profile to get displayName
+                        const token = localStorage.getItem('token');
+                        if (token && userData.userId) {
+                            fetch(`/api/profile/${userData.userId}`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success && data.profile) {
+                                    const nameToUse = data.profile.displayName || data.profile.username || '';
+                                    if (nameToUse) {
+                                        playerNameInput.value = nameToUse;
+                                        sessionStorage.setItem('userDisplayName', nameToUse);
+                                    }
+                                } else if (userData.username) {
+                                    playerNameInput.value = userData.username || '';
+                                }
+                            })
+                            .catch(() => {
+                                // Fallback to username from userData
+                                if (userData.username) {
+                                    playerNameInput.value = userData.username || '';
+                                }
+                            });
+                        } else if (userData.username) {
+                            playerNameInput.value = userData.username || '';
+                        }
+                    }
+                } catch (e) {
+                    // Fallback to guest name if parsing fails
+                    const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+                    playerNameInput.value = `Anon${randomNum}`;
                 }
-            } catch (e) {
-                // Fallback to guest name if parsing fails
-                const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-                playerNameInput.value = `Anon${randomNum}`;
             }
         } else {
             // Generate new random guest name
@@ -5046,7 +5154,19 @@ function calculateTotalPower(card, playerData, enemyData) {
         return card?.power || 0;
     }
     
-    let totalPower = card.power || 0;
+    // Get base power from card database to avoid using modified power values
+    // For Watch Tower and other cards that modify power during attacks, we need the original base power
+    let basePower = card.power || 0;
+    if (card.id && (window.CARD_DATABASE || CARD_DATABASE)) {
+        const cardDatabase = window.CARD_DATABASE || CARD_DATABASE;
+        const cardData = cardDatabase[card.id];
+        if (cardData && cardData.power !== undefined) {
+            // Use base power from database (for Watch Tower, this is 0)
+            basePower = cardData.power || 0;
+        }
+    }
+    
+    let totalPower = basePower;
     
     // Formation bonus (from keyword)
     if (card.keywords && card.keywords.includes('formation')) {
@@ -5087,6 +5207,18 @@ function calculateTotalPower(card, playerData, enemyData) {
         if (hasEnemyInfantry) {
             totalPower += 1;
         }
+    }
+    
+    // Watch Tower: Gets +1 attack for every friendly bannerman on the battlefield
+    // Note: Watch Tower base power is 0, so totalPower starts at 0
+    if (card.watchTowerEffect || card.id === 'watchTower') {
+        // Count all friendly bannermen (units/constructs) excluding Watch Tower itself
+        const friendlyBannermen = playerData.board.filter(u => 
+            u.instanceId !== card.instanceId && 
+            (u.type === 'unit' || u.type === 'construct')
+        );
+        // Add +1 attack for each friendly bannerman
+        totalPower += friendlyBannermen.length;
     }
     
     return totalPower;
@@ -5594,36 +5726,56 @@ function startTargeting(card) {
     
     // Add visual highlights and click handlers to valid targets
     if (card.targetType === 'unit' || card.targetType === 'construct') {
-        // Target enemy units/constructs only
-        const enemyBoard = document.getElementById('enemyBoard');
-        if (enemyBoard) {
-            const constructEls = enemyBoard.querySelectorAll('.card');
-            constructEls.forEach(el => {
-                if (el._cardData) {
-                    el.classList.add('valid-target');
-                    el.onclick = () => {
-                        if (game.targeting && (game.targeting.mode === 'spell' || game.targeting.mode === 'ability')) {
-                            playCard(card, 'player', el._cardData);
-                            cancelTargeting();
-                        }
-                    };
-                }
-            });
-        }
-        
-        // If ability with damage, also allow hero targeting
-        if (canTargetHero) {
-            const enemyHeroCard = document.getElementById('enemyHeroCard');
-            if (enemyHeroCard) {
-                const heroCardEl = enemyHeroCard.querySelector('.card');
-                if (heroCardEl) {
-                    heroCardEl.classList.add('valid-target');
-                    heroCardEl.onclick = () => {
-                        if (game.targeting && (game.targeting.mode === 'spell' || game.targeting.mode === 'ability')) {
-                            playCard(card, 'player', { type: 'hero', name: 'Enemy', id: 'enemyHero' });
-                            cancelTargeting();
-                        }
-                    };
+        // Check if this is Tactical Retreat (targets friendly bannermen)
+        if (card.id === 'tacticalRetreat' || card.targetType === 'bannerman') {
+            // Tactical Retreat: Target friendly units/constructs only
+            const playerBoard = document.getElementById('playerBoard');
+            if (playerBoard) {
+                const constructEls = playerBoard.querySelectorAll('.card');
+                constructEls.forEach(el => {
+                    if (el._cardData) {
+                        el.classList.add('valid-target');
+                        el.onclick = () => {
+                            if (game.targeting && (game.targeting.mode === 'spell' || game.targeting.mode === 'ability')) {
+                                playCard(card, 'player', el._cardData);
+                                cancelTargeting();
+                            }
+                        };
+                    }
+                });
+            }
+        } else {
+            // Target enemy units/constructs only
+            const enemyBoard = document.getElementById('enemyBoard');
+            if (enemyBoard) {
+                const constructEls = enemyBoard.querySelectorAll('.card');
+                constructEls.forEach(el => {
+                    if (el._cardData) {
+                        el.classList.add('valid-target');
+                        el.onclick = () => {
+                            if (game.targeting && (game.targeting.mode === 'spell' || game.targeting.mode === 'ability')) {
+                                playCard(card, 'player', el._cardData);
+                                cancelTargeting();
+                            }
+                        };
+                    }
+                });
+            }
+            
+            // If ability with damage, also allow hero targeting
+            if (canTargetHero) {
+                const enemyHeroCard = document.getElementById('enemyHeroCard');
+                if (enemyHeroCard) {
+                    const heroCardEl = enemyHeroCard.querySelector('.card');
+                    if (heroCardEl) {
+                        heroCardEl.classList.add('valid-target');
+                        heroCardEl.onclick = () => {
+                            if (game.targeting && (game.targeting.mode === 'spell' || game.targeting.mode === 'ability')) {
+                                playCard(card, 'player', { type: 'hero', name: 'Enemy', id: 'enemyHero' });
+                                cancelTargeting();
+                            }
+                        };
+                    }
                 }
             }
         }
@@ -5999,7 +6151,13 @@ function showCardPreview(card, event) {
     // Calculate bonus breakdown for board cards
     let bonusHTML = '';
     if (hasStats) {
-        const ownerClass = event.target.closest('.player-board') ? 'player' : 'enemy';
+        // Determine owner by checking which board the card is in
+        // Find the card element (event.target might be a child element)
+        const cardElement = event.target.closest('.card') || event.target;
+        const playerBoardEl = document.getElementById('playerBoard');
+        const enemyBoardEl = document.getElementById('enemyBoard');
+        const isPlayerCard = playerBoardEl && (playerBoardEl.contains(cardElement) || playerBoardEl.contains(event.target));
+        const ownerClass = isPlayerCard ? 'player' : 'enemy';
         const playerData = ownerClass === 'player' ? game.player : game.enemy;
         let bonusInfo = [];
         let totalBonus = 0;
@@ -6240,16 +6398,47 @@ function initializeGameData() {
                 if (playerNameInput) {
                     const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
                     if (isLoggedIn) {
-                        // Use logged-in user's username
-                        try {
-                            const userData = JSON.parse(sessionStorage.getItem('userData'));
-                            if (userData && userData.username) {
-                                playerNameInput.value = userData.username;
+                        // First check if we have displayName stored in sessionStorage
+                        const storedDisplayName = sessionStorage.getItem('userDisplayName');
+                        if (storedDisplayName) {
+                            playerNameInput.value = storedDisplayName;
+                        } else {
+                            // Try to load profile to get displayName
+                            try {
+                                const userData = JSON.parse(sessionStorage.getItem('userData'));
+                                if (userData && userData.userId) {
+                                    const token = localStorage.getItem('token');
+                                    if (token) {
+                                        fetch(`/api/profile/${userData.userId}`, {
+                                            headers: { 'Authorization': `Bearer ${token}` }
+                                        })
+                                        .then(res => res.json())
+                                        .then(data => {
+                                            if (data.success && data.profile) {
+                                                const nameToUse = data.profile.displayName || data.profile.username || '';
+                                                if (nameToUse) {
+                                                    playerNameInput.value = nameToUse;
+                                                    sessionStorage.setItem('userDisplayName', nameToUse);
+                                                }
+                                            } else if (userData.username) {
+                                                playerNameInput.value = userData.username;
+                                            }
+                                        })
+                                        .catch(() => {
+                                            // Fallback to username
+                                            if (userData.username) {
+                                                playerNameInput.value = userData.username;
+                                            }
+                                        });
+                                    } else if (userData.username) {
+                                        playerNameInput.value = userData.username;
+                                    }
+                                }
+                            } catch (e) {
+                                // Fallback to guest name if parsing fails
+                                const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+                                playerNameInput.value = `Anon${randomNum}`;
                             }
-                        } catch (e) {
-                            // Fallback to guest name if parsing fails
-                            const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-                            playerNameInput.value = `Anon${randomNum}`;
                         }
                     } else {
                         // Generate random guest name
@@ -6277,16 +6466,47 @@ function initializeGameData() {
             if (playerNameInput) {
                 const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
                 if (isLoggedIn) {
-                    // Use logged-in user's username
-                    try {
-                        const userData = JSON.parse(sessionStorage.getItem('userData'));
-                        if (userData && userData.username) {
-                            playerNameInput.value = userData.username;
+                    // First check if we have displayName stored in sessionStorage
+                    const storedDisplayName = sessionStorage.getItem('userDisplayName');
+                    if (storedDisplayName) {
+                        playerNameInput.value = storedDisplayName;
+                    } else {
+                        // Try to load profile to get displayName
+                        try {
+                            const userData = JSON.parse(sessionStorage.getItem('userData'));
+                            if (userData && userData.userId) {
+                                const token = localStorage.getItem('token');
+                                if (token) {
+                                    fetch(`/api/profile/${userData.userId}`, {
+                                        headers: { 'Authorization': `Bearer ${token}` }
+                                    })
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        if (data.success && data.profile) {
+                                            const nameToUse = data.profile.displayName || data.profile.username || '';
+                                            if (nameToUse) {
+                                                playerNameInput.value = nameToUse;
+                                                sessionStorage.setItem('userDisplayName', nameToUse);
+                                            }
+                                        } else if (userData.username) {
+                                            playerNameInput.value = userData.username;
+                                        }
+                                    })
+                                    .catch(() => {
+                                        // Fallback to username
+                                        if (userData.username) {
+                                            playerNameInput.value = userData.username;
+                                        }
+                                    });
+                                } else if (userData.username) {
+                                    playerNameInput.value = userData.username;
+                                }
+                            }
+                        } catch (e) {
+                            // Fallback to guest name if parsing fails
+                            const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+                            playerNameInput.value = `Anon${randomNum}`;
                         }
-                    } catch (e) {
-                        // Fallback to guest name if parsing fails
-                        const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-                        playerNameInput.value = `Anon${randomNum}`;
                     }
                 } else {
                     // Generate random guest name
@@ -6871,8 +7091,9 @@ function confirmMultiplayerHero() {
     console.log('[Game] networkManager.isMultiplayer:', networkManager?.isMultiplayer);
 
     // Check if this is single player or multiplayer
-    // Single player if gameMode is explicitly 'singleplayer' OR if networkManager doesn't exist/isn't connected
-    const isSinglePlayer = gameMode === 'singleplayer' || (!networkManager || !networkManager.isMultiplayer);
+    // If gameMode is explicitly 'singleplayer', treat as single player
+    // Otherwise, if we're in the multiplayer hero modal, treat as multiplayer
+    const isSinglePlayer = gameMode === 'singleplayer';
     console.log('[Game] Is single player?', isSinglePlayer);
     
     if (isSinglePlayer) {
@@ -6885,6 +7106,10 @@ function confirmMultiplayerHero() {
         startGame(selectedMultiplayerHero.id);
         return;
     }
+    
+    // Ensure gameMode is set to multiplayer
+    gameMode = 'multiplayer';
+    setGameMode('multiplayer');
 
     console.log('[Game] Starting multiplayer matchmaking');
 
@@ -7003,13 +7228,19 @@ function confirmMultiplayerHero() {
     if (!playerName) {
         const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
         if (isLoggedIn) {
-            try {
-                const userData = JSON.parse(sessionStorage.getItem('userData'));
-                if (userData && userData.username) {
-                    playerName = userData.username;
+            // First check if we have displayName stored in sessionStorage
+            const storedDisplayName = sessionStorage.getItem('userDisplayName');
+            if (storedDisplayName) {
+                playerName = storedDisplayName;
+            } else {
+                try {
+                    const userData = JSON.parse(sessionStorage.getItem('userData'));
+                    if (userData && userData.username) {
+                        playerName = userData.username;
+                    }
+                } catch (e) {
+                    console.error('Error reading userData:', e);
                 }
-            } catch (e) {
-                console.error('Error reading userData:', e);
             }
         }
     }
@@ -7249,6 +7480,8 @@ function loadProfileData(userId) {
         if (data.success) {
             populateProfileUI(data.profile);
             populateStatsUI(data.stats);
+            // Update player name input with displayName
+            updatePlayerNameInput(data.profile);
             document.getElementById('accountDashboardModal').style.display = 'block';
             
             // Load match history
@@ -7502,7 +7735,7 @@ function markAllNotificationsRead() {
 
 function switchDashboardTab(tab) {
     // Hide all tab contents
-    const tabs = ['account', 'history', 'achievements', 'social', 'notifications'];
+    const tabs = ['account', 'decks', 'history', 'achievements', 'social', 'notifications'];
     tabs.forEach(t => {
         const content = document.getElementById(`dashboardContent${t.charAt(0).toUpperCase() + t.slice(1)}`);
         const tabBtn = document.getElementById(`dashboardTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
@@ -7545,9 +7778,134 @@ function switchDashboardTab(tab) {
             // Load notifications
             loadNotifications(userData.userId, token);
         } else if (tab === 'account') {
-            // Load deletion status
-            loadDeletionStatus();
+            // Account tab - no special loading needed
+        } else if (tab === 'decks') {
+            // Load user decks
+            loadDashboardDecks(userData.userId, token);
         }
+    }
+}
+
+function loadDashboardDecks(userId, token) {
+    const decksList = document.getElementById('dashboardDecksList');
+    if (!decksList) return;
+    
+    decksList.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">Loading decks...</div>';
+    
+    fetch(`/api/deck/${userId}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(async res => {
+        if (!res.ok) {
+            throw new Error(`HTTP ${res.status}`);
+        }
+        const contentType = res.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            throw new Error('Response is not JSON');
+        }
+        return res.json();
+    })
+    .then(data => {
+        if (data.success && data.decks) {
+            const decks = data.decks || [];
+            
+            if (decks.length === 0) {
+                decksList.innerHTML = '<div style="text-align: center; color: #888; padding: 20px; font-size: 14px;">No custom decks found. Create one in the Deck Builder!</div>';
+                return;
+            }
+            
+            // Group decks by unit type
+            const decksByType = {};
+            decks.forEach(deck => {
+                const unitType = deck.heroUnitType || deck.unitType || 'unknown';
+                if (!decksByType[unitType]) {
+                    decksByType[unitType] = [];
+                }
+                decksByType[unitType].push(deck);
+            });
+            
+            let html = '';
+            Object.keys(decksByType).forEach(unitType => {
+                const unitTypeNames = {
+                    'ranged': '🏹 Ranged',
+                    'infantry': '🛡️ Infantry',
+                    'cavalry': '🐎 Cavalry'
+                };
+                const typeName = unitTypeNames[unitType] || unitType;
+                html += `<div style="margin-bottom: 15px; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid #8b6f47; border-radius: 4px;">`;
+                html += `<p style="color: #d4af37; font-size: 15px; font-weight: bold; margin-bottom: 10px;">${typeName}</p>`;
+                
+                decksByType[unitType].forEach(deck => {
+                    const cardCount = deck.cardList ? (Array.isArray(deck.cardList) ? deck.cardList.length : JSON.parse(deck.cardList).length) : 0;
+                    html += `<div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; margin-bottom: 8px; background: rgba(0,0,0,0.3); border: 1px solid #8b6f47; border-radius: 4px;">`;
+                    html += `<div>`;
+                    html += `<div style="color: #f4e4c1; font-size: 15px; font-weight: bold;">${deck.deckName || 'Unnamed Deck'}</div>`;
+                    html += `<div style="color: #aaa; font-size: 13px; margin-top: 3px;">${cardCount} cards</div>`;
+                    html += `</div>`;
+                    html += `<div style="display: flex; gap: 5px;">`;
+                    html += `<button onclick="editDashboardDeck(${deck.id})" style="padding: 8px 12px; font-size: 13px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px; color: #f4e4c1;">Edit</button>`;
+                    html += `</div>`;
+                    html += `</div>`;
+                });
+                
+                html += `</div>`;
+            });
+            
+            decksList.innerHTML = html;
+        } else {
+            decksList.innerHTML = '<div style="text-align: center; color: #888; padding: 20px; font-size: 14px;">Error loading decks.</div>';
+        }
+    })
+    .catch(error => {
+        console.error('Error loading dashboard decks:', error);
+        decksList.innerHTML = '<div style="text-align: center; color: #888; padding: 20px; font-size: 14px;">Error loading decks.</div>';
+    });
+}
+
+function editDashboardDeck(deckId) {
+    const token = localStorage.getItem('token');
+    const userData = JSON.parse(sessionStorage.getItem('userData'));
+    
+    if (!token || !userData) {
+        alert('Session expired. Please log in again.');
+        return;
+    }
+    
+    // Find the deck in userSavedDecks
+    const deck = userSavedDecks.find(d => d.id === deckId);
+    if (deck) {
+        openDeckBuilderFromDashboard();
+        setTimeout(() => {
+            editSavedDeck(deck);
+        }, 500);
+    } else {
+        // If not found, fetch it
+        const user = JSON.parse(userData);
+        fetch(`/api/deck/${user.userId}/${deckId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        .then(async res => {
+            if (!res.ok) throw new Error('Failed to load deck');
+            return res.json();
+        })
+        .then(data => {
+            if (data.success && data.deck) {
+                openDeckBuilderFromDashboard();
+                setTimeout(() => {
+                    editSavedDeck(data.deck);
+                }, 500);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading deck:', error);
+            alert('Failed to load deck for editing.');
+        });
     }
 }
 
@@ -8687,18 +9045,39 @@ function populateMatchHistory(matches) {
     }).join('');
 }
 
-function populateProfileUI(profile) {
-    // Update header username (now a div)
-    const usernameEl = document.getElementById('profileUsername');
-    if (usernameEl) {
-        usernameEl.textContent = profile.username || '-';
+function updatePlayerNameInput(profile) {
+    const playerNameInput = document.getElementById('playerNameInput');
+    if (playerNameInput && profile) {
+        // Use displayName if available, otherwise fallback to username
+        const nameToUse = profile.displayName || profile.username || '';
+        if (nameToUse) {
+            playerNameInput.value = nameToUse;
+            // Store in sessionStorage for quick access
+            sessionStorage.setItem('userDisplayName', nameToUse);
+        }
     }
-    
-    document.getElementById('profileDisplayName').value = profile.displayName;
-    document.getElementById('profileEmail').value = profile.email;
-    document.getElementById('profileBio').value = profile.bio;
+}
 
-    // Format and display join date
+function populateProfileUI(profile) {
+    // Update username in Account tab (now a div, not input)
+    const usernameEls = document.querySelectorAll('#profileUsername');
+    usernameEls.forEach(el => {
+        el.textContent = profile.username || '-';
+    });
+    
+    const displayNameEl = document.getElementById('profileDisplayName');
+    if (displayNameEl) displayNameEl.value = profile.displayName || '';
+    
+    const emailEl = document.getElementById('profileEmail');
+    if (emailEl) emailEl.value = profile.email || '';
+    
+    const bioEl = document.getElementById('profileBio');
+    if (bioEl) bioEl.value = profile.bio || '';
+    
+    // Update player name input with displayName
+    updatePlayerNameInput(profile);
+
+    // Format and display join date in Account tab (now a div, not input)
     if (profile.createdAt) {
         const joinDate = new Date(profile.createdAt);
         const formattedDate = joinDate.toLocaleDateString('en-US', {
@@ -8706,11 +9085,15 @@ function populateProfileUI(profile) {
             month: 'long',
             day: 'numeric'
         });
-        // Update header join date (now a div)
-        const joinDateEl = document.getElementById('profileJoinDate');
-        if (joinDateEl) {
-            joinDateEl.textContent = formattedDate || '-';
-        }
+        const joinDateEls = document.querySelectorAll('#profileJoinDate');
+        joinDateEls.forEach(el => {
+            el.textContent = formattedDate;
+        });
+    } else {
+        const joinDateEls = document.querySelectorAll('#profileJoinDate');
+        joinDateEls.forEach(el => {
+            el.textContent = '-';
+        });
     }
 
     // Display preferred unit type
@@ -8870,6 +9253,24 @@ function closeChangePasswordModal() {
         document.getElementById('newPassword').value = '';
         document.getElementById('confirmNewPassword').value = '';
         document.getElementById('changePasswordMessage').style.display = 'none';
+    }
+}
+
+function openGameSettingsModal() {
+    const modal = document.getElementById('gameSettingsModal');
+    const dashboard = document.getElementById('accountDashboardModal');
+    if (modal) {
+        modal.style.display = 'block';
+        if (dashboard) dashboard.style.display = 'none';
+    }
+}
+
+function closeGameSettingsModal() {
+    const modal = document.getElementById('gameSettingsModal');
+    const dashboard = document.getElementById('accountDashboardModal');
+    if (modal) {
+        modal.style.display = 'none';
+        if (dashboard) dashboard.style.display = 'block';
     }
 }
 
@@ -9863,6 +10264,8 @@ if (typeof window !== 'undefined') {
     window.openChangeEmailModal = openChangeEmailModal;
     window.closeChangeEmailModal = closeChangeEmailModal;
     window.submitChangeEmail = submitChangeEmail;
+    window.openGameSettingsModal = openGameSettingsModal;
+    window.closeGameSettingsModal = closeGameSettingsModal;
     window.confirmDeckBuilderHero = confirmDeckBuilderHero;
     window.cancelDeckBuilderHeroSelection = cancelDeckBuilderHeroSelection;
     window.selectDeckBuilderHero = selectDeckBuilderHero;
@@ -9878,6 +10281,8 @@ if (typeof window !== 'undefined') {
     window.copySavedDeck = copySavedDeck;
     window.switchDashboardTab = switchDashboardTab;
     window.switchSocialView = switchSocialView;
+    window.loadDashboardDecks = loadDashboardDecks;
+    window.editDashboardDeck = editDashboardDeck;
     window.logoutAllSessions = logoutAllSessions;
     window.openAccountDeletionModal = openAccountDeletionModal;
     window.closeAccountDeletionModal = closeAccountDeletionModal;
