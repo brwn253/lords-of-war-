@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lords of War - Authentication</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Cinzel', serif;
+            background: linear-gradient(135deg, #2a1810 0%, #1a0f0a 100%);
+            color: #f4e4c1;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                linear-gradient(90deg, rgba(70, 35, 10, 0.2) 1px, transparent 1px),
+                linear-gradient(rgba(70, 35, 10, 0.2) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .auth-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            max-width: 1000px;
+            width: 90%;
+            min-height: 600px;
+            background: rgba(42, 24, 16, 0.8);
+            border: 3px solid #8b6f47;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), inset 0 0 40px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 10;
+        }
+
+        .auth-art {
+            background: linear-gradient(135deg, #3e2414 0%, #2a1810 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            border-right: 2px solid #8b6f47;
+            position: relative;
+            overflow: hidden;
+            min-height: 600px;
+        }
+
+        .auth-art::before {
+            content: '⚔️';
+            position: absolute;
+            font-size: 200px;
+            opacity: 0.1;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-15deg);
+        }
+
+        .auth-art h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #d4af37;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            position: relative;
+            z-index: 1;
+        }
+
+        .auth-art p {
+            font-size: 18px;
+            color: #a8956f;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 35px;
+            position: relative;
+            z-index: 1;
+            overflow-y: auto;
+            max-height: 100%;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #8b6f47;
+            padding-bottom: 15px;
+            width: 100%;
+        }
+
+        .form-header h2 {
+            font-size: 26px;
+            color: #d4af37;
+            margin-bottom: 8px;
+        }
+
+        .form-header p {
+            font-size: 13px;
+            color: #a8956f;
+        }
+
+        .form-group {
+            width: 100%;
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #d4af37;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            background: rgba(30, 20, 15, 0.8);
+            border: 2px solid #8b6f47;
+            color: #f4e4c1;
+            font-family: 'Cinzel', serif;
+            font-size: 13px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #d4af37;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+        }
+
+        .form-group input::placeholder {
+            color: #8b6f47;
+        }
+
+        .error {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-top: 6px;
+            display: none;
+        }
+
+        .success {
+            color: #2ecc71;
+            font-size: 12px;
+            margin-top: 6px;
+            display: none;
+        }
+
+        .form-group input.invalid {
+            border-color: #e74c3c;
+        }
+
+        .form-group input.valid {
+            border-color: #2ecc71;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+            border: none;
+            color: #2a1810;
+            font-family: 'Cinzel', serif;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 12px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .form-footer {
+            text-align: center;
+            font-size: 12px;
+            color: #a8956f;
+            border-top: 1px solid #8b6f47;
+            padding-top: 12px;
+            margin-top: 12px;
+            width: 100%;
+        }
+
+        .form-footer a {
+            color: #d4af37;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .alert {
+            width: 100%;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            display: none;
+        }
+
+        .alert.error {
+            background: rgba(231, 76, 60, 0.1);
+            border: 1px solid #e74c3c;
+            color: #e74c3c;
+        }
+
+        .alert.success {
+            background: rgba(46, 204, 113, 0.1);
+            border: 1px solid #2ecc71;
+            color: #2ecc71;
+        }
+
+        .password-requirements {
+            font-size: 10px !important;
+            color: #a8956f !important;
+            margin-top: 4px !important;
+            line-height: 1.3 !important;
+        }
+
+        @media (max-width: 768px) {
+            .auth-container {
+                grid-template-columns: 1fr;
+                min-height: auto;
+                width: 95%;
+            }
+
+            .auth-art {
+                border-right: none;
+                border-bottom: 2px solid #8b6f47;
+                min-height: 200px;
+                padding: 30px;
+            }
+
+            .auth-form {
+                padding: 30px 25px;
+            }
+
+            .form-header h2 {
+                font-size: 22px;
+            }
+
+            .form-group input {
+                font-size: 12px;
+            }
+
+            .btn {
+                font-size: 12px;
+                padding: 9px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-art">
+            <h1>LORDS OF WAR</h1>
+            <p>Medieval Card Game</p>
+            <p style="margin-top: 30px; font-size: 14px; max-width: 300px;">
+                Engage in epic battles of strategy and skill. Collect cards, build decks, and claim victory!
+            </p>
+        </div>
+
+        <div class="auth-form">
+            <div class="form-header">
+                <h2 id="formTitle">Welcome Back</h2>
+                <p id="formSubtitle">The realm awaits your return</p>
+            </div>
+
+            <div id="alertBox" class="alert"></div>
+
+            <!-- LOGIN FORM -->
+            <form id="loginForm" style="width: 100%;">
+                <div class="form-group">
+                    <label for="loginEmail">Username or Email</label>
+                    <input
+                        type="text"
+                        id="loginEmail"
+                        placeholder="username or your.email@example.com"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input
+                        type="password"
+                        id="loginPassword"
+                        placeholder="••••••••"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="btn" id="loginBtn">ENTER THE REALM</button>
+
+                <div class="form-footer">
+                    <div>Don't have an account? <a onclick="switchToRegister()">Forge a Legend</a></div>
+                    <div style="margin-top: 12px; border-top: 1px solid #8b6f47; padding-top: 12px;">Or <a onclick="playAsGuest()">play as guest</a></div>
+                </div>
+            </form>
+
+            <!-- REGISTER FORM -->
+            <form id="registerForm" style="display: none; width: 100%;">
+                <div class="form-group">
+                    <label for="regUsername">Adventurer's Name</label>
+                    <input
+                        type="text"
+                        id="regUsername"
+                        placeholder="Choose your legend..."
+                        required
+                    >
+                    <span class="error" id="usernameError"></span>
+                    <span class="success" id="usernameSuccess"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="regEmail">Email</label>
+                    <input
+                        type="email"
+                        id="regEmail"
+                        placeholder="your.email@example.com"
+                        required
+                    >
+                    <span class="error" id="emailError"></span>
+                    <span class="success" id="emailSuccess"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="regPassword">Password</label>
+                    <input
+                        type="password"
+                        id="regPassword"
+                        placeholder="••••••••"
+                        required
+                    >
+                    <span class="error" id="passwordError"></span>
+                    <div class="password-requirements">
+                        • 8+ chars • Uppercase • Number • Special char
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="regConfirmPassword">Confirm Password</label>
+                    <input
+                        type="password"
+                        id="regConfirmPassword"
+                        placeholder="••••••••"
+                        required
+                    >
+                    <span class="error" id="confirmError"></span>
+                </div>
+
+                <button type="submit" class="btn" id="registerBtn">CREATE ACCOUNT</button>
+
+                <div class="form-footer">
+                    Already have an account?
+                    <a onclick="switchToLogin()">Enter the Realm</a>
+                </div>
+            </form>
+
+            <!-- GUEST MODE -->
+            <div id="guestPrompt" style="display: none; text-align: center; width: 100%;">
+                <p style="font-size: 13px; color: #a8956f; margin-bottom: 25px;">
+                    Or test the realm without an account
+                </p>
+                <button type="button" class="btn" onclick="playAsGuest()" style="background: linear-gradient(135deg, #666 0%, #444 100%);">PLAY AS GUEST</button>
+                <p style="font-size: 11px; color: #8b6f47; margin-top: 15px;">
+                    (Progress will not be saved)
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '';  // Same server
+
+        // Show/hide functions
+        function switchToLogin() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('guestPrompt').style.display = 'none';
+            document.getElementById('formTitle').textContent = 'Welcome Back';
+            document.getElementById('formSubtitle').textContent = 'The realm awaits your return';
+            clearAlerts();
+        }
+
+        function switchToRegister() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+            document.getElementById('guestPrompt').style.display = 'block';
+            document.getElementById('formTitle').textContent = 'Create Account';
+            document.getElementById('formSubtitle').textContent = 'Forge your legend';
+            clearAlerts();
+        }
+
+        function playAsGuest() {
+            // Set a guest token that indicates no authentication
+            localStorage.setItem('isGuest', 'true');
+            localStorage.removeItem('token'); // Ensure no token set
+            showAlert('Entering the realm as a traveler...', 'success');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1000);
+        }
+
+        function showAlert(message, type) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.textContent = message;
+            alertBox.className = `alert ${type}`;
+            alertBox.style.display = 'block';
+        }
+
+        function clearAlerts() {
+            document.getElementById('alertBox').style.display = 'none';
+        }
+
+        // Registration form
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearAlerts();
+
+            const username = document.getElementById('regUsername').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+
+            // Validation
+            if (password !== confirmPassword) {
+                showAlert('Passwords do not match', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password, confirmPassword })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    localStorage.setItem('token', data.data.token);
+                    showAlert('Account created! Redirecting...', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1500);
+                } else {
+                    showAlert(data.message, 'error');
+                }
+            } catch (error) {
+                showAlert('Registration failed. Please try again.', 'error');
+                console.error(error);
+            }
+        });
+
+        // Login form
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearAlerts();
+
+            const loginIdentifier = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            if (!loginIdentifier || !password) {
+                showAlert('Username/email and password are required', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ loginIdentifier, password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Store authentication data
+                    localStorage.setItem('token', data.data.token);
+                    sessionStorage.setItem('isLoggedIn', 'true');
+                    sessionStorage.setItem('userData', JSON.stringify({
+                        userId: data.data.userId,
+                        username: data.data.username,
+                        email: data.data.email
+                    }));
+                    showAlert('Login successful! Redirecting...', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1500);
+                } else {
+                    showAlert(data.message, 'error');
+                }
+            } catch (error) {
+                showAlert('Login failed. Please try again.', 'error');
+                console.error(error);
+            }
+        });
+
+        // Check if already logged in
+        window.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            if (token) {
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>

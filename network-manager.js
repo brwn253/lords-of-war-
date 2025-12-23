@@ -14,12 +14,21 @@ class NetworkManager {
 
   /**
    * Connect to the multiplayer server
-   * @param {string} serverUrl - Server URL (default: http://localhost:3000)
+   * @param {string} serverUrl - Server URL (auto-detects if not provided)
    */
-  connect(serverUrl = 'http://localhost:3000') {
-    // If already connected and socket is active, don't reconnect
+  connect(serverUrl = null) {
+    // Auto-detect server URL if not provided
+    if (!serverUrl) {
+      const protocol = window.location.protocol;
+      const hostname = window.location.hostname;
+      const port = 8080;
+      serverUrl = `${protocol}//${hostname}:${port}`;
+    }
+    // If already connected and socket is active, ensure handlers are registered
     if (this.connected && this.socket && this.socket.connected) {
-      console.log('Already connected to server');
+      console.log('Already connected to server, ensuring handlers are registered');
+      // Handlers should already be registered, but ensure they are
+      this._registerSocketHandlers();
       return;
     }
 
@@ -54,6 +63,24 @@ class NetworkManager {
       return;
     }
 
+    // Register socket handlers
+    this._registerSocketHandlers();
+  }
+
+  /**
+   * Register all socket event handlers
+   * @private
+   */
+  _registerSocketHandlers() {
+    if (!this.socket) {
+      console.error('[NetworkManager] Cannot register handlers: socket is null');
+      return;
+    }
+
+    // Remove existing handlers to prevent duplicates (only for events we care about)
+    this.socket.off('bothPlayersReady');
+    this.socket.off('waitingForOpponent');
+
     // Connection events
     this.socket.on('connect', () => {
       this.connected = true;
@@ -80,6 +107,17 @@ class NetworkManager {
       this.playerRole = data.yourRole;
       this.isMultiplayer = true;
       this.emit('gameStart', data);
+    });
+
+    this.socket.on('bothPlayersReady', (data) => {
+      console.log('[NetworkManager] ✓✓✓ Both players ready! Received bothPlayersReady event ✓✓✓');
+      console.log('[NetworkManager] Event data:', data);
+      this.emit('bothPlayersReady', data);
+    });
+
+    this.socket.on('waitingForOpponent', () => {
+      console.log('[NetworkManager] Waiting for opponent');
+      this.emit('waitingForOpponent');
     });
 
     this.socket.on('stateUpdate', (gameState) => {
@@ -307,14 +345,20 @@ class NetworkManager {
   /**
    * Remove callback for event
    * @param {string} eventName - Event name
-   * @param {function} callback - Callback to remove
+   * @param {function} callback - Callback to remove (optional - if not provided, removes all handlers)
    */
   off(eventName, callback) {
-    if (this.eventCallbacks[eventName]) {
+    if (!this.eventCallbacks[eventName]) return;
+    
+    if (callback) {
+      // Remove specific callback
       const index = this.eventCallbacks[eventName].indexOf(callback);
       if (index >= 0) {
         this.eventCallbacks[eventName].splice(index, 1);
       }
+    } else {
+      // Remove all callbacks for this event
+      this.eventCallbacks[eventName] = [];
     }
   }
 

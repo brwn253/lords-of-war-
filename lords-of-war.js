@@ -11,10 +11,10 @@ const HISTORIC_LEADERS = {
             commandCost: 2,
             commandName: 'Ambush Tactics',
             commandText: 'Draw 1 card',
-            passive: 'Your ranged units deal +1 damage',
+            passive: 'Your ranged bannermen deal +1 damage',
             portrait: 'RH',
             color: '#2d5016',
-            description: 'Robin Hood\n\n⚔️ HERO TYPE: Ranged\nHP: 48\n\n📋 PASSIVE ABILITY:\nYour ranged units deal +1 damage\n\nRanged Mechanics:\n• +1 attack vs Infantry\n• Take no counter-damage from melee\n• Cavalry deal +1 attack vs Ranged'
+            description: 'Robin Hood\n\n⚔️ HERO TYPE: Ranged\nHP: 48\n\n📋 PASSIVE ABILITY:\nYour ranged bannermen deal +1 damage\n\nRanged Mechanics:\n• +1 attack vs Infantry\n• Take no counter-damage from melee\n• Cavalry deal +1 attack vs Ranged'
         },
         {
             id: 'williamTell',
@@ -65,10 +65,10 @@ const HISTORIC_LEADERS = {
             commandCost: 2,
             commandName: 'Battle Formation',
             commandText: 'Draw 1 card',
-            passive: 'Your infantry units deal +1 damage',
+            passive: 'Your infantry bannermen deal +1 damage',
             portrait: 'LE',
             color: '#5f1a1a',
-            description: 'Leonidas\n\n⚔️ HERO TYPE: Infantry\nHP: 57\nStarts with: Sword\n\n📋 PASSIVE ABILITY:\nYour infantry units deal +1 damage\n\nInfantry Mechanics:\n• +1 attack vs Cavalry\n• Ranged deal +1 attack vs Infantry'
+            description: 'Leonidas\n\n⚔️ HERO TYPE: Infantry\nHP: 57\nStarts with: Sword\n\n📋 PASSIVE ABILITY:\nYour infantry bannermen deal +1 damage\n\nInfantry Mechanics:\n• +1 attack vs Cavalry\n• Ranged deal +1 attack vs Infantry'
         },
         {
             id: 'joanOfArc',
@@ -78,10 +78,10 @@ const HISTORIC_LEADERS = {
             commandCost: 2,
             commandName: 'Holy Crusade',
             commandText: 'Draw 1 card',
-            passive: 'When an infantry unit dies, draw a card',
+            passive: 'When an infantry bannerman dies, draw a card',
             portrait: 'JA',
             color: '#8b3a3a',
-            description: 'Joan of Arc\n\n⚔️ HERO TYPE: Infantry\nHP: 57\nStarts with: Sword\n\n📋 PASSIVE ABILITY:\nWhen an infantry unit dies, draw a card\n\nInfantry Mechanics:\n• +1 attack vs Cavalry\n• Ranged deal +1 attack vs Infantry'
+            description: 'Joan of Arc\n\n⚔️ HERO TYPE: Infantry\nHP: 57\nStarts with: Sword\n\n📋 PASSIVE ABILITY:\nWhen an infantry bannerman dies, draw a card\n\nInfantry Mechanics:\n• +1 attack vs Cavalry\n• Ranged deal +1 attack vs Infantry'
         },
         {
             id: 'richardLionheart',
@@ -91,10 +91,10 @@ const HISTORIC_LEADERS = {
             commandCost: 2,
             commandName: 'Heraldic Wisdom',
             commandText: 'Draw 1 card',
-            passive: 'Your infantry units take 1 less damage',
+            passive: 'Your infantry bannermen take 1 less damage',
             portrait: 'RL',
             color: '#6b4423',
-            description: 'Richard the Lionheart\n\n⚔️ HERO TYPE: Infantry\nHP: 57\nStarts with: Sword\n\n📋 PASSIVE ABILITY:\nYour infantry units take 1 less damage\n\nInfantry Mechanics:\n• +1 attack vs Cavalry\n• Ranged deal +1 attack vs Infantry'
+            description: 'Richard the Lionheart\n\n⚔️ HERO TYPE: Infantry\nHP: 57\nStarts with: Sword\n\n📋 PASSIVE ABILITY:\nYour infantry bannermen take 1 less damage\n\nInfantry Mechanics:\n• +1 attack vs Cavalry\n• Ranged deal +1 attack vs Infantry'
         },
         {
             id: 'williamWallace',
@@ -104,10 +104,10 @@ const HISTORIC_LEADERS = {
             commandCost: 2,
             commandName: 'Highland Strategy',
             commandText: 'Draw 1 card',
-            passive: 'Your infantry units can attack the turn they are played',
+            passive: 'Your infantry bannermen can attack the turn they are played',
             portrait: 'WW',
             color: '#2d3d52',
-            description: 'William Wallace\n\n⚔️ HERO TYPE: Infantry\nHP: 57\nStarts with: Sword\n\n📋 PASSIVE ABILITY:\nYour infantry units can attack the turn they are played\n\nInfantry Mechanics:\n• +1 attack vs Cavalry\n• Ranged deal +1 attack vs Infantry'
+            description: 'William Wallace\n\n⚔️ HERO TYPE: Infantry\nHP: 57\nStarts with: Sword\n\n📋 PASSIVE ABILITY:\nYour infantry bannermen can attack the turn they are played\n\nInfantry Mechanics:\n• +1 attack vs Cavalry\n• Ranged deal +1 attack vs Infantry'
         }
     ],
     cavalry: [
@@ -119,10 +119,10 @@ const HISTORIC_LEADERS = {
             commandCost: 2,
             commandName: 'Scouts Report',
             commandText: 'Draw 1 card',
-            passive: 'Your cavalry units deal +1 damage',
+            passive: 'Your cavalry bannermen deal +1 damage',
             portrait: 'GK',
             color: '#1a3a1a',
-            description: 'Genghis Khan\n\n⚔️ HERO TYPE: Cavalry\nHP: 52\n\n📋 PASSIVE ABILITY:\nYour cavalry units deal +1 damage\n\nCavalry Mechanics:\n• +1 attack vs Ranged\n• Infantry deal +1 attack vs Cavalry'
+            description: 'Genghis Khan\n\n⚔️ HERO TYPE: Cavalry\nHP: 52\n\n📋 PASSIVE ABILITY:\nYour cavalry bannermen deal +1 damage\n\nCavalry Mechanics:\n• +1 attack vs Ranged\n• Infantry deal +1 attack vs Cavalry'
         },
         {
             id: 'alexander',
@@ -132,10 +132,10 @@ const HISTORIC_LEADERS = {
             commandCost: 2,
             commandName: 'Strategic Expansion',
             commandText: 'Draw 1 card',
-            passive: 'When you play a cavalry unit, draw a card',
+            passive: 'When you play a cavalry bannerman, draw a card',
             portrait: 'AT',
             color: '#2d1a5f',
-            description: 'Alexander the Great\n\n⚔️ HERO TYPE: Cavalry\nHP: 52\n\n📋 PASSIVE ABILITY:\nWhen you play a cavalry unit, draw a card\n\nCavalry Mechanics:\n• +1 attack vs Ranged\n• Infantry deal +1 attack vs Cavalry'
+            description: 'Alexander the Great\n\n⚔️ HERO TYPE: Cavalry\nHP: 52\n\n📋 PASSIVE ABILITY:\nWhen you play a cavalry bannerman, draw a card\n\nCavalry Mechanics:\n• +1 attack vs Ranged\n• Infantry deal +1 attack vs Cavalry'
         },
         {
             id: 'saladin',
@@ -157,11 +157,11 @@ const HISTORIC_LEADERS = {
             unitType: 'cavalry',
             commandCost: 2,
             commandName: 'Royal Command',
-            commandText: 'Give target cavalry unit +2/+2',
-            passive: 'Your cavalry units deal +1 counter-damage',
+            commandText: 'Give target cavalry bannerman +2/+2',
+            passive: 'Your cavalry bannermen deal +1 counter-damage',
             portrait: 'CH',
             color: '#1a2d5f',
-            description: 'Charlemagne\n\n⚔️ HERO TYPE: Cavalry\nHP: 52\n\n📋 PASSIVE ABILITY:\nYour cavalry units deal +1 counter-damage\n\nCavalry Mechanics:\n• +1 attack vs Ranged\n• Infantry deal +1 attack vs Cavalry'
+            description: 'Charlemagne\n\n⚔️ HERO TYPE: Cavalry\nHP: 52\n\n📋 PASSIVE ABILITY:\nYour cavalry bannermen deal +1 counter-damage\n\nCavalry Mechanics:\n• +1 attack vs Ranged\n• Infantry deal +1 attack vs Cavalry'
         }
     ]
 };
@@ -214,6 +214,20 @@ const CARD_DATABASE = {
         rarity: 'rare',
         scoutEffect: true
     },
+    watchTower: {
+        id: 'watchTower',
+        name: 'Watch Tower',
+        type: 'unit',
+        unitType: 'ranged',
+        cost: 4,
+        power: 0,
+        durability: 10,
+        text: 'Gets +1 attack for every friendly bannerman on the battlefield. Deals Ranged damage. Cannot attack enemy hero.',
+        rarity: 'epic',
+        keywords: ['watchtower'],
+        watchTowerEffect: true,
+        cannotAttackHero: true
+    },
 
     // ===== INFANTRY MONSTER CARDS =====
     footman: {
@@ -261,6 +275,21 @@ const CARD_DATABASE = {
         text: 'Command: When this unit is played, draw a card. High durability.',
         rarity: 'rare',
         commandEffect: true
+    },
+    battleMedic: {
+        id: 'battleMedic',
+        name: 'Battle Medic',
+        type: 'unit',
+        unitType: 'infantry',
+        cost: 3,
+        power: 1,
+        durability: 8,
+        text: 'When it enters the battlefield, instantly heal 1 damage to all friendly bannerman and heroes. At the end of each turn, heal 1 damage to a friendly character.',
+        rarity: 'epic',
+        keywords: ['medic'],
+        medicEffect: true,
+        healOnEnter: true,
+        healEndOfTurn: true
     },
 
     // ===== CAVALRY MONSTER CARDS =====
@@ -365,7 +394,7 @@ const CARD_DATABASE = {
         type: 'ability',
         unitType: 'ranged',
         cost: 4,
-        text: 'Give all bows in your deck, hand, and equipped +1 Damage permanently.',
+        text: 'Hero attack +1. Each weapon or enchantment adds +1 attack.',
         rarity: 'epic',
         enchantmentEffect: true,
         enchantmentType: 'bow'
@@ -378,6 +407,18 @@ const CARD_DATABASE = {
         cost: 3,
         text: 'Draw 3 cards.',
         rarity: 'common'
+    },
+    launchNet: {
+        id: 'launchNet',
+        name: 'Launch Net',
+        type: 'ability',
+        unitType: 'ranged',
+        cost: 2,
+        text: 'Target Bannerman cannot attack next turn.',
+        rarity: 'rare',
+        needsTarget: true,
+        targetType: 'bannerman',
+        effectType: 'stun'
     },
 
     // ===== INFANTRY ABILITY CARDS =====
@@ -409,7 +450,7 @@ const CARD_DATABASE = {
         type: 'ability',
         unitType: 'infantry',
         cost: 4,
-        text: 'Give all swords equipped AND in your hand +1 attack permanently.',
+        text: 'Hero attack +1. Each weapon or enchantment adds +1 attack.',
         rarity: 'epic'
     },
     supplyLine: {
@@ -431,6 +472,16 @@ const CARD_DATABASE = {
         rarity: 'common',
         needsTarget: true,
         targetType: 'infantry'
+    },
+    disarm: {
+        id: 'disarm',
+        name: 'Disarm',
+        type: 'ability',
+        unitType: 'infantry',
+        cost: 3,
+        text: 'Destroy a random enemy equipment card.',
+        rarity: 'rare',
+        effectType: 'destroyRandomEquipment'
     },
 
     // ===== CAVALRY ABILITY CARDS =====
@@ -462,7 +513,7 @@ const CARD_DATABASE = {
         type: 'ability',
         unitType: 'cavalry',
         cost: 4,
-        text: 'Give all axes equipped AND in your hand +1 attack permanently.',
+        text: 'Hero attack +1. Each weapon or enchantment adds +1 attack.',
         rarity: 'epic'
     },
     courierNetwork: {
@@ -484,6 +535,16 @@ const CARD_DATABASE = {
         rarity: 'rare',
         needsTarget: true,
         targetType: 'cavalry'
+    },
+    sabotage: {
+        id: 'sabotage',
+        name: 'Sabotage',
+        type: 'ability',
+        unitType: 'cavalry',
+        cost: 3,
+        text: 'Destroy a random enemy equipment card.',
+        rarity: 'rare',
+        effectType: 'destroyRandomEquipment'
     },
 
     // ===== NEW UNIVERSAL ABILITY CARDS =====
@@ -534,11 +595,11 @@ const CARD_DATABASE = {
         type: 'equipment',
         unitType: 'ranged',
         cost: 2,
-        text: 'Attach to hero. Hero can deal ranged damage to any enemy character once per turn.',
+        text: 'Attach to hero. First weapon gives +1 attack. Each additional weapon or enchantment adds +1 attack. Hero can deal ranged damage to any enemy character once per turn.',
         rarity: 'common',
         equipType: 'ranged',
         equipSlot: 'weapon',
-        attackPower: 2
+        attackPower: 1
     },
     sword: {
         id: 'sword',
@@ -546,11 +607,11 @@ const CARD_DATABASE = {
         type: 'equipment',
         unitType: 'infantry',
         cost: 2,
-        text: 'Attach to hero. Hero can deal melee damage to any enemy character once per turn.',
+        text: 'Attach to hero. First weapon gives +1 attack. Each additional weapon or enchantment adds +1 attack. Hero can deal melee damage to any enemy character once per turn.',
         rarity: 'common',
         equipType: 'infantry',
         equipSlot: 'weapon',
-        attackPower: 2
+        attackPower: 1
     },
     axe: {
         id: 'axe',
@@ -558,11 +619,11 @@ const CARD_DATABASE = {
         type: 'equipment',
         unitType: 'cavalry',
         cost: 2,
-        text: 'Attach to hero. Hero can deal melee damage to any enemy character once per turn.',
+        text: 'Attach to hero. First weapon gives +1 attack. Each additional weapon or enchantment adds +1 attack. Hero can deal melee damage to any enemy character once per turn.',
         rarity: 'common',
         equipType: 'cavalry',
         equipSlot: 'weapon',
-        attackPower: 2
+        attackPower: 1
     },
     
     // ===== RANGED ARMOR CARDS (Padded Cloth Set) =====
@@ -737,6 +798,368 @@ const CARD_DATABASE = {
         equipType: 'infantry',
         equipSlot: 'boots',
         armorValue: 1
+    },
+
+    // ===== SIEGE CARDS (Available to all hero types) =====
+    ballista: {
+        id: 'ballista',
+        name: 'Ballista',
+        type: 'unit',
+        unitType: 'siege',
+        cost: 5,
+        power: 4,
+        durability: 10,
+        text: 'Siege weapon. High attack and durability. No hitback.',
+        rarity: 'rare',
+        keywords: ['siege']
+    },
+    catapult: {
+        id: 'catapult',
+        name: 'Catapult',
+        type: 'unit',
+        unitType: 'siege',
+        cost: 5,
+        power: 2,
+        durability: 10,
+        text: 'Siege weapon. This unit can attack twice in a turn. No hitback.',
+        rarity: 'epic',
+        keywords: ['siege', 'doubleAttack'],
+        doubleAttack: true
+    },
+
+    // ===== HIGH COST UNITS (5-7 cost) =====
+    
+    // Ranged high-cost units
+    masterArcher: {
+        id: 'masterArcher',
+        name: 'Master Archer',
+        type: 'unit',
+        unitType: 'ranged',
+        cost: 5,
+        power: 5,
+        durability: 5,
+        text: 'Elite ranged unit. When this unit attacks, draw a card. No hitback.',
+        rarity: 'epic',
+        keywords: ['scout'],
+        scoutEffect: true
+    },
+    siegeMaster: {
+        id: 'siegeMaster',
+        name: 'Siege Master',
+        type: 'unit',
+        unitType: 'ranged',
+        cost: 6,
+        power: 4,
+        durability: 8,
+        text: 'When this unit enters the battlefield, deal 2 damage to all enemy units and hero. No hitback.',
+        rarity: 'epic',
+        keywords: ['siege'],
+        enterBattlefieldEffect: true
+    },
+    
+    // Infantry high-cost units
+    champion: {
+        id: 'champion',
+        name: 'Champion',
+        type: 'unit',
+        unitType: 'infantry',
+        cost: 5,
+        power: 5,
+        durability: 7,
+        text: 'Elite infantry unit. When this unit kills an enemy, gain +1/+1 permanently.',
+        rarity: 'epic',
+        keywords: ['champion']
+    },
+    fortressGuard: {
+        id: 'fortressGuard',
+        name: 'Fortress Guard',
+        type: 'unit',
+        unitType: 'infantry',
+        cost: 6,
+        power: 3,
+        durability: 10,
+        text: 'Defensive unit. When attacked, deal 2 damage back to the attacker.',
+        rarity: 'epic',
+        keywords: ['fortress']
+    },
+    warGeneral: {
+        id: 'warGeneral',
+        name: 'War General',
+        type: 'unit',
+        unitType: 'infantry',
+        cost: 7,
+        power: 6,
+        durability: 8,
+        text: 'Legendary commander. All friendly infantry units gain +1/+1 while this is on the battlefield.',
+        rarity: 'legendary',
+        keywords: ['command', 'general'],
+        auraEffect: true
+    },
+    
+    // Cavalry high-cost units
+    heavyCavalry: {
+        id: 'heavyCavalry',
+        name: 'Heavy Cavalry',
+        type: 'unit',
+        unitType: 'cavalry',
+        cost: 5,
+        power: 5,
+        durability: 5,
+        text: 'Elite cavalry unit. Charge. When this unit attacks, deal 1 damage to all enemy units and hero.',
+        rarity: 'epic',
+        keywords: ['charge', 'trample']
+    },
+    cavalryCommander: {
+        id: 'cavalryCommander',
+        name: 'Cavalry Commander',
+        type: 'unit',
+        unitType: 'cavalry',
+        cost: 6,
+        power: 4,
+        durability: 7,
+        text: 'When this unit enters the battlefield, draw 2 cards. Charge.',
+        rarity: 'epic',
+        keywords: ['charge', 'command'],
+        commandEffect: true,
+        drawCards: 2
+    },
+    
+    // ===== HIGH COST ABILITIES (5-7 cost) =====
+    
+    // Ranged high-cost abilities
+    volley: {
+        id: 'volley',
+        name: 'Volley',
+        type: 'ability',
+        unitType: 'ranged',
+        cost: 5,
+        text: 'Deal 2 damage to all enemy units.',
+        rarity: 'epic',
+        effectType: 'aoeDamage',
+        damageAmount: 2
+    },
+    precisionStrike: {
+        id: 'precisionStrike',
+        name: 'Precision Strike',
+        type: 'ability',
+        unitType: 'ranged',
+        cost: 6,
+        text: 'Deal 5 damage to target enemy character. Draw 2 cards.',
+        rarity: 'epic',
+        needsTarget: true,
+        targetType: 'any',
+        damageAmount: 5,
+        drawCards: 2
+    },
+    
+    // Infantry high-cost abilities
+    battleCry: {
+        id: 'battleCry',
+        name: 'Battle Cry',
+        type: 'ability',
+        unitType: 'infantry',
+        cost: 5,
+        text: 'Give all friendly infantry units +2/+2 until end of turn.',
+        rarity: 'epic',
+        effectType: 'massBuff'
+    },
+    lastStand: {
+        id: 'lastStand',
+        name: 'Last Stand',
+        type: 'ability',
+        unitType: 'infantry',
+        cost: 6,
+        text: 'Heal your hero for 5. Draw 3 cards. All friendly units gain +1/+1 until end of turn.',
+        rarity: 'epic',
+        effectType: 'lastStand',
+        healAmount: 5,
+        drawCards: 3
+    },
+    
+    // Cavalry high-cost abilities
+    cavalryCharge: {
+        id: 'cavalryCharge',
+        name: 'Cavalry Charge',
+        type: 'ability',
+        unitType: 'cavalry',
+        cost: 5,
+        text: 'Give all friendly cavalry units +3/+0 until end of turn. Draw a card.',
+        rarity: 'epic',
+        effectType: 'cavalryCharge',
+        drawCards: 1
+    },
+    flankingManeuver: {
+        id: 'flankingManeuver',
+        name: 'Flanking Maneuver',
+        type: 'ability',
+        unitType: 'cavalry',
+        cost: 6,
+        text: 'Deal 3 damage to target enemy character. All friendly cavalry units can attack immediately.',
+        rarity: 'epic',
+        needsTarget: true,
+        targetType: 'any',
+        damageAmount: 3,
+        effectType: 'flanking'
+    },
+    
+    // Universal high-cost abilities
+    reinforcements: {
+        id: 'reinforcements',
+        name: 'Reinforcements',
+        type: 'ability',
+        cost: 5,
+        text: 'Draw 5 cards.',
+        rarity: 'epic',
+        drawCards: 5
+    },
+    warCouncil: {
+        id: 'warCouncil',
+        name: 'War Council',
+        type: 'ability',
+        cost: 6,
+        text: 'Draw 3 cards. Gain +2 maximum essence this turn.',
+        rarity: 'epic',
+        drawCards: 3,
+        effectType: 'essenceBoost'
+    },
+    totalWar: {
+        id: 'totalWar',
+        name: 'Total War',
+        type: 'ability',
+        cost: 7,
+        text: 'Deal 3 damage to all enemy characters. Draw 2 cards. Gain +1 maximum essence permanently.',
+        rarity: 'legendary',
+        effectType: 'totalWar',
+        damageAmount: 3,
+        drawCards: 2
+    },
+    
+    // ===== MID-COST VARIETY CARDS (4-5 cost) =====
+    
+    // Ranged mid-cost
+    longbowman: {
+        id: 'longbowman',
+        name: 'Longbowman',
+        type: 'unit',
+        unitType: 'ranged',
+        cost: 4,
+        power: 3,
+        durability: 4,
+        text: 'Elite ranged unit. When this unit attacks, deal 1 damage to a random enemy unit. No hitback.',
+        rarity: 'rare',
+        keywords: ['piercing']
+    },
+    ranger: {
+        id: 'ranger',
+        name: 'Ranger',
+        type: 'unit',
+        unitType: 'ranged',
+        cost: 4,
+        power: 3,
+        durability: 5,
+        text: 'When this unit enters the battlefield, destroy target enemy equipment. No hitback.',
+        rarity: 'rare',
+        keywords: ['ranger']
+    },
+    
+    // Infantry mid-cost
+    pikeman: {
+        id: 'pikeman',
+        name: 'Pikeman',
+        type: 'unit',
+        unitType: 'infantry',
+        cost: 2,
+        power: 2,
+        durability: 3,
+        text: 'When this unit blocks an attack, deal 1 damage to the attacker before combat.',
+        rarity: 'common',
+        keywords: ['pike']
+    },
+    berserker: {
+        id: 'berserker',
+        name: 'Berserker',
+        type: 'unit',
+        unitType: 'infantry',
+        cost: 3,
+        power: 4,
+        durability: 2,
+        text: 'High attack, low durability. Gains +1 attack when damaged.',
+        rarity: 'rare',
+        keywords: ['berserk']
+    },
+    eliteGuard: {
+        id: 'eliteGuard',
+        name: 'Elite Guard',
+        type: 'unit',
+        unitType: 'infantry',
+        cost: 5,
+        power: 4,
+        durability: 6,
+        text: 'When this unit enters the battlefield, heal your hero for 3.',
+        rarity: 'rare',
+        keywords: ['guard'],
+        healOnEnter: true,
+        healAmount: 3
+    },
+    
+    // Cavalry mid-cost
+    lightCavalry: {
+        id: 'lightCavalry',
+        name: 'Light Cavalry',
+        type: 'unit',
+        unitType: 'cavalry',
+        cost: 2,
+        power: 2,
+        durability: 2,
+        text: 'Charge. When this unit attacks, draw a card if it survives.',
+        rarity: 'common',
+        keywords: ['charge', 'scout']
+    },
+    dragoon: {
+        id: 'dragoon',
+        name: 'Dragoon',
+        type: 'unit',
+        unitType: 'cavalry',
+        cost: 4,
+        power: 4,
+        durability: 4,
+        text: 'Charge. When this unit kills an enemy, draw a card.',
+        rarity: 'rare',
+        keywords: ['charge']
+    },
+    
+    // Universal mid-cost abilities
+    rally: {
+        id: 'rally',
+        name: 'Rally',
+        type: 'ability',
+        cost: 2,
+        text: 'Give all friendly bannermen +1/+1 until end of turn.',
+        rarity: 'common',
+        effectType: 'rally'
+    },
+    fortify: {
+        id: 'fortify',
+        name: 'Fortify',
+        type: 'ability',
+        cost: 3,
+        text: 'Give target friendly bannerman +0/+3 and Taunt (enemies must attack it).',
+        rarity: 'rare',
+        needsTarget: true,
+        targetType: 'bannerman',
+        effectType: 'fortify'
+    },
+    tacticalRetreat: {
+        id: 'tacticalRetreat',
+        name: 'Tactical Retreat',
+        type: 'ability',
+        cost: 4,
+        text: 'Return target friendly unit to your hand. Draw 2 cards.',
+        rarity: 'rare',
+        needsTarget: true,
+        targetType: 'bannerman',
+        effectType: 'retreat',
+        drawCards: 2
     },
 };
 

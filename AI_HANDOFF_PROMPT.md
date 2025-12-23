@@ -1,206 +1,146 @@
-# Multiplayer Game Fixes - Handoff Prompt
+# Lords of War - Game Project Summary
 
-## Context
-We're working on a multiplayer card game (Lords of War) built with Node.js/Socket.IO server and vanilla JavaScript client. The game was working in single-player mode, but multiplayer had numerous issues where features that worked in single-player weren't working in multiplayer.
+## Project Overview
 
-## Architecture
-- **Server**: `server/game-server.js` - Handles game logic, state management, and Socket.IO events
-- **Client**: `lords-of-war-engine.js` - Client-side game logic and UI updates
-- **Network**: `network-manager.js` - Socket.IO wrapper for client-server communication
-- **UI**: `index.html` - Game interface
+Lords of War is a multiplayer medieval card game built with Node.js backend and HTML/CSS/JavaScript frontend. Players build decks, select heroes, and battle against opponents or AI. The game features user authentication, player profiles, stats tracking, and both single-player and multiplayer modes.
 
-## Key Changes Made
+## Tech Stack
 
-### 1. Hero Selection Flow
-- **Issue**: Hero selection menu was overlaying the game, and heroes had to be selected after queuing
-- **Fix**: 
-  - Moved hero selection BEFORE queuing (saves time for both players)
-  - Added cancel button to return to main menu
-  - Server now stores heroes from queue data and initializes game immediately
+- **Frontend**: HTML5, CSS3, JavaScript (vanilla)
+- **Backend**: Node.js, Express.js, Socket.io for real-time multiplayer
+- **Database**: SQLite3
+- **Authentication**: JWT token-based with localStorage
+- **Hosting**: Local server accessible internally and externally via port forwarding
 
-### 2. Network Connection Issues
-- **Issue**: "Connecting endlessly" - stale connection state
-- **Fix**: 
-  - `NetworkManager.connect()` now checks `socket.connected` and cleans up disconnected sockets
-  - `NetworkManager.disconnect()` clears all event listeners and resets state
-  - Explicit disconnect before new connections
+## Recent Implementations & Fixes
 
-### 3. Turn Management
-- **Issue**: Turns weren't changing, "Not your turn" errors, game never starting
-- **Fix**:
-  - Server now explicitly joins sockets to Socket.IO rooms (`socket.join(roomId)`)
-  - Added fallback direct socket emits in `broadcastGameState()`
-  - Client-side `endTurn()` immediately disables button to prevent double-clicks
-  - `startTurn()` and `startGameAfterRoll()` skip local state modification in multiplayer (server controls everything)
-  - Server calls `executeTurnStart()` to properly initialize turns
+### Authentication System
+- Registration and login with JWT tokens stored in localStorage (key: 'token')
+- Auth verification on page load with `authVerificationComplete` flag to prevent race conditions
+- User data stored in sessionStorage as JSON: `{userId, username, email}`
+- Guest mode: generates random "AnonXXXX" (4 digits) usernames for non-logged-in players
 
-### 4. Deck Creation
-- **Issue**: Only drawing 1 kind of card (e.g., only archers)
-- **Fix**: 
-  - `createMultiplayerDeck()` now creates diverse decks with multiple card types
-  - Added equipment and ability cards to decks (matching single-player)
-  - Cards include: units, abilities, and equipment based on hero type
+### Database Schema
+- **Users table**: `id`, `username`, `email`, `password_hash`, `created_at`, `updated_at`
+- **Player_stats table**: `user_id`, `gold`, `gems`, `total_wins`, `total_losses`, `current_rank`, `level`, `display_name`, `avatar_id`, `bio`
+- Currently 3 registered accounts: `testplayer`, `test12345`, `test123456`
 
-### 5. Card Hand Positioning
-- **Issue**: Cards moving positions when one is removed
-- **Fix**: 
-  - `updateHand()` now preserves original order within card types
-  - Groups cards by ID/tier but maintains relative order
+### Profile & Stats Dashboard
+- Compact modal matching the clean login page design
+- Displays: username, profile info (display name, email, join date, bio), stats (wins/losses/win rate/level), vault (gold/gems)
+- Avatar selector (8 emoji avatars)
+- Profile edit functionality with validation
+- Logout button
 
-### 6. Player Name Display
-- **Issue**: Name showing as "[object HTMLDivElement]" or accumulating flag emojis
-- **Fix**: 
-  - Ensured `window.playerAlias` is always a string
-  - Strips existing flag emoji before prepending to prevent accumulation
-  - Sets player alias correctly in `confirmMultiplayerHero()` and `initializeMultiplayerGame()`
+### UI Redesigns
+All pages now match clean, minimalist aesthetic:
+- **Auth page** (login/register) - compact forms with medieval theme
+- **Main menu** - reduced size, clean grid layout for game modes
+- **All modals** - consistent styling, reduced padding/margins, efficient spacing
+- **Hero selection modal** - closes properly after confirmation
 
-### 7. Combat System - Hitback Logic
-- **Issue**: Ranged units taking hitback when they shouldn't, archers not hitting back
-- **Fix**: 
-  - Fixed hitback logic to match single-player exactly:
-    - Ranged attacker vs Melee defender: NO hitback (ranged evades)
-    - Melee attacker vs Ranged defender: YES hitback (ranged always hits back)
-    - Melee vs Melee: YES hitback
-    - Ranged vs Ranged: YES hitback
-  - Added explicit power checks and logging
+### Bug Fixes Applied
+1. Hero selection modal now closes when user confirms in single-player mode
+2. Game over screens (Enemy Wins/You Win) now close when clicking "Main Menu" or "Play Again"
+3. Logged-in users now have their username pre-filled in player name input; guests get random Anon names
+4. Registration form now responsive and fits properly
+5. Profile data loading with proper error handling and null checks
 
-### 8. Combat System - Damage Application
-- **Issue**: Units not taking damage, math not adding up
-- **Fix**:
-  - Switched from `health` to `durability` (matching single-player)
-  - Added defensive checks for `null`/`undefined`/`0` values
-  - Explicit number conversion and validation
-  - Direct board array updates to ensure changes persist
-  - Enhanced logging before/after damage
+### Networking & Server
+- Server migrated from port 3000 to port 8080 (ISP was blocking 3000)
+- Server listens on all interfaces (0.0.0.0:8080)
+- Port forwarding configured on router (10.0.0.207:8080 → external IP 73.193.82.179:8080)
+- Client auto-detects server URL based on current hostname/port
+- Socket.io with CORS configured to accept all origins
 
-### 9. Tier Name Display
-- **Issue**: T2 units not showing "T2" in name
-- **Fix**: 
-  - Extract base name (remove existing tier suffix) before adding new tier
-  - Format: `${baseName} T${tier}`
+## Current Status
 
-### 10. Charge Units
-- **Issue**: Charge units (cavalry) can't attack on first turn
-- **Fix**:
-  - Server sets `canAttack: true` and `exhausted: false` for charge units when played
-  - Client-side fix in `applyServerState()` to correct charge units with `canAttack: false`
-  - Turn refresh now refreshes ALL units (charge only affects initial play)
-  - Multiple safety checks to ensure charge units have `canAttack: true`
+✅ Authentication system working (3 test accounts registered)  
+✅ Profile dashboard fully functional  
+✅ Game modes working (single-player, multiplayer queue)  
+✅ Modal transitions clean and functional  
+✅ External access working (accessible from internet via port 8080)  
+✅ Internal access working (accessible via local network)  
+✅ Server running and stable with proper logging
 
-### 11. Card Draw Effects
-- **Issue**: Scout/Command/Dispatch effects not drawing cards
-- **Fix**: 
-  - Server now checks for `scoutEffect`, `commandEffect`, `dispatchEffect` properties
-  - Draws card from deck when unit with effect is played
-  - Preserves effect properties in `newUnit`
+## File Locations
 
-### 12. Missing Features Added
-- **Mountain King passive**: Protection keyword on units with 5+ durability
-- **Swift Rider passive**: Units with cost <= 3 can attack immediately
-- **Type advantage bonuses**: Ranged vs Infantry (+1 when played), combat type advantages
-- **Formation keyword**: Other units with formation get +1 power when unit is played
-- **Protection/Ward keyword**: Blocks first attack/damage
-- **Combat bonuses**: Weapon bonuses, Infantry +1, Cavalry +1
-- **Infantry hero starting sword**: Infantry heroes now start with sword equipped
+- **Frontend**: `C:\Users\JWBrown\Desktop\lords-of-war-\`
+  - `index.html` - Main game page
+  - `auth.html` - Authentication page (login/register)
+  - `lords-of-war-engine.js` - Core game logic
+  - `network-manager.js` - Socket.io client and networking
+  - `lords-of-war.js` - Card database and game data
 
-### 13. Card Power Display
-- **Issue**: Cards showing base power, not total power with bonuses
-- **Fix**: 
-  - Created `calculateTotalPower()` function that includes:
-    - Base power
-    - Formation bonuses
-    - Hero passive bonuses
-    - Type advantage bonuses
-  - Cards on battlefield now show total damage including all bonuses
+- **Backend**: `C:\Users\JWBrown\Desktop\lords-of-war-\server\`
+  - `game-server.js` - Main Express server with Socket.io
+  - `database.js` - SQLite database operations
+  - `auth-routes.js` - Authentication API endpoints
+  - `profile-routes.js` - Profile API endpoints
+  - `auth.js` - JWT authentication utilities
+  - `package.json` - Node.js dependencies
 
-## Current Issues
+- **Database**: `C:\Users\JWBrown\Desktop\lords-of-war-\server\lords_of_war.db`
 
-### 1. Charge Units Still Can't Attack
-- **Symptom**: Horseman shows `canAttack: false, exhausted: false` in client console
-- **Status**: Added multiple fixes but issue persists
-- **Server logs needed**: Check if server is setting `canAttack: true` when Horseman is played
-- **Client logs**: Shows `[STATE] Charge unit Horseman: canAttack=false` - client is receiving `false` from server
-- **Possible causes**: 
-  - Server not detecting charge correctly
-  - State being overwritten after creation
-  - JSON serialization losing properties
+## Known Details
 
-### 2. Units Not Taking Damage
-- **Symptom**: "cards arent taking damage when they should"
-- **Status**: Added defensive checks and logging, but issue persists
-- **Server logs needed**: Check `[ATTACK] BEFORE damage` and `[ATTACK] AFTER damage` logs
-- **Possible causes**:
-  - Target reference not persisting in board array
-  - State not being broadcast correctly
-  - Client not applying damage correctly
-  - Durability initialization issues
+- Player can login or play as guest
+- Heroes available: Hou Yi and others (hero selection modal)
+- Game board includes player health, enemy health, cards, essence, and action buttons
+- Multiplayer uses Socket.io for real-time communication
+- Profile API endpoints: `GET/PUT /api/profile/:userId` (requires JWT auth)
+- Auth API endpoints: `POST /api/auth/register`, `POST /api/auth/login`
 
-### 3. Equipment and Abilities Not Being Drawn
-- **Symptom**: "equipment and abilitys are still not being pulled/drawn"
-- **Status**: Added to deck creation, but may not be in deck or not being drawn
-- **Check**: Server console should show `[DECK] Card types breakdown:` with equipment and ability counts
-- **Possible causes**:
-  - Cards not being added to deck
-  - Cards being filtered out somewhere
-  - Deck not being shuffled correctly
+## Game Mechanics (Reference)
 
-### 4. Math Not Adding Up
-- **Symptom**: "the math isnt adding up"
-- **Status**: Added total power calculation, but damage calculation may still be wrong
-- **Check**: Verify damage calculation includes all bonuses (weapon, type advantage, infantry/cavalry bonuses)
-- **Possible causes**:
-  - Bonuses not being calculated correctly
-  - Display showing wrong values
-  - Damage being applied incorrectly
+### Unit Types
+- **Ranged**: No charge, no hitback when attacking or attacked
+- **Infantry**: No charge, higher HP, melee hitback
+- **Cavalry**: All have Charge (can attack the turn they're played), melee hitback
 
-## Key Files to Review
+### Combat System
+- **Ranged vs Melee**: Ranged doesn't hit back, melee does
+- **Melee vs Ranged**: Melee hits back, ranged doesn't
+- **Ranged vs Ranged**: No hitback
+- **Melee vs Melee**: Both hit back
 
-### Server (`server/game-server.js`)
-- **Line ~580-650**: `executePlayCard()` - Card playing logic, charge detection, unit creation
-- **Line ~525-540**: `executeTurnStart()` - Turn refresh logic
-- **Line ~756-884**: `executeAttack()` - Attack and damage calculation
-- **Line ~1153-1185**: `broadcastGameState()` - State broadcasting
-- **Line ~886-1110**: `initializeMultiplayerGame()` - Deck creation and game initialization
+### Equipment System
+- **Weapons**: Bow (Ranged), Sword (Infantry), Axe (Cavalry)
+- **Armor Sets**:
+  - Ranged: Padded Cloth (6 pieces - no shield/back)
+  - Cavalry: Leather (8 pieces - full set)
+  - Infantry: Plate (8 pieces - full set)
+- **Equipment Slots**: Weapon, Head, Chest, Legs, Shield, Boots, Gloves, Neck, Back
+- Armor increases hero max HP when equipped
 
-### Client (`lords-of-war-engine.js`)
-- **Line ~255-363**: `applyServerState()` - State synchronization and normalization
-- **Line ~2968-3039**: `handleConstructClick()` - Card click handling for attacks
-- **Line ~2712-2840**: `createCardElement()` - Card rendering with total power calculation
-- **Line ~1629-1776**: `attack()` - Client-side attack logic (single-player only)
+## Quick Start Guide
 
-## Testing Checklist
+### Running the Server
+1. Navigate to `server/` directory
+2. Run `npm install` (if dependencies not installed)
+3. Run `node game-server.js` or `npm start`
+4. Server will start on port 8080
 
-1. **Charge Units**: Play a Horseman → Should be able to attack immediately
-2. **Damage**: Skirmisher (ranged, 1 power) attacks Footman (melee, 3 durability) → Footman should take 1 damage, survive with 2 durability
-3. **Hitback**: Footman attacks Archer → Archer should hit back, Footman should take damage
-4. **No Hitback**: Skirmisher attacks Footman → Skirmisher should NOT take hitback
-5. **Equipment**: Check if equipment cards appear in deck and can be drawn
-6. **Abilities**: Check if ability cards appear in deck and can be drawn
-7. **Total Power**: Unit with bonuses should show total power on battlefield
-8. **Tier Names**: Merged units should show "T2", "T3", etc.
+### Accessing the Game
+- **Local**: `http://localhost:8080` or `http://127.0.0.1:8080`
+- **Network**: `http://10.0.0.207:8080` (local network)
+- **External**: `http://73.193.82.179:8080` (via port forwarding)
 
-## Server Console Logs to Check
+### Testing Accounts
+- Username: `testplayer`
+- Username: `test12345`
+- Username: `test123456`
+- (Passwords stored as hashes in database)
 
-When testing, look for these key logs:
-- `[PLAYCARD] playing Horseman, keywords: ['charge'], hasCharge: true`
-- `[PLAYCARD] Created unit: { canAttack: true, ... }`
-- `[ATTACK] BEFORE damage - Target Footman: durability=3`
-- `[ATTACK] AFTER damage - Target Footman: durability 3 -> 2`
-- `[DECK] Card types breakdown: { unit: X, ability: Y, equipment: Z }`
+## Important Notes for Developers
 
-## Next Steps
+- JWT tokens are stored in `localStorage` with key `'token'`
+- User session data stored in `sessionStorage` as JSON
+- Auth verification runs on page load - check `authVerificationComplete` flag before accessing user data
+- Guest players get random "AnonXXXX" usernames
+- Server CORS is configured to accept all origins (development setup)
+- Database uses SQLite3 - file location: `server/lords_of_war.db`
 
-1. **Debug charge units**: Check server logs when Horseman is played - is `hasCharge` true? Is `canAttack` set to true?
-2. **Debug damage**: Check server logs during attack - is damage calculated correctly? Is durability being updated?
-3. **Debug deck**: Check if equipment/abilities are actually in the deck when created
-4. **Verify state sync**: Ensure server state changes are being broadcast and received correctly
-5. **Test edge cases**: Units with 0 durability, negative damage, etc.
+---
 
-## Important Notes
-
-- **Single-player works**: All these features work correctly in single-player mode
-- **Server is authoritative**: In multiplayer, server controls all game state
-- **Client is display-only**: Client should only display server state, not modify it
-- **State synchronization**: `applyServerState()` maps server `player1`/`player2` to client `player`/`enemy`
-- **Durability vs Health**: Server uses both, but `durability` is source of truth (matching single-player)
-
+*Last Updated: Based on current project state as of latest session*
