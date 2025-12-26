@@ -11,6 +11,14 @@ const profileRoutes = require('./profile-routes');
 const deckRoutes = require('./deck-routes');
 const friendsRoutes = require('./friends-routes');
 const messagesRoutes = require('./messages-routes');
+const allianceRoutes = require('./alliance-routes');
+const chatRoutes = require('./chat-routes');
+const auctionRoutes = require('./auction-routes');
+const shopRoutes = require('./shop-routes');
+const collectionRoutes = require('./collection-routes');
+const leaderboardsRoutes = require('./leaderboards-routes');
+const adventureRoutes = require('./adventure-routes');
+const { track1v1Win, getCurrentSeasonId } = require('./leaderboard-tracking');
 
 const app = express();
 const server = http.createServer(app);
@@ -61,6 +69,27 @@ app.use('/api/friends', friendsRoutes);
 
 // Messages routes
 app.use('/api/messages', messagesRoutes);
+
+// Alliance routes
+app.use('/api/alliance', allianceRoutes);
+
+// Chat routes
+app.use('/api/chat', chatRoutes);
+
+// Auction House routes
+app.use('/api/auction', auctionRoutes);
+
+// Shop routes
+app.use('/api/shop', shopRoutes);
+
+// Collection routes
+app.use('/api/collection', collectionRoutes);
+
+// Leaderboards routes
+app.use('/api/leaderboards', leaderboardsRoutes);
+
+// Adventure routes
+app.use('/api/adventure', adventureRoutes);
 
 // Default route - serve auth page
 app.get('/', (req, res) => {
@@ -751,6 +780,124 @@ io.on('connection', (socket) => {
   });
 
   // ===== DISCONNECT =====
+  // ===== CHAT SYSTEM =====
+  socket.on('globalChatMessage', async ({ message }) => {
+    if (!socket.userId) {
+      socket.emit('error', { message: 'You must be logged in to chat' });
+      return;
+    }
+
+    if (!message || message.trim().length === 0 || message.length > 500) {
+      socket.emit('error', { message: 'Invalid message' });
+      return;
+    }
+
+    try {
+      // Get username
+      db.get('SELECT username FROM users WHERE id = ?', [socket.userId], (err, user) => {
+        if (err || !user) {
+          socket.emit('error', { message: 'Database error' });
+          return;
+        }
+
+        // Insert message
+        db.run(`
+          INSERT INTO global_chat (user_id, username, message)
+          VALUES (?, ?, ?)
+        `, [socket.userId, user.username, message.trim()], function(err) {
+          if (err) {
+            console.error('Error sending global chat:', err);
+            socket.emit('error', { message: 'Failed to send message' });
+            return;
+          }
+
+          // Broadcast to all connected clients
+          io.emit('globalChatMessage', {
+            id: this.lastID,
+            userId: socket.userId,
+            username: user.username,
+            message: message.trim(),
+            timestamp: new Date().toISOString()
+          });
+        });
+      });
+    } catch (error) {
+      console.error('Global chat error:', error);
+      socket.emit('error', { message: 'Internal server error' });
+    }
+  });
+
+  socket.on('allianceChatMessage', async ({ message }) => {
+    if (!socket.userId) {
+      socket.emit('error', { message: 'You must be logged in to chat' });
+      return;
+    }
+
+    if (!message || message.trim().length === 0 || message.length > 500) {
+      socket.emit('error', { message: 'Invalid message' });
+      return;
+    }
+
+    try {
+      // Get user's alliance
+      db.get(`
+        SELECT alliance_id
+        FROM alliance_members
+        WHERE user_id = ?
+      `, [socket.userId], (err, member) => {
+        if (err || !member) {
+          socket.emit('error', { message: 'You are not in an alliance' });
+          return;
+        }
+
+        // Get username
+        db.get('SELECT username FROM users WHERE id = ?', [socket.userId], (err, user) => {
+          if (err || !user) {
+            socket.emit('error', { message: 'Database error' });
+            return;
+          }
+
+          // Insert message
+          db.run(`
+            INSERT INTO alliance_chat (user_id, alliance_id, username, message)
+            VALUES (?, ?, ?, ?)
+          `, [socket.userId, member.alliance_id, user.username, message.trim()], function(err) {
+            if (err) {
+              console.error('Error sending alliance chat:', err);
+              socket.emit('error', { message: 'Failed to send message' });
+              return;
+            }
+
+            // Broadcast to all alliance members
+            db.all(`
+              SELECT user_id FROM alliance_members WHERE alliance_id = ?
+            `, [member.alliance_id], (err, members) => {
+              if (!err && members) {
+                members.forEach(m => {
+                  const memberSockets = userSockets.get(m.user_id);
+                  if (memberSockets) {
+                    memberSockets.forEach(sockId => {
+                      io.to(sockId).emit('allianceChatMessage', {
+                        id: this.lastID,
+                        userId: socket.userId,
+                        username: user.username,
+                        message: message.trim(),
+                        timestamp: new Date().toISOString()
+                      });
+                    });
+                  }
+                });
+              }
+            });
+          });
+        });
+      });
+    } catch (error) {
+      console.error('Alliance chat error:', error);
+      socket.emit('error', { message: 'Internal server error' });
+    }
+  });
+
   socket.on('disconnect', () => {
     const playerInfo = playerSockets.get(socket.id);
     console.log(`[DISCONNECT] Player disconnected: ${socket.id}`);
@@ -2290,6 +2437,13 @@ function endGame(room, reason = 'health', concedingRole = null) {
           // Update player stats
           if (result1 === 'win') {
             db.run('UPDATE player_stats SET total_wins = total_wins + 1 WHERE user_id = ?', [player1UserId]);
+            
+            // Track 1v1 leaderboard win
+            getCurrentSeasonId((err, seasonId) => {
+              if (!err && seasonId) {
+                track1v1Win(player1UserId, seasonId);
+              }
+            });
           } else if (result1 === 'loss') {
             db.run('UPDATE player_stats SET total_losses = total_losses + 1 WHERE user_id = ?', [player1UserId]);
           }
@@ -2327,6 +2481,13 @@ function endGame(room, reason = 'health', concedingRole = null) {
           // Update player stats
           if (result2 === 'win') {
             db.run('UPDATE player_stats SET total_wins = total_wins + 1 WHERE user_id = ?', [player2UserId]);
+            
+            // Track 1v1 leaderboard win
+            getCurrentSeasonId((err, seasonId) => {
+              if (!err && seasonId) {
+                track1v1Win(player2UserId, seasonId);
+              }
+            });
           } else if (result2 === 'loss') {
             db.run('UPDATE player_stats SET total_losses = total_losses + 1 WHERE user_id = ?', [player2UserId]);
           }

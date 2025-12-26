@@ -1172,29 +1172,42 @@ const SoundManager = {
         this.attackEnabled = localStorage.getItem('settingAttackSound') !== 'false';
         this.deathEnabled = localStorage.getItem('settingDeathSound') !== 'false';
         
-        // Initialize Web Audio API context (lazy initialization)
-        try {
-            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        } catch (e) {
-            console.warn('Web Audio API not supported:', e);
-        }
+        // Initialize Web Audio API context (lazy initialization - only when needed)
+        // Don't create AudioContext automatically to avoid browser warnings
+        this.audioContext = null;
+        
+        // Lazy initialization function for AudioContext
+        this.initAudioContext = function() {
+            if (!this.audioContext) {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.warn('Web Audio API not supported:', e);
+                }
+            }
+            return this.audioContext;
+        };
     },
     
     playSound(frequency, duration, type = 'sine', volume = 0.1) {
-        if (!this.soundsEnabled || !this.audioContext) return;
+        if (!this.soundsEnabled) return;
+        
+        // Initialize AudioContext on first use (after user interaction)
+        const audioContext = this.initAudioContext();
+        if (!audioContext) return;
         
         try {
-            const oscillator = this.audioContext.createOscillator();
-            const gainNode = this.audioContext.createGain();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
             
             oscillator.connect(gainNode);
-            gainNode.connect(this.audioContext.destination);
+            gainNode.connect(audioContext.destination);
             
             oscillator.frequency.value = frequency;
             oscillator.type = type;
             
-            gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
-            gainNode.gain.linearRampToValueAtTime(volume, this.audioContext.currentTime + 0.01);
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
             gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
             
             oscillator.start(this.audioContext.currentTime);
@@ -1788,6 +1801,9 @@ if (typeof window !== 'undefined') {
 }
 
 function startGame(heroId) {
+    // Reset game state for new game
+    resetGame();
+    
     // Set game start time for match tracking
     window.gameStartTime = Date.now();
     
@@ -2049,6 +2065,13 @@ function initializePlayerGame() {
     // This function contains the rest of startGame logic that depends on deck being created
     const HISTORIC_LEADERS = window.HISTORIC_LEADERS || {};
     const heroData = game.player.hero;
+    
+    // Reset gold/essence for new game
+    game.player.maxEssence = 0;
+    game.player.currentEssence = 0;
+    game.enemy.maxEssence = 0;
+    game.enemy.currentEssence = 0;
+    
     game.player.equipment = null;
     game.player.equipmentUsed = false;
     game.player.equipmentSlots = {
@@ -2144,6 +2167,10 @@ function initializePlayerGame() {
     log(`Player chose ${heroData.name} (${heroData.unitType})`);
     log(`Enemy is ${game.enemy.hero.name} (${game.enemy.hero.unitType})`);
 
+    // Update gold display to show 0/0
+    updateEssenceDisplay('player');
+    updateEssenceDisplay('enemy');
+    
     startTurn('player');
     updateUI();
 
@@ -4025,6 +4052,15 @@ function returnToMainMenu() {
     game.enemy.hand = [];
     game.player.heroPowerUsed = false;
     game.enemy.heroPowerUsed = false;
+    // Reset gold/essence
+    game.player.maxEssence = 0;
+    game.player.currentEssence = 0;
+    game.enemy.maxEssence = 0;
+    game.enemy.currentEssence = 0;
+    
+    // Update UI to show reset gold
+    updateEssenceDisplay('player');
+    updateEssenceDisplay('enemy');
 
     // Show main menu, hide game board and modals
     const mainMenu = document.getElementById('mainMenuModal');
@@ -6374,8 +6410,46 @@ function initializeGameData() {
         window.closeSettingsModal = closeSettingsModal;
         window.saveSettings = saveSettings;
         window.switchGuideTab = switchGuideTab;
-        window.submitBugReport = submitBugReport;
-        window.clearBugReport = clearBugReport;
+    // Define bug report functions
+    function submitBugReport() {
+        const descInput = document.getElementById('bugDescription');
+        const stepsInput = document.getElementById('bugSteps');
+        const alertDiv = document.getElementById('bugReportAlert');
+        
+        const description = descInput?.value || '';
+        const steps = stepsInput?.value || '';
+        
+        if (!description.trim()) {
+            if (alertDiv) {
+                alertDiv.innerHTML = '<div style="color: #c41e3a; padding: 8px; background: rgba(196, 30, 58, 0.2); border: 1px solid #c41e3a; border-radius: 4px; font-size: 11px;">Description is required</div>';
+            }
+            return;
+        }
+        
+        // For now, just show a success message
+        // In the future, this could send to a backend endpoint
+        if (alertDiv) {
+            alertDiv.innerHTML = '<div style="color: #4caf50; padding: 8px; background: rgba(76, 175, 80, 0.2); border: 1px solid #4caf50; border-radius: 4px; font-size: 11px;">Bug report submitted! Thank you for your feedback.</div>';
+        }
+        
+        // Clear form after a delay
+        setTimeout(() => {
+            clearBugReport();
+        }, 3000);
+    }
+    
+    function clearBugReport() {
+        const descInput = document.getElementById('bugDescription');
+        const stepsInput = document.getElementById('bugSteps');
+        const alertDiv = document.getElementById('bugReportAlert');
+        
+        if (descInput) descInput.value = '';
+        if (stepsInput) stepsInput.value = '';
+        if (alertDiv) alertDiv.innerHTML = '';
+    }
+    
+    window.submitBugReport = submitBugReport;
+    window.clearBugReport = clearBugReport;
         window.concedeGame = concedeGame;
         window.returnToMainMenuFromGame = returnToMainMenuFromGame;
         window.setupUnitTypeTooltips = setupUnitTypeTooltips;
@@ -6533,7 +6607,42 @@ function initializeGameData() {
 
 // ===== MULTIPLAYER UI FUNCTIONS =====
 
+function openSinglePlayerMenu() {
+    const modal = document.getElementById('singlePlayerMenuModal');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
+
+function startSinglePlayerGame() {
+    // Set game mode to singleplayer
+    gameMode = 'singleplayer';
+    setGameMode('singleplayer');
+    
+    // Hide main menu and show hero selection
+    document.getElementById('mainMenuModal').style.display = 'none';
+    showMultiplayerHeroSelection(); // Reuse the same hero selection UI
+}
+
+function closeSinglePlayerMenu() {
+    const modal = document.getElementById('singlePlayerMenuModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function openMultiplayerMenu() {
+    const modal = document.getElementById('multiplayerMenuModal');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
+
+function closeMultiplayerMenu() {
+    const modal = document.getElementById('multiplayerMenuModal');
+    if (modal) modal.style.display = 'none';
+}
+
 function startQuickMatch() {
+    closeMultiplayerMenu();
     const playerName = document.getElementById('playerNameInput')?.value || 'Player';
 
     // Store player name for later use
@@ -6546,6 +6655,12 @@ function startQuickMatch() {
     // Show hero selection FIRST (before joining queue)
     document.getElementById('mainMenuModal').style.display = 'none';
     showMultiplayerHeroSelection();
+}
+
+function startRaid() {
+    closeMultiplayerMenu();
+    alert('Raid mode coming soon!');
+    // TODO: Implement raid mode
 }
 
 // Store selected hero for multiplayer
@@ -7734,8 +7849,12 @@ function markAllNotificationsRead() {
 }
 
 function switchDashboardTab(tab) {
+    // Handle collection tab
+    if (tab === 'collection') {
+        loadCollectionStats();
+    }
     // Hide all tab contents
-    const tabs = ['account', 'decks', 'history', 'achievements', 'social', 'notifications'];
+    const tabs = ['account', 'cards', 'history', 'achievements', 'social'];
     tabs.forEach(t => {
         const content = document.getElementById(`dashboardContent${t.charAt(0).toUpperCase() + t.slice(1)}`);
         const tabBtn = document.getElementById(`dashboardTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
@@ -7779,9 +7898,12 @@ function switchDashboardTab(tab) {
             loadNotifications(userData.userId, token);
         } else if (tab === 'account') {
             // Account tab - no special loading needed
-        } else if (tab === 'decks') {
-            // Load user decks
+        } else if (tab === 'cards') {
+            // Load user decks (same as old 'decks' tab)
             loadDashboardDecks(userData.userId, token);
+        } else if (tab === 'account') {
+            // Load notifications when account tab is opened
+            loadNotifications(userData.userId, token);
         }
     }
 }
@@ -8990,6 +9112,7 @@ function populateAchievements(achievements) {
     }
     
     const achievementNames = {
+        'create_account': '🎉 Create an Account',
         'level_5': '🏅 Level 5',
         'level_10': '🥇 Level 10',
         'level_15': '🥈 Level 15',
@@ -8997,7 +9120,17 @@ function populateAchievements(achievements) {
         'level_25': '⭐ Level 25',
         'level_30': '💎 Level 30',
         'level_40': '👑 Level 40',
-        'level_50': '🌟 Level 50'
+        'level_50': '🌟 Level 50',
+        'win_10_games': '⚔️ Win 10 Games',
+        'win_50_games': '👑 Win 50 Games',
+        'list_card_5': '📝 List 5 Cards',
+        'list_card_50': '📋 List 50 Cards',
+        'list_card_500': '📚 List 500 Cards',
+        'list_card_1000': '📖 List 1000 Cards',
+        'buy_card_5': '🛒 Buy 5 Cards',
+        'buy_card_50': '🛍️ Buy 50 Cards',
+        'buy_card_500': '🏪 Buy 500 Cards',
+        'buy_card_1000': '🏬 Buy 1000 Cards'
     };
     
     container.innerHTML = achievements.map(achievement => {
@@ -10254,6 +10387,13 @@ function closeDeckBuilder() {
 
 // Make functions available globally
 if (typeof window !== 'undefined') {
+    window.openSinglePlayerMenu = openSinglePlayerMenu;
+    window.closeSinglePlayerMenu = closeSinglePlayerMenu;
+    window.startSinglePlayerGame = startSinglePlayerGame;
+    window.openMultiplayerMenu = openMultiplayerMenu;
+    window.closeMultiplayerMenu = closeMultiplayerMenu;
+    window.startQuickMatch = startQuickMatch;
+    window.startRaid = startRaid;
     window.openDeckBuilder = openDeckBuilder;
     window.openDeckBuilderFromDashboard = openDeckBuilderFromDashboard;
     window.selectDeckBuilderUnitType = selectDeckBuilderUnitType;
@@ -10294,6 +10434,94 @@ if (typeof window !== 'undefined') {
     window.challengeFriend = challengeFriend;
     window.handleFriendChallenge = handleFriendChallenge;
     window.updateFriendStatus = updateFriendStatus;
+    // Define switchFriendsView function
+    function switchFriendsView(view) {
+        const friendsList = document.getElementById('friendsList');
+        const friendsViewBlocked = document.getElementById('friendsViewBlocked');
+        
+        if (view === 'blocked') {
+            // Load blocked users
+            const userData = JSON.parse(sessionStorage.getItem('userData'));
+            const token = localStorage.getItem('token');
+            if (userData && token) {
+                loadBlockedUsers(userData.userId, token);
+            }
+            if (friendsViewBlocked) {
+                friendsViewBlocked.textContent = 'Your Friends';
+                friendsViewBlocked.onclick = () => switchFriendsView('friends');
+            }
+        } else {
+            // Load friends
+            const userData = JSON.parse(sessionStorage.getItem('userData'));
+            const token = localStorage.getItem('token');
+            if (userData && token) {
+                loadFriends(userData.userId, token);
+            }
+            if (friendsViewBlocked) {
+                friendsViewBlocked.textContent = 'Blocked Users';
+                friendsViewBlocked.onclick = () => switchFriendsView('blocked');
+            }
+        }
+    }
+    
+    // Define loadBlockedUsers function
+    function loadBlockedUsers(userId, token) {
+        fetch('/api/friends/blocked', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        .then(res => {
+            if (!res.ok) {
+                throw new Error(`HTTP ${res.status}`);
+            }
+            const contentType = res.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Response is not JSON');
+            }
+            return res.json();
+        })
+        .then(data => {
+            const container = document.getElementById('friendsList');
+            if (!container) return;
+            
+            if (data.success) {
+                populateBlockedUsersList(data.blocked || []);
+            } else {
+                container.innerHTML = '<div style="text-align: center; color: #888; padding: 20px; font-size: 13px;">Failed to load blocked users</div>';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading blocked users:', error);
+            const container = document.getElementById('friendsList');
+            if (container) {
+                container.innerHTML = '<div style="text-align: center; color: #888; padding: 20px; font-size: 13px;">Failed to load blocked users</div>';
+            }
+        });
+    }
+    
+    function populateBlockedUsersList(blocked) {
+        const container = document.getElementById('friendsList');
+        if (!container) return;
+        
+        if (blocked.length === 0) {
+            container.innerHTML = '<div style="text-align: center; color: #888; padding: 20px; font-size: 13px;">No blocked users</div>';
+            return;
+        }
+        
+        container.innerHTML = blocked.map(user => {
+            return `
+                <div style="padding: 8px; margin-bottom: 6px; background: rgba(0,0,0,0.2); border: 1px solid #8b6f47; border-radius: 4px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="color: #f4e4c1; font-weight: bold; font-size: 12px;">${escapeHtml(user.username)}</div>
+                    </div>
+                    <button onclick="unblockUser(${user.id})" style="padding: 4px 8px; font-size: 10px; background: rgba(76, 175, 80, 0.3); border: 1px solid #4caf50; cursor: pointer; border-radius: 3px; color: #f4e4c1;">Unblock</button>
+                </div>
+            `;
+        }).join('');
+    }
+    
     window.switchFriendsView = switchFriendsView;
     window.blockUser = blockUser;
     window.unblockUser = unblockUser;
@@ -10324,6 +10552,11 @@ function logout() {
 
     // Redirect to auth page
     window.location.href = '/auth.html';
+}
+
+// Expose functions to window for inline onclick handlers
+if (typeof window !== 'undefined') {
+    window.openAccountDashboard = openAccountDashboard;
 }
 
 // Initialize when script loads (after lords-of-war.js)

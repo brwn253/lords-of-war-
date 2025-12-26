@@ -5,6 +5,35 @@ const { db } = require('./database');
 const { authenticateToken } = require('./auth');
 
 /**
+ * GET /api/profile/view/:username
+ * Fetch user profile by username (public view)
+ * Requires: Auth token
+ */
+router.get('/view/:username', authenticateToken, (req, res) => {
+  try {
+    const { username } = req.params;
+
+    // Find user by username
+    db.get('SELECT id FROM users WHERE username COLLATE NOCASE = ?', [username], (err, user) => {
+      if (err || !user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      fetchUserProfileData(user.id, res);
+    });
+  } catch (error) {
+    console.error('Error fetching profile by username:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+});
+
+/**
  * GET /api/profile/:userId
  * Fetch user profile and stats
  * Requires: Auth token
@@ -21,76 +50,7 @@ router.get('/:userId', authenticateToken, (req, res) => {
       });
     }
 
-    // Query user and stats
-    db.get(
-      `SELECT
-        u.id,
-        u.username,
-        u.email,
-        u.created_at,
-        ps.total_wins,
-        ps.total_losses,
-        ps.level,
-        ps.current_rank,
-        ps.gold,
-        ps.gems,
-        ps.display_name,
-        ps.avatar_id,
-        ps.bio,
-        ps.preferred_unit_type,
-        ps.xp,
-        ps.xp_to_next_level
-      FROM users u
-      LEFT JOIN player_stats ps ON u.id = ps.user_id
-      WHERE u.id = ?`,
-      [userId],
-      (err, row) => {
-        if (err) {
-          console.error('Database error:', err);
-          return res.status(500).json({
-            success: false,
-            message: 'Database error occurred'
-          });
-        }
-
-        if (!row) {
-          return res.status(404).json({
-            success: false,
-            message: 'User not found'
-          });
-        }
-
-        // Calculate win rate
-        const games = (row.total_wins || 0) + (row.total_losses || 0);
-        const winRate = games > 0 ? ((row.total_wins || 0) / games * 100).toFixed(1) : 0;
-
-        res.json({
-          success: true,
-          profile: {
-            userId: row.id,
-            username: row.username,
-            email: row.email,
-            createdAt: row.created_at,
-            displayName: row.display_name || row.username,
-            bio: row.bio || '',
-            avatarId: row.avatar_id || 1,
-            preferredUnitType: row.preferred_unit_type || null
-          },
-          stats: {
-            wins: row.total_wins || 0,
-            losses: row.total_losses || 0,
-            gamesPlayed: games,
-            winRate: parseFloat(winRate),
-            level: row.level || 1,
-            rank: row.current_rank || 'Unranked',
-            gold: row.gold || 0,
-            gems: row.gems || 0,
-            xp: row.xp || 0,
-            xpToNextLevel: row.xp_to_next_level || 100
-          }
-        });
-      }
-    );
+    fetchUserProfileData(parseInt(userId), res);
   } catch (error) {
     console.error('Error fetching profile:', error);
     res.status(500).json({
@@ -99,6 +59,124 @@ router.get('/:userId', authenticateToken, (req, res) => {
     });
   }
 });
+
+function fetchUserProfileData(userId, res) {
+
+  // Query user and stats
+  db.get(
+    `SELECT
+      u.id,
+      u.username,
+      u.email,
+      u.created_at,
+      ps.total_wins,
+      ps.total_losses,
+      ps.level,
+      ps.current_rank,
+      ps.gold,
+      ps.gems,
+      ps.display_name,
+      ps.avatar_id,
+      ps.bio,
+      ps.preferred_unit_type,
+      ps.xp,
+      ps.xp_to_next_level
+    FROM users u
+    LEFT JOIN player_stats ps ON u.id = ps.user_id
+    WHERE u.id = ?`,
+    [userId],
+    (err, row) => {
+      if (err) {
+        console.error('Database error:', err);
+        return res.status(500).json({
+          success: false,
+          message: 'Database error occurred'
+        });
+      }
+
+      if (!row) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found'
+        });
+      }
+
+      // Calculate win rate
+      const games = (row.total_wins || 0) + (row.total_losses || 0);
+      const winRate = games > 0 ? ((row.total_wins || 0) / games * 100).toFixed(1) : 0;
+
+      // Get alliance information
+      db.get(`
+        SELECT 
+          am.*,
+          a.name as alliance_name,
+          a.tag as alliance_tag,
+          a.high_lord_id,
+          u2.username as liege_username,
+          u3.username as high_lord_name,
+          COUNT(DISTINCT b.id) as bannerman_count
+        FROM alliance_members am
+        LEFT JOIN alliances a ON am.alliance_id = a.id
+        LEFT JOIN users u2 ON am.liege_id = u2.id
+        LEFT JOIN users u3 ON a.high_lord_id = u3.id
+        LEFT JOIN alliance_members b ON b.liege_id = am.user_id
+        WHERE am.user_id = ?
+        GROUP BY am.id
+      `, [userId], (err, alliance) => {
+        if (err) {
+          console.error('Error fetching alliance:', err);
+          alliance = null;
+        }
+
+        // Get bannermen
+        db.all(`
+          SELECT 
+            am.user_id,
+            u.username,
+            ps.display_name
+          FROM alliance_members am
+          JOIN users u ON am.user_id = u.id
+          LEFT JOIN player_stats ps ON u.id = ps.user_id
+          WHERE am.liege_id = ?
+        `, [userId], (err, bannermen) => {
+          if (err) {
+            bannermen = [];
+          }
+
+          res.json({
+            success: true,
+            profile: {
+              userId: row.id,
+              username: row.username,
+              email: row.email,
+              createdAt: row.created_at,
+              displayName: row.display_name || row.username,
+              bio: row.bio || '',
+              avatarId: row.avatar_id || 1,
+              preferredUnitType: row.preferred_unit_type || null
+            },
+            stats: {
+              wins: row.total_wins || 0,
+              losses: row.total_losses || 0,
+              gamesPlayed: games,
+              winRate: parseFloat(winRate),
+              level: row.level || 1,
+              rank: row.current_rank || 'Unranked',
+              gold: row.gold || 0,
+              gems: row.gems || 0,
+              xp: row.xp || 0,
+              xpToNextLevel: row.xp_to_next_level || 100
+            },
+            alliance: alliance ? {
+              ...alliance,
+              bannermen: bannermen || []
+            } : null
+          });
+        });
+      });
+    }
+  );
+}
 
 /**
  * PUT /api/profile/:userId

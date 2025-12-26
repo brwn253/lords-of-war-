@@ -104,6 +104,19 @@ router.post('/register', async (req, res) => {
                 (err) => {
                   if (err) {
                     console.error('Stats error:', err);
+                  } else {
+                    // Give new account starter cards (60 of each type)
+                    const { giveNewAccountStarterCards } = require('./new-account-cards');
+                    giveNewAccountStarterCards(userId, () => {
+                      console.log(`[NEW ACCOUNT] Starter cards given to user ${userId}`);
+                    });
+                    
+                    // Unlock "Create an Account" achievement with 1 booster pack reward
+                    const { unlockAchievement } = require('./achievement-helper');
+                    unlockAchievement(userId, 'create_account', {
+                      type: 'booster_pack',
+                      amount: 1
+                    });
                   }
                 }
               );

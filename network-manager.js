@@ -86,6 +86,13 @@ class NetworkManager {
       this.connected = true;
       console.log('Connected to server:', this.socket.id);
       this.emit('connected');
+      
+      // Initialize chat when connected
+      if (typeof initChat === 'function') {
+        setTimeout(() => {
+          initChat();
+        }, 100);
+      }
     });
 
     this.socket.on('disconnect', () => {

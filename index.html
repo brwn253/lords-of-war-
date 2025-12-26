@@ -45,7 +45,7 @@
             grid-template-rows: auto 1fr;
             height: calc(100vh - 180px);
             margin-top: 0px;
-            padding: 150px 170px 20px 380px;
+            padding: 150px 170px 200px 380px;
             gap: 2px;
             position: relative;
             z-index: 0;
@@ -131,15 +131,15 @@
         }
         
         #playerAliasOld {
-            position: fixed !important;
-            left: 50% !important;
-            right: auto !important;
-            transform: translateX(-50%) !important;
-            bottom: 10px !important;
-            top: auto !important;
-            padding: 6px 12px !important;
-            text-align: center !important;
-            z-index: 100 !important;
+            position: fixed;
+            left: 50%;
+            right: auto;
+            transform: translateX(-50%);
+            bottom: 10px;
+            top: auto;
+            padding: 6px 12px;
+            text-align: center;
+            z-index: 100;
         }
 
         #enemyAlias {
@@ -171,11 +171,11 @@
         }
         
         #enemyAliasOld {
-            position: fixed !important;
-            left: 50% !important;
-            right: auto !important;
-            transform: translateX(-50%) !important;
-            top: 10px !important;
+            position: fixed;
+            left: 50%;
+            right: auto;
+            transform: translateX(-50%);
+            top: 10px;
             bottom: auto !important;
             font-size: 22px !important;
             color: #ffd700 !important;
@@ -2154,7 +2154,7 @@
                 opacity: 1;
                 left: auto;
                 top: auto;
-                position: relative !important;
+                position: relative;
                 transform: translateX(0) translateY(0) scale(1) rotate(0deg);
             }
         }
@@ -2628,7 +2628,7 @@
             <div class="battle-row player" id="playerBoard"></div>
             
             <!-- Player Hero Card below battlefield -->
-            <div id="playerHeroCardContainer" style="position: absolute; bottom: -150px; left: 50%; transform: translateX(-50%); z-index: 10; display: flex; align-items: center; gap: 8px; pointer-events: none;">
+            <div id="playerHeroCardContainer" style="position: absolute; bottom: -180px; left: 50%; transform: translateX(-50%); z-index: 10; display: flex; align-items: center; gap: 8px; pointer-events: none;">
                 <!-- Hero Card -->
                 <div id="playerHeroCard" style="pointer-events: auto;"></div>
             </div>
@@ -2719,8 +2719,8 @@
         <div style="margin-bottom: 20px;">
             <p style="font-size: 11px; color: #d4af37; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; text-align: center;">Game Modes</p>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                <button onclick="startSinglePlayer()" style="padding: 16px 20px; font-size: 15px; background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); border: 3px solid #8b6f47; cursor: pointer; border-radius: 8px; color: #2a1810; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s;">🎮 Single Player</button>
-                <button onclick="startQuickMatch()" style="padding: 16px 20px; font-size: 15px; background: linear-gradient(135deg, #4a90e2 0%, #2563eb 100%); border: 3px solid #4a7aff; cursor: pointer; border-radius: 8px; color: #f4e4c1; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s;">⚡ Quick Match</button>
+                <button onclick="openSinglePlayerMenu()" style="padding: 16px 20px; font-size: 15px; background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); border: 3px solid #8b6f47; cursor: pointer; border-radius: 8px; color: #2a1810; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s;">🎮 Single Player</button>
+                <button onclick="openMultiplayerMenu()" style="padding: 16px 20px; font-size: 15px; background: linear-gradient(135deg, #4a90e2 0%, #2563eb 100%); border: 3px solid #4a7aff; cursor: pointer; border-radius: 8px; color: #f4e4c1; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s;">🌐 Multiplayer</button>
             </div>
         </div>
 
@@ -2728,6 +2728,7 @@
         <div style="padding-top: 20px; border-top: 2px solid rgba(139, 111, 71, 0.3);">
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px;">
                 <button onclick="showGameInstructions()" style="padding: 10px 12px; font-size: 12px; background: rgba(139, 111, 71, 0.2); border: 2px solid #8b6f47; cursor: pointer; border-radius: 6px; color: #f4e4c1; font-weight: 600; transition: all 0.2s;">📖 Guide</button>
+                <button onclick="openLeaderboardsModal()" style="padding: 10px 12px; font-size: 12px; background: rgba(139, 111, 71, 0.2); border: 2px solid #8b6f47; cursor: pointer; border-radius: 6px; color: #f4e4c1; font-weight: 600; transition: all 0.2s;">🏆 Leaderboards</button>
                 <button onclick="changeLanguage()" style="padding: 10px 12px; font-size: 12px; background: rgba(139, 111, 71, 0.2); border: 2px solid #8b6f47; cursor: pointer; border-radius: 6px; color: #f4e4c1; font-weight: 600; transition: all 0.2s;">🌍 English</button>
                 <button id="loginLogoutBtn" onclick="handleLoginLogout()" style="padding: 10px 12px; font-size: 12px; background: linear-gradient(135deg, #4a90e2 0%, #2563eb 100%); border: 2px solid #4a7aff; cursor: pointer; border-radius: 6px; color: #f4e4c1; font-weight: 600; transition: all 0.2s;">🔐 Login</button>
                 <button onclick="openAccountDashboard()" style="padding: 10px 12px; font-size: 12px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 2px solid #d4af37; cursor: pointer; border-radius: 6px; color: #f4e4c1; font-weight: 700; transition: all 0.2s;">👤 Account</button>
@@ -2872,11 +2873,10 @@
         <!-- Tabs at Top -->
         <div style="display: flex; gap: 2px; margin-bottom: 10px; border-bottom: 2px solid #8b6f47; overflow-x: auto;">
             <button id="dashboardTabAccount" onclick="switchDashboardTab('account')" style="flex: 0 0 auto; padding: 6px 8px; font-size: 11px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 2px solid #d4af37; border-bottom: none; cursor: pointer; border-radius: 4px 4px 0 0; color: #f4e4c1; font-weight: bold; white-space: nowrap; margin-right: -2px;">👤 Account</button>
-            <button id="dashboardTabDecks" onclick="switchDashboardTab('decks')" style="flex: 0 0 auto; padding: 6px 8px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-bottom: none; cursor: pointer; border-radius: 4px 4px 0 0; color: #f4e4c1; white-space: nowrap; margin-right: -2px;">🃏 Decks</button>
+            <button id="dashboardTabCards" onclick="switchDashboardTab('cards')" style="flex: 0 0 auto; padding: 6px 8px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-bottom: none; cursor: pointer; border-radius: 4px 4px 0 0; color: #f4e4c1; white-space: nowrap; margin-right: -2px;">🃏 Cards</button>
             <button id="dashboardTabHistory" onclick="switchDashboardTab('history')" style="flex: 0 0 auto; padding: 6px 8px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-bottom: none; cursor: pointer; border-radius: 4px 4px 0 0; color: #f4e4c1; white-space: nowrap; margin-right: -2px;">⚔️ History</button>
             <button id="dashboardTabAchievements" onclick="switchDashboardTab('achievements')" style="flex: 0 0 auto; padding: 6px 8px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-bottom: none; cursor: pointer; border-radius: 4px 4px 0 0; color: #f4e4c1; white-space: nowrap; margin-right: -2px;">🏆 Achievements</button>
             <button id="dashboardTabSocial" onclick="switchDashboardTab('social')" style="flex: 0 0 auto; padding: 6px 8px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-bottom: none; cursor: pointer; border-radius: 4px 4px 0 0; color: #f4e4c1; white-space: nowrap; margin-right: -2px;">👥 Social</button>
-            <button id="dashboardTabNotifications" onclick="switchDashboardTab('notifications')" style="flex: 0 0 auto; padding: 6px 8px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-bottom: none; cursor: pointer; border-radius: 4px 4px 0 0; color: #f4e4c1; white-space: nowrap;">🔔 Notifications</button>
         </div>
 
         <!-- Tab Content -->
@@ -2955,12 +2955,32 @@
                         <button onclick="openAccountDeletionModal()" style="width: auto; min-width: 120px; padding: 6px; background: linear-gradient(135deg, #8b1a1a 0%, #5a0f0f 100%); border: 1px solid #c41e3a; font-size: 12px; cursor: pointer; border-radius: 3px; color: #f4e4c1; font-weight: bold; margin-top: 8px;">🗑️ Delete Account</button>
                     </div>
                 </div>
+                
+                <!-- Notifications Section in Account Tab -->
+                <div style="margin-top: 20px; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid #8b6f47; border-radius: 4px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <p style="color: #d4af37; font-size: 15px; font-weight: bold; text-transform: uppercase; margin: 0;">🔔 Notifications</p>
+                        <button onclick="markAllNotificationsRead()" style="padding: 6px 12px; font-size: 12px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px; color: #f4e4c1;">Mark All Read</button>
+                    </div>
+                    <div id="notificationsList" style="font-size: 14px; max-height: 200px; overflow-y: auto;">
+                        <div style="text-align: center; color: #888; padding: 20px;">Loading...</div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Decks Tab -->
-            <div id="dashboardContentDecks" style="display: none;">
-                <div style="margin-bottom: 15px;">
-                    <button onclick="openDeckBuilderFromDashboard()" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #8b4a8b 0%, #6b3a6b 100%); border: 2px solid #d4af37; font-size: 16px; cursor: pointer; border-radius: 4px; color: #f4e4c1; font-weight: bold; margin-bottom: 15px;">🃏 Deck Builder</button>
+            <!-- Cards Tab (formerly Decks) -->
+            <div id="dashboardContentCards" style="display: none;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 20px;">
+                    <button onclick="closeAccountDashboard(); openCollectionModal(); switchCollectionTab('manage');" style="padding: 15px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 2px solid #d4af37; cursor: pointer; border-radius: 4px; color: #f4e4c1; font-weight: bold; font-size: 14px;">📚 Manage My Cards</button>
+                    <button onclick="openDeckBuilderFromDashboard()" style="padding: 15px; background: linear-gradient(135deg, #8b4a8b 0%, #6b3a6b 100%); border: 2px solid #d4af37; cursor: pointer; border-radius: 4px; color: #f4e4c1; font-weight: bold; font-size: 14px;">🃏 Deck Builder</button>
+                    <button onclick="closeAccountDashboard(); openCollectionModal(); switchCollectionTab('custom');" style="padding: 15px; background: linear-gradient(135deg, #4a5f8f 0%, #2a3f5f 100%); border: 2px solid #8b6f47; cursor: pointer; border-radius: 4px; color: #f4e4c1; font-weight: bold; font-size: 14px;">📋 Custom Decks</button>
+                    <button onclick="closeAccountDashboard(); openCollectionModal(); switchCollectionTab('unopened');" style="padding: 15px; background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); border: 2px solid #8b6f47; cursor: pointer; border-radius: 4px; color: white; font-weight: bold; font-size: 14px;">📦 Unopened Products</button>
+                </div>
+                
+                <p style="color: #d4af37; font-size: 15px; font-weight: bold; margin-bottom: 10px; margin-top: 20px; text-transform: uppercase;">🛒 Shop & Auction</p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 20px;">
+                    <button onclick="closeAccountDashboard(); openAuctionModal();" style="padding: 15px; background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%); border: 2px solid #8b6f47; cursor: pointer; border-radius: 4px; color: #2a1810; font-weight: bold; font-size: 14px;">🏛️ Auction House</button>
+                    <button onclick="closeAccountDashboard(); openShopModal();" style="padding: 15px; background: linear-gradient(135deg, #e67e22 0%, #d35400 100%); border: 2px solid #8b6f47; cursor: pointer; border-radius: 4px; color: white; font-weight: bold; font-size: 14px;">🛒 Shop</button>
                 </div>
                 
                 <p style="color: #d4af37; font-size: 15px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Your Custom Decks</p>
@@ -3074,25 +3094,14 @@
                 <div id="socialViewAlliances" style="display: none;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                         <p style="color: #d4af37; font-size: 15px; font-weight: bold; text-transform: uppercase; margin: 0;">⚔️ Alliances</p>
-                        <button onclick="alert('Alliance feature coming soon!')" style="padding: 8px 14px; font-size: 13px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px; color: #f4e4c1;">+ Create Alliance</button>
+                        <button onclick="closeAccountDashboard(); openAllianceModal();" style="padding: 8px 14px; font-size: 13px; background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px; color: white; font-weight: bold;">Manage Alliances</button>
                     </div>
-                    <div style="text-align: center; color: #888; padding: 40px; background: rgba(0,0,0,0.2); border: 1px solid #8b6f47; border-radius: 4px;">
-                        <p style="font-size: 16px; margin-bottom: 10px;">Alliances feature coming soon!</p>
-                        <p style="font-size: 14px; color: #aaa;">Join or create alliances with other players to compete together.</p>
+                    <div style="text-align: center; color: #888; padding: 20px; background: rgba(0,0,0,0.2); border: 1px solid #8b6f47; border-radius: 4px;">
+                        <p style="font-size: 14px; color: #aaa;">Click "Manage Alliances" to create or join an alliance, manage fealty requests, and view your bannermen.</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Notifications Tab -->
-            <div id="dashboardContentNotifications" style="display: none;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <p style="color: #d4af37; font-size: 15px; font-weight: bold; text-transform: uppercase; margin: 0;">🔔 Notifications</p>
-                    <button onclick="markAllNotificationsRead()" style="padding: 8px 14px; font-size: 13px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; cursor: pointer; border-radius: 3px; color: #f4e4c1;">Mark All Read</button>
-                </div>
-                <div id="notificationsList" style="font-size: 14px;">
-                    <div style="text-align: center; color: #888; padding: 20px;">Loading...</div>
-                </div>
-            </div>
         </div>
 
         <!-- Footer Buttons -->
@@ -3329,6 +3338,26 @@
         <button onclick="closeGameSettingsModal()" style="width: 100%; padding: 10px; background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%); border: 1px solid #8b6f47; font-size: 13px; cursor: pointer; border-radius: 4px; color: #f4e4c1; font-weight: bold;">Close</button>
     </div>
 
+    <!-- Single Player Menu Modal -->
+    <div class="modal" id="singlePlayerMenuModal" style="display: none; max-width: 500px;">
+        <h1 style="font-size: 28px; margin-bottom: 20px; color: #d4af37;">🎮 Single Player</h1>
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <button onclick="startSinglePlayerGame(); closeSinglePlayerMenu();" style="padding: 16px 20px; font-size: 16px; background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); border: 3px solid #8b6f47; cursor: pointer; border-radius: 8px; color: white; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">⚔️ VS AI</button>
+            <button onclick="openAdventureMode(); closeSinglePlayerMenu();" style="padding: 16px 20px; font-size: 16px; background: linear-gradient(135deg, #9b59b6 0%, #7d3c98 100%); border: 3px solid #8b6f47; cursor: pointer; border-radius: 8px; color: white; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">🗺️ Adventure Mode</button>
+            <button onclick="closeSinglePlayerMenu()" style="padding: 12px 20px; font-size: 14px; background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%); border: 2px solid #8b6f47; cursor: pointer; border-radius: 6px; color: #f4e4c1; font-weight: 600;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Multiplayer Menu Modal -->
+    <div class="modal" id="multiplayerMenuModal" style="display: none; max-width: 500px;">
+        <h1 style="font-size: 28px; margin-bottom: 20px; color: #4a90e2;">🌐 Multiplayer</h1>
+        <div style="display: flex; flex-direction: column; gap: 15px;">
+            <button onclick="startQuickMatch(); closeMultiplayerMenu();" style="padding: 16px 20px; font-size: 16px; background: linear-gradient(135deg, #4a90e2 0%, #2563eb 100%); border: 3px solid #8b6f47; cursor: pointer; border-radius: 8px; color: white; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">⚔️ 1v1 Quick Match</button>
+            <button onclick="startRaid(); closeMultiplayerMenu();" style="padding: 16px 20px; font-size: 16px; background: linear-gradient(135deg, #e67e22 0%, #d35400 100%); border: 3px solid #8b6f47; cursor: pointer; border-radius: 8px; color: white; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">🏰 Raid</button>
+            <button onclick="closeMultiplayerMenu()" style="padding: 12px 20px; font-size: 14px; background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%); border: 2px solid #8b6f47; cursor: pointer; border-radius: 6px; color: #f4e4c1; font-weight: 600;">Cancel</button>
+        </div>
+    </div>
+
     <!-- Lobby Modal (Multiplayer) -->
     <div class="modal" id="lobbyModal" style="display: none;">
         <h1>🌐 Quick Match Lobby</h1>
@@ -3545,9 +3574,133 @@
         </div>
     </div>
 
+    <!-- Persistent Chat Box (always visible) -->
+    <div id="persistentChatBox" style="position: fixed; bottom: 100px; right: 20px; width: 350px; max-height: 500px; background: rgba(42, 24, 16, 0.95); border: 3px solid #8b6f47; border-radius: 8px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8); z-index: 10000; display: none; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(139, 111, 71, 0.3); border-bottom: 2px solid #8b6f47;">
+            <h3 style="color: #d4af37; margin: 0; font-size: 16px;">💬 Chat</h3>
+            <div style="display: flex; gap: 5px;">
+                <button onclick="toggleChatMinimize()" style="padding: 4px 8px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; border-radius: 3px; cursor: pointer; color: #f4e4c1; font-size: 12px;">−</button>
+                <button onclick="closePersistentChat()" style="padding: 4px 8px; background: linear-gradient(135deg, #c41e3a 0%, #8b1a1a 100%); border: 1px solid #8b6f47; border-radius: 3px; cursor: pointer; color: white; font-size: 12px;">×</button>
+            </div>
+        </div>
+        
+        <!-- Chat Tabs -->
+        <div style="display: flex; gap: 2px; padding: 5px; background: rgba(0,0,0,0.2); border-bottom: 2px solid #8b6f47;">
+            <button id="persistentChatTabGlobal" onclick="switchPersistentChatTab('global')" style="flex: 1; padding: 6px; font-size: 11px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 1px solid #d4af37; border-radius: 4px; cursor: pointer; color: #f4e4c1; font-weight: bold;">🌍 Global Chat</button>
+            <button id="persistentChatTabAlliance" onclick="switchPersistentChatTab('alliance')" style="flex: 1; padding: 6px; font-size: 11px; background: rgba(139, 111, 71, 0.3); border: 1px solid #8b6f47; border-radius: 4px; cursor: pointer; color: #f4e4c1;">⚔️ Alliance Chat</button>
+        </div>
+
+        <!-- Chat Messages Area -->
+        <div id="persistentChatMessages" style="flex: 1; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.3); min-height: 200px; max-height: 300px; font-size: 12px;">
+            <div style="color: #aaa; text-align: center; padding: 20px;">Loading messages...</div>
+        </div>
+
+        <!-- Chat Input -->
+        <div style="display: flex; gap: 5px; padding: 8px; background: rgba(0,0,0,0.2); border-top: 2px solid #8b6f47;">
+            <input type="text" id="persistentChatInput" placeholder="Type message..." maxlength="500" style="flex: 1; padding: 6px; border: 1px solid #8b6f47; background: rgba(0,0,0,0.5); color: #f4e4c1; border-radius: 3px; font-size: 12px;" onkeypress="if(event.key==='Enter') sendPersistentChatMessage()">
+            <button onclick="sendPersistentChatMessage()" style="padding: 6px 12px; background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); border: 1px solid #8b6f47; border-radius: 3px; cursor: pointer; color: white; font-weight: bold; font-size: 12px;">Send</button>
+        </div>
+    </div>
+
+    <!-- Chat Minimized Button -->
+    <button id="chatMinimizeButton" onclick="openPersistentChat()" style="position: fixed; bottom: 100px; right: 20px; width: 60px; height: 60px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 3px solid #d4af37; border-radius: 50%; cursor: pointer; color: #f4e4c1; font-size: 24px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.8); z-index: 9999; display: none; align-items: center; justify-content: center;">💬</button>
+
+    <!-- Chat Modal (for full-screen view) -->
+    <div class="modal" id="chatModal" style="display: none; max-width: 600px; width: 90%; max-height: 80vh;">
+        <div style="display: flex; flex-direction: column; height: 100%;">
+            <h1 style="text-align: center; margin-bottom: 15px; font-size: 24px; color: #d4af37;">💬 Chat</h1>
+            
+            <!-- Chat Tabs -->
+            <div style="display: flex; gap: 8px; margin-bottom: 15px; border-bottom: 2px solid #8b6f47;">
+                <button id="chatTabGlobal" onclick="switchChatTab('global')" style="flex: 1; padding: 10px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 2px solid #d4af37; border-bottom: none; border-radius: 6px 6px 0 0; cursor: pointer; color: #f4e4c1; font-weight: bold;">🌍 Global Chat</button>
+                <button id="chatTabAlliance" onclick="switchChatTab('alliance')" style="flex: 1; padding: 10px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-bottom: none; border-radius: 6px 6px 0 0; cursor: pointer; color: #f4e4c1;">⚔️ Alliance Chat</button>
+                <button id="chatTabPrivate" onclick="switchChatTab('private')" style="flex: 1; padding: 10px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-bottom: none; border-radius: 6px 6px 0 0; cursor: pointer; color: #f4e4c1;">✉️ Private</button>
+            </div>
+
+            <!-- Chat Messages Area -->
+            <div id="chatMessages" style="flex: 1; overflow-y: auto; padding: 15px; background: rgba(0,0,0,0.3); border: 2px solid #8b6f47; border-radius: 6px; margin-bottom: 15px; min-height: 300px; max-height: 400px;">
+                <div style="color: #aaa; text-align: center; padding: 20px;">Loading messages...</div>
+            </div>
+
+            <!-- Chat Input -->
+            <div style="display: flex; gap: 8px;">
+                <input type="text" id="chatInput" placeholder="Type your message..." maxlength="500" style="flex: 1; padding: 10px; border: 2px solid #8b6f47; background: rgba(0,0,0,0.5); color: #f4e4c1; border-radius: 4px; font-size: 14px;" onkeypress="if(event.key==='Enter') sendChatMessage()">
+                <button onclick="sendChatMessage()" style="padding: 10px 20px; background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); border: 2px solid #8b6f47; border-radius: 4px; cursor: pointer; color: white; font-weight: bold;">Send</button>
+            </div>
+
+            <button onclick="closeChatModal()" style="margin-top: 15px; padding: 10px; background: linear-gradient(135deg, #c41e3a 0%, #8b1a1a 100%); border: 2px solid #8b6f47; border-radius: 4px; cursor: pointer; color: white; font-weight: bold;">Close</button>
+        </div>
+    </div>
+
+    <!-- Alliances Modal -->
+    <div class="modal" id="allianceModal" style="display: none; max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto;">
+        <h1 style="text-align: center; margin-bottom: 20px; font-size: 24px; color: #d4af37;">⚔️ Alliances</h1>
+        
+        <div id="allianceContent">
+            <!-- Content will be loaded dynamically -->
+        </div>
+
+        <button onclick="closeAllianceModal()" style="margin-top: 20px; padding: 10px 20px; background: linear-gradient(135deg, #c41e3a 0%, #8b1a1a 100%); border: 2px solid #8b6f47; border-radius: 4px; cursor: pointer; color: white; font-weight: bold;">Close</button>
+    </div>
+
+    <!-- Auction House Modal -->
+    <div class="modal" id="auctionModal" style="display: none; max-width: 1000px; width: 95%; max-height: 90vh; overflow-y: auto;">
+        <h1 style="text-align: center; margin-bottom: 20px; font-size: 24px; color: #d4af37;">🏛️ Auction House</h1>
+        
+        <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+            <button id="auctionTabBrowse" onclick="switchAuctionTab('browse')" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 2px solid #d4af37; border-radius: 6px; cursor: pointer; color: #f4e4c1; font-weight: bold;">Browse</button>
+            <button id="auctionTabMyListings" onclick="switchAuctionTab('mylistings')" style="flex: 1; padding: 12px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-radius: 6px; cursor: pointer; color: #f4e4c1;">My Listings</button>
+            <button id="auctionTabList" onclick="switchAuctionTab('list')" style="flex: 1; padding: 12px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-radius: 6px; cursor: pointer; color: #f4e4c1;">List Item</button>
+        </div>
+
+        <div id="auctionContent">
+            <!-- Content will be loaded dynamically -->
+        </div>
+
+        <button onclick="closeAuctionModal()" style="margin-top: 20px; padding: 10px 20px; background: linear-gradient(135deg, #c41e3a 0%, #8b1a1a 100%); border: 2px solid #8b6f47; border-radius: 4px; cursor: pointer; color: white; font-weight: bold;">Close</button>
+    </div>
+
+    <!-- Shop Modal -->
+    <div class="modal" id="shopModal" style="display: none; max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto;">
+        <h1 style="text-align: center; margin-bottom: 20px; font-size: 24px; color: #d4af37;">🛒 Shop</h1>
+        
+        <div id="shopContent">
+            <!-- Content will be loaded dynamically -->
+        </div>
+
+        <button onclick="closeShopModal()" style="margin-top: 20px; padding: 10px 20px; background: linear-gradient(135deg, #c41e3a 0%, #8b1a1a 100%); border: 2px solid #8b6f47; border-radius: 4px; cursor: pointer; color: white; font-weight: bold;">Close</button>
+    </div>
+
+    <!-- Card Collection Modal -->
+    <div class="modal" id="collectionModal" style="display: none; max-width: 1200px; width: 95%; max-height: 90vh; overflow-y: auto;">
+        <h1 style="text-align: center; margin-bottom: 20px; font-size: 24px; color: #d4af37;">🃏 Card Collection</h1>
+        
+        <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+            <button id="collectionTabManage" onclick="switchCollectionTab('manage')" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #8b7355 0%, #6b5344 100%); border: 2px solid #d4af37; border-radius: 6px; cursor: pointer; color: #f4e4c1; font-weight: bold;">Manage Cards</button>
+            <button id="collectionTabBuild" onclick="switchCollectionTab('build')" style="flex: 1; padding: 12px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-radius: 6px; cursor: pointer; color: #f4e4c1;">Build Deck</button>
+            <button id="collectionTabCustom" onclick="switchCollectionTab('custom')" style="flex: 1; padding: 12px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-radius: 6px; cursor: pointer; color: #f4e4c1;">Custom Decks</button>
+            <button id="collectionTabUnopened" onclick="switchCollectionTab('unopened')" style="flex: 1; padding: 12px; background: rgba(139, 111, 71, 0.3); border: 2px solid #8b6f47; border-radius: 6px; cursor: pointer; color: #f4e4c1;">Unopened</button>
+        </div>
+
+        <div id="collectionContent">
+            <!-- Content will be loaded dynamically -->
+        </div>
+
+        <button onclick="closeCollectionModal()" style="margin-top: 20px; padding: 10px 20px; background: linear-gradient(135deg, #c41e3a 0%, #8b1a1a 100%); border: 2px solid #8b6f47; border-radius: 4px; cursor: pointer; color: white; font-weight: bold;">Close</button>
+    </div>
+
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script src="network-manager.js"></script>
     <script src="lords-of-war.js"></script>
     <script src="lords-of-war-engine.js"></script>
+    <script src="chat-ui.js"></script>
+    <script src="alliance-ui.js"></script>
+    <script src="auction-ui.js"></script>
+    <script src="shop-ui.js"></script>
+    <script src="collection-ui.js"></script>
+    <script src="collection-stats.js"></script>
+    <script src="player-profile-ui.js"></script>
+    <script src="leaderboards-ui.js"></script>
+    <script src="adventure-mode-ui.js"></script>
 </body>
 </html>

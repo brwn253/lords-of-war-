@@ -13,8 +13,14 @@ router.get('/', authenticateToken, (req, res) => {
   try {
     const userId = req.user.userId;
     // Import userSockets from game-server (must be done inside function to avoid circular dependency)
-    const gameServer = require('../game-server');
-    const userSockets = gameServer.userSockets || new Map();
+    let userSockets = new Map();
+    try {
+      const gameServer = require('./game-server');
+      userSockets = gameServer.userSockets || new Map();
+    } catch (err) {
+      // If circular dependency, use empty Map
+      console.warn('Could not get userSockets, using empty Map');
+    }
 
     db.all(
       `SELECT 
